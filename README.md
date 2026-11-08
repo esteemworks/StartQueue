@@ -31,7 +31,7 @@ When you sign in, Windows launches every autostart app at the same time. They fi
 
 | Film | What it shows |
 | --- | --- |
-| **[The tour](docs/video/StartQueue-chips.mp4)** (96 s, sound on) | What Windows gives you for the autostart, then everything StartQueue adds: your order, delays, waiting for another app, quiet starts, profiles shared with the other EsteemWorks apps and prepared apps |
+| **[Watch the tour](https://esteemworks.github.io/startqueue/)** (1:36, plays in your browser, sound on) | What Windows gives you for the autostart, then everything StartQueue adds: your order, delays, waiting for another app, quiet starts, profiles shared with the other EsteemWorks apps and prepared apps |
 
 ## Highlights
 
