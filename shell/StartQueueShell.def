@@ -1,0 +1,4 @@
+LIBRARY StartQueueShell
+EXPORTS
+    DllGetClassObject PRIVATE
+    DllCanUnloadNow PRIVATE

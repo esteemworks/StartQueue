@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>StartQueue</AssemblyName>
+    <RootNamespace>StartQueue</RootNamespace>
+    <Version>1.6.0</Version>
+    <!-- Program.Main, not the Main WPF generates: at sign-in the startup order begins before WPF loads. -->
+    <StartupObject>StartQueue.Program</StartupObject>
+    <Product>StartQueue</Product>
+    <AssemblyTitle>StartQueue</AssemblyTitle>
+    <Description>StartQueue</Description>
+    <Copyright>Leon Tüpker</Copyright>
+    <!-- WPF0001: ThemeMode (Fluent), WFO5001: WinForms color mode for the tray menu -->
+    <NoWarn>$(NoWarn);WPF0001;WFO5001</NoWarn>
+    <ApplicationIcon Condition="Exists('..\..\assets\StartQueue.ico')">..\..\assets\StartQueue.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- The family's building blocks: from the kit's sources when its repository is next to this one, otherwise the
+       compiled package in kit\ (nuget.config). The kit is not open source; see kit\LICENSE.txt. -->
+  <PropertyGroup>
+    <EsteemWorksKitSource>$(MSBuildThisFileDirectory)..\..\..\EsteemWorks.Kit\src\EsteemWorks.Kit\EsteemWorks.Kit.csproj</EsteemWorksKitSource>
+  </PropertyGroup>
+  <Import Project="..\..\kit\EsteemWorks.Kit.props" Condition="Exists('..\..\kit\EsteemWorks.Kit.props')" />
+  <ItemGroup>
+    <!-- The family's building blocks, compiled in. Becomes a submodule before the next release. -->
+    <ProjectReference Include="$(EsteemWorksKitSource)" Condition="Exists('$(EsteemWorksKitSource)')" />
+    <PackageReference Include="EsteemWorks.Kit" Version="$(EsteemWorksKitVersion)" Condition="!Exists('$(EsteemWorksKitSource)')" />
+  </ItemGroup>
+
+</Project>
