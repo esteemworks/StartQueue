@@ -4,6 +4,7 @@
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:ui="clr-namespace:StartQueue.UI"
         xmlns:s="clr-namespace:StartQueue"
+        xmlns:kit="clr-namespace:EsteemWorks.Kit.UI;assembly=EsteemWorks.Kit"
         Title="StartQueue" Width="1140" Height="740" MinWidth="920" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Bg}" Foreground="{DynamicResource Text2}"
@@ -941,49 +942,9 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.AccentHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsAccent}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <!-- Three segments as wide as the ones above; each shows its color -->
-                            <Border Grid.Column="1" Style="{StaticResource SegmentGroup}">
-                                <StackPanel Orientation="Horizontal">
-                                    <RadioButton Style="{StaticResource FirstSegment}" GroupName="Accent" IsChecked="{Binding AccentProfile}"
-                                                 AutomationProperties.Name="{x:Static s:Strings.AccentProfile}" ToolTip="{x:Static s:Strings.AccentProfileTip}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="10" Height="10" VerticalAlignment="Center">
-                                                <Ellipse.Fill>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                        <GradientStop Color="#228BE6" Offset="0" />
-                                                        <GradientStop Color="#40C057" Offset="0.5" />
-                                                        <GradientStop Color="#BE4BDB" Offset="1" />
-                                                    </LinearGradientBrush>
-                                                </Ellipse.Fill>
-                                            </Ellipse>
-                                            <TextBlock Text="{x:Static s:Strings.AccentProfile}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </RadioButton>
-                                    <RadioButton Style="{StaticResource Segment}" GroupName="Accent" IsChecked="{Binding AccentStartQueue}"
-                                                 AutomationProperties.Name="{x:Static s:Strings.AccentStartQueue}" ToolTip="{x:Static s:Strings.AccentStartQueueTip}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="10" Height="10" VerticalAlignment="Center">
-                                                <Ellipse.Fill>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                        <GradientStop Color="#F59F00" Offset="0" />
-                                                        <GradientStop Color="#E8590C" Offset="0.5" />
-                                                        <GradientStop Color="#C92A2A" Offset="1" />
-                                                    </LinearGradientBrush>
-                                                </Ellipse.Fill>
-                                            </Ellipse>
-                                            <TextBlock Text="{x:Static s:Strings.AccentStartQueue}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </RadioButton>
-                                    <RadioButton Style="{StaticResource Segment}" GroupName="Accent" IsChecked="{Binding AccentWindows}"
-                                                 AutomationProperties.Name="{x:Static s:Strings.AccentWindows}" ToolTip="{x:Static s:Strings.AccentWindowsTip}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="10" Height="10" Fill="{Binding WindowsAccentSwatch}" VerticalAlignment="Center" />
-                                            <TextBlock Text="{x:Static s:Strings.AccentWindows}" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </RadioButton>
-                                </StackPanel>
-                            </Border>
+                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static kit:AccentRow.Help}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static kit:AccentRow.Label}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
+                            <!-- The family's segments (StartQueue, Profile, Windows, Sand) from the kit's AccentRow, set when the settings open -->
+                            <ContentControl x:Name="AccentHost" Grid.Column="1" Focusable="False" />
                         </Grid>
                         <Border Style="{StaticResource Divider}" />
                         <Grid Style="{StaticResource SettingRow}">

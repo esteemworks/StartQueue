@@ -349,14 +349,6 @@ public static class Strings
     public static string ThemeSystem => T("Like Windows", "Wie Windows");
     public static string ThemeLight => T("Light", "Hell");
     public static string ThemeDark => T("Dark", "Dunkel");
-    public static string SettingsAccent => T("Accent color", "Akzentfarbe");
-    public static string AccentStartQueue => T("StartQueue", "StartQueue");
-    public static string AccentWindows => T("Windows", "Windows");
-    public static string AccentProfile => T("Profile", "Profil");
-    public static string AccentHelp => T("The color of buttons, marks and the bar below the header.", "Die Farbe von Schaltflächen, Markierungen und dem Balken unter der Kopfzeile.");
-    public static string AccentProfileTip => T("The window takes on the color of the profile it shows. \"No profile\" has the StartQueue colors.", "Das Fenster nimmt die Farbe des Profils an, das es gerade zeigt. „Ohne Profil“ hat die StartQueue-Farben.");
-    public static string AccentStartQueueTip => T("Deep orange from amber to ember, whatever the profile.", "Tiefes Orange von Bernstein bis Glut, unabhängig vom Profil.");
-    public static string AccentWindowsTip => T("The accent color from the Windows settings.", "Die Akzentfarbe aus den Windows-Einstellungen.");
     public static string SettingsLanguage => T("Language", "Sprache");
     public static string LanguageSystem => T("Like Windows", "Wie Windows");
     public static string LanguageHelp => T("Also applies to the \"Add to StartQueue\" entry in the Explorer context menu.", "Gilt auch für den Eintrag „Zu StartQueue hinzufügen“ im Kontextmenü des Explorers.");

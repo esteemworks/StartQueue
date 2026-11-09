@@ -2,6 +2,10 @@
 
 All notable changes to StartQueue. Downloads are on the [releases page](../../releases).
 
+## Unreleased
+
+- **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
+
 ## 1.6.0
 
 ### Profiles shared with the family

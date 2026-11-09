@@ -977,7 +977,12 @@ public partial class MainWindow : Window
             TabServices.IsChecked = true;
             _ = LoadServicesAsync();
         }
-        if (next == View.Settings) SettingsView.DataContext = new SettingsVm(host);
+        if (next == View.Settings)
+        {
+            var settings = new SettingsVm(host);
+            SettingsView.DataContext = settings;
+            AccentHost.Content = EsteemWorks.Kit.UI.AccentRow.Segments(host.Config.Settings.Accent.ToKit(), profiles: true, settings.PickAccent);
+        }
     }
 
     void Tab_Checked(object sender, RoutedEventArgs e)

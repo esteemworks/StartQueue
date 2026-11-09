@@ -72,7 +72,7 @@ Apps that need administrator rights start in your order too, without a UAC promp
 Every entry StartQueue takes over can be **given back** to its original place in Windows, and uninstalling gives back all of them. Your list stays for a later installation. Export your list and settings to one file to keep them or take them to another PC, and go back to one of the last five states StartQueue saved by itself, for example from before an update (Settings > About > **Back up settings**).
 
 ### Feels like Windows 11
-Light and dark following Windows, StartQueue's ember colors, the Windows accent color or your profile's color, English and German, keyboard shortcuts, rounded corners and scrolling with the middle mouse button. Add apps by dragging them from the Start menu, through the Explorer context menu, or from suggestions based on what you use often.
+Light and dark following Windows, StartQueue's ember colors, the Windows accent color, quiet Sand or your profile's color, English and German, keyboard shortcuts, rounded corners and scrolling with the middle mouse button. Add apps by dragging them from the Start menu, through the Explorer context menu, or from suggestions based on what you use often.
 
 ## Screenshots
 

@@ -242,11 +242,12 @@ public sealed class Config
 }
 
 /// <summary>
-/// StartQueue: the app's own deep orange with a gradient, the default. Windows: the accent color set in Windows.
-/// Profile: the color of the profile the window shows. The names are in config.json and on the command line.
+/// StartQueue: the app's own deep orange with a gradient. Windows: the accent color set in Windows. Profile: the color
+/// of the profile the window shows, the default. Sand: the family's quiet beige, the same in every EsteemWorks app.
+/// The names are in config.json and on the command line, so new ones only ever come at the end and none is renamed.
 /// The theme itself (System, Light, Dark) is EsteemWorks.Kit's <see cref="ThemeChoice"/>, with the same names.
 /// </summary>
-public enum AccentChoice { StartQueue, Windows, Profile }
+public enum AccentChoice { StartQueue, Windows, Profile, Sand }
 
 public static class AccentChoices
 {
@@ -255,7 +256,17 @@ public static class AccentChoices
     {
         AccentChoice.Windows => EsteemWorks.Kit.AccentChoice.Windows,
         AccentChoice.Profile => EsteemWorks.Kit.AccentChoice.Shown,
+        AccentChoice.Sand => EsteemWorks.Kit.AccentChoice.Sand,
         _ => EsteemWorks.Kit.AccentChoice.Brand,
+    };
+
+    /// <summary>The kit's choice (from the row <c>AccentRow</c> builds) in StartQueue's terms.</summary>
+    public static AccentChoice FromKit(this EsteemWorks.Kit.AccentChoice accent) => accent switch
+    {
+        EsteemWorks.Kit.AccentChoice.Windows => AccentChoice.Windows,
+        EsteemWorks.Kit.AccentChoice.Shown => AccentChoice.Profile,
+        EsteemWorks.Kit.AccentChoice.Sand => AccentChoice.Sand,
+        _ => AccentChoice.StartQueue,
     };
 }
 

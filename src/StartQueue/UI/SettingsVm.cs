@@ -56,27 +56,8 @@ public sealed class SettingsVm : INotifyPropertyChanged
     public bool ThemeLight { get => Current.Theme == ThemeChoice.Light; set => Pick(value, s => s.Theme = ThemeChoice.Light); }
     public bool ThemeDark { get => Current.Theme == ThemeChoice.Dark; set => Pick(value, s => s.Theme = ThemeChoice.Dark); }
 
-    public bool AccentStartQueue { get => Current.Accent == AccentChoice.StartQueue; set => Pick(value, s => s.Accent = AccentChoice.StartQueue); }
-    public bool AccentWindows { get => Current.Accent == AccentChoice.Windows; set => Pick(value, s => s.Accent = AccentChoice.Windows); }
-    public bool AccentProfile { get => Current.Accent == AccentChoice.Profile; set => Pick(value, s => s.Accent = AccentChoice.Profile); }
-
-    /// <summary>The accent color set in Windows right now, for the swatch next to "Same as Windows".</summary>
-    public System.Windows.Media.Brush WindowsAccentSwatch
-    {
-        get
-        {
-            try
-            {
-                var c = new Windows.UI.ViewManagement.UISettings().GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
-                return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(c.R, c.G, c.B));
-            }
-            catch
-            {
-                return System.Windows.Media.Brushes.Gray;
-            }
-        }
-    }
-
+    /// <summary>The choice of the accent row (built by the kit's <c>AccentRow</c> in MainWindow), saved and applied.</summary>
+    public void PickAccent(EsteemWorks.Kit.AccentChoice accent) => Change(s => s.Accent = accent.FromKit());
 
     /// <summary>The language drop-down: Like Windows, English, Deutsch.</summary>
     public int LanguageIndex

@@ -125,6 +125,25 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
+    public void The_accent_is_kept_as_chosen_and_matches_the_kit()
+    {
+        File.Copy(Fixture("config-v1.json"), Path.Combine(Data, "config.json"));
+        RestorableSettings.Configure();
+        foreach (var accent in Enum.GetValues<AccentChoice>())
+        {
+            ConfigStore.Update(c => c.Settings.Accent = accent);
+            Assert.Equal(accent, ConfigStore.Load().Settings.Accent);
+            // The kit's row gives back what it was given.
+            Assert.Equal(accent, accent.ToKit().FromKit());
+        }
+        // Saved by name, so 1.6 and earlier read the three they know as before.
+        ConfigStore.Update(c => c.Settings.Accent = AccentChoice.Sand);
+        Assert.Contains("\"accent\": \"Sand\"", File.ReadAllText(Path.Combine(Data, "config.json")));
+        Assert.Equal(5, ConfigStore.Load().Entries.Count);
+        Assert.Equal(AccentChoice.Profile, new Settings().Accent);
+    }
+
+    [Fact]
     public void Export_and_import_carry_the_list_and_the_shortcuts()
     {
         File.Copy(Fixture("config-v1.json"), Path.Combine(Data, "config.json"));
