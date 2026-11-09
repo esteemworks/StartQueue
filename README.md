@@ -112,7 +112,7 @@ Download `StartQueue-Setup-<version>.exe` from the [latest release](../../releas
 The installation with admin rights can also be done later under **Settings > About**. A newer setup simply updates, your list and settings stay. Uninstall through **Windows Settings > Apps**: every entry StartQueue took over goes back to Windows, your list stays for a later installation.
 
 > [!NOTE]
-> The setup is not signed with a public code signing certificate yet. Windows SmartScreen therefore warns about an unknown publisher: choose "More info", then "Run anyway". With Smart App Control or policies like AppLocker, WDAC or ASR rules, Windows may block it.
+> The setup is not signed with a public code signing certificate yet. Windows SmartScreen therefore warns about an unknown publisher: choose "More info", then "Run anyway". With Smart App Control or policies like AppLocker, WDAC or ASR rules, Windows may block it. No scanner on VirusTotal flags the setup of version 1.6.0: [report](https://www.virustotal.com/gui/file/9f92102955845bea803ef4345d204794dc94b2067e7be6c906ff1e7deeff7920).
 
 ## How it works
 
