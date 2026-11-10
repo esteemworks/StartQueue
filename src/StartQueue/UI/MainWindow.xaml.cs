@@ -202,7 +202,8 @@ public partial class MainWindow : Window
         Frame.StartIntro(
         [
             new IntroStep("welcome", () => Strings.IntroStepWelcome, () => intro.Page(IntroView.Welcome)),
-            new IntroStep("takeover", () => Strings.IntroStepTakeOver, () => intro.Page(IntroView.TakeOver)),
+            // Wide, as the design has it: the list left, the cards for all users and for new entries right.
+            new IntroStep("takeover", () => Strings.IntroStepTakeOver, () => intro.Page(IntroView.TakeOver), Wide: true),
             new IntroStep("ready", () => Strings.IntroStepSwitchOn, () => intro.Page(IntroView.Ready)),
         ]);
         if (config.FirstStart == FirstStart.LookingAround) Frame.LookAround();

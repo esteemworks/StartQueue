@@ -69,13 +69,18 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <StackPanel>
+            <StackPanel MaxWidth="760" HorizontalAlignment="Left">
                 <TextBlock Style="{StaticResource H2}" FontSize="22" TextWrapping="Wrap" Text="{x:Static s:Strings.IntroTakeOverTitle}" />
                 <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="21" Foreground="{DynamicResource Text2}" Text="{x:Static s:Strings.IntroTakeOverText}" />
             </StackPanel>
-            <!-- One column: the kit shows a step at most 760 px wide -->
-            <StackPanel Grid.Row="1" Margin="0,16,0,0">
-                <Border Style="{StaticResource Card}" Padding="0" Margin="0,0,0,16" VerticalAlignment="Top">
+            <!-- Two columns as in the design: a wide step (IntroStep Wide), the list left, the two cards right -->
+            <Grid Grid.Row="1" Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="360" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource Card}" Padding="0" Margin="0" VerticalAlignment="Top">
                     <StackPanel>
                         <Grid Margin="16,12">
                             <TextBlock x:Name="FoundLabel" Style="{StaticResource SectionLabel}" VerticalAlignment="Center" />
@@ -119,7 +124,7 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel>
+                <StackPanel Grid.Column="2">
                     <Border x:Name="AllUsersCard" Style="{StaticResource Card}" Padding="18,14" Visibility="Collapsed">
                         <StackPanel>
                             <TextBlock x:Name="AllUsersLabel" Style="{StaticResource SectionLabel}" Margin="0,0,0,8" />
@@ -157,7 +162,7 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Grid>
 
         <!-- ========== 3 Switch on ========== -->
