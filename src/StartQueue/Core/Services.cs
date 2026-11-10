@@ -240,6 +240,8 @@ public static class Services
 
         try
         {
+            // Every start with a UAC prompt is logged the same way (Elevation.RunSelfElevated), so the sandbox test can count them.
+            Log.Info($"Elevated start: --service {action} \"{name}\"");
             using var process = Process.Start(new ProcessStartInfo(Environment.ProcessPath!, $"--service {action} \"{name}\"")
             {
                 UseShellExecute = true,

@@ -118,9 +118,17 @@ $stepTakeOver = L 'Step 2 of 3: Take over, current step' 'Schritt 2 von 3: Über
 $stepSwitchOn = L 'Step 3 of 3: Switch on, current step' 'Schritt 3 von 3: Einschalten, aktueller Schritt'
 $tabOrder = L 'Startup order' 'Startreihenfolge'
 
+# The sandbox account has no UAC token split: everything runs elevated and nothing would ever ask. With this the setup,
+# the uninstaller and StartQueue act as an administrator under UAC does, and every start that would ask Windows is
+# logged ("Elevated start: ..."), so they can be counted: Basic 0, Full 1 to set up and 1 to uninstall, in use 0.
+$env:ESTEEMWORKS_ASSUME_STANDARD = '1'
+function Elevated-Starts { @(Select-String -Path $log -Pattern 'Elevated start: ' -ErrorAction SilentlyContinue | ForEach-Object { $_.Line }) }
+
 # ================= A. Basis, without admin rights =================
 Set-Autostart
 $installed = Install-App
+$asked = @(Elevated-Starts)
+Test-Check 'A: Basic in the setup asks Windows nothing' ($asked.Count -eq 0) ($asked -join ' | ')
 Start-Restricted
 Test-Check 'A: StartQueue made its list' (Wait-Until { (Config) -and (Previewed).Count -ge 4 } 60) (Describe-List)
 $c = Config
@@ -161,10 +169,11 @@ Test-Check 'A: the window opens as the preview again' ($null -ne (Find (L 'Conti
 Save-Screen 'a-3-preview'
 Shots 'a-preview'
 
-# "Switch on" in the header is named for screen readers as the button at the end of the introduction.
-Test-Check 'A: Switch on in the preview shows the last step' ((Click (L 'Switch StartQueue on' 'StartQueue einschalten')) -and $null -ne (Find $stepSwitchOn))
-# One entry stays with Windows: back to Take over and its switch off.
-[void](Click (L 'Back' 'Zurück'))
+# Back into the introduction (the kit's frame starts it again at its first step after a restart).
+Test-Check 'A: Continue setup leads back into the introduction' ((Click (L 'Continue setup' 'Einrichtung fortsetzen')) -and $null -ne (Find $stepWelcome))
+Test-Check 'A: back in the introduction is saved' (Wait-Until { (Config).firstStart -eq 'Welcome' } 10) (Config).firstStart
+# One entry stays with Windows: its switch off in Take over.
+[void](Click (L 'Next' 'Weiter'))
 $games = Find $gamesName $types::CheckBox
 if ($games) { $games.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 1 }
 Test-Check 'A: TestGames unticked' ($games -and $games.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Current.ToggleState -eq 'Off')
@@ -194,6 +203,8 @@ Test-Check 'A: no step line any more' ($null -eq (Find $stepWelcome -Tries 2))
 # Uninstalling gives every entry back.
 Stop-App
 Uninstall-App
+$asked = @(Elevated-Starts)
+Test-Check 'A: uninstalling Basic asks Windows nothing' ($asked.Count -eq 0) ($asked -join ' | ')
 Test-Check 'A: uninstall gives the Run entries back' ((RunValue TestCloud) -and (RunValue TestChat))
 Test-Check 'A: and the startup shortcut' (Test-Path "$startup\TestNotes.lnk")
 
@@ -201,6 +212,8 @@ Test-Check 'A: and the startup shortcut' (Test-Path "$startup\TestNotes.lnk")
 Stop-App
 Remove-Item $data -Recurse -Force -ErrorAction SilentlyContinue
 $installed = Install-App -SetupArguments '/FULL'
+$asked = @(Elevated-Starts)
+Test-Check 'B: Full in the setup asks Windows exactly once' ($asked.Count -eq 1 -and $asked[0] -match '--setup-admin') ($asked -join ' | ')
 Start-Restricted
 Test-Check 'B: list made' (Wait-Until { (Config) -and (Previewed).Count -ge 5 } 60) (Describe-List)
 $c = Config
@@ -237,6 +250,22 @@ Test-Check 'B: through the admin helper' ((Lines 'Admin helper: --restore done \
 Test-Check 'B: no UAC prompt' (@(Get-Process consent -ErrorAction SilentlyContinue).Count -le $consentBefore)
 Test-Check 'B: and out of the list' (-not ((Config).entries | Where-Object { $_.origin.name -eq 'TestPrinter' }))
 
+# Shutting down with prepared apps, set up in the settings: through the admin helper too.
+$gear = Find (L 'Settings' 'Einstellungen') $types::Button
+if (-not $gear) { $gear = (Find-Window).FindFirst('Descendants', (New-Object System.Windows.Automation.PropertyCondition($ae::NameProperty, (L 'Settings' 'Einstellungen')))) }
+if ($gear) { $gear.GetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern).Toggle(); Start-Sleep 2 }
+function By-Id([string]$Id) { (Find-Window).FindFirst('Descendants', (New-Object System.Windows.Automation.PropertyCondition($ae::AutomationIdProperty, $Id))) }
+$prepared = By-Id 'PreparedButton'
+Write-Note "prepared apps button: $(if ($prepared) { $prepared.Current.Name } else { 'not shown' })"
+if ($prepared) {
+    $prepared.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+    Start-Sleep 2
+    $ok = By-Id 'ConfirmOk'
+    if ($ok) { $ok.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke() }
+}
+Test-Check 'B: prepared apps set up through the admin helper' (Wait-Until { (Lines 'Admin helper: --prepared-signin done \(0\)') -ge 1 } 60)
+Save-Screen 'b-2-settings'
+
 # A service change through the helper, as the services view hands it over; and nothing it does not know.
 function Ask-Helper([string[]]$Arguments) {
     $id = [guid]::NewGuid().ToString()
@@ -256,10 +285,15 @@ $after = (Get-CimInstance Win32_Service -Filter "Name='Spooler'").StartMode
 Test-Check 'B: a service change through the helper' ($code -eq 0 -and $after -eq 'Manual') "exit $code, $before -> $after"
 $code = Ask-Helper @('--uninstall')
 Test-Check 'B: the helper takes no other command line' ($code -eq 87) "exit $code"
+$asked = @(Elevated-Starts)
+Test-Check 'B: after the setup no more UAC prompts (giving back, prepared apps, service)' ($asked.Count -eq 1) ($asked -join ' | ')
 
 # ================= C. Update of 1.6.0 with a list in use =================
 Stop-App
 Uninstall-App
+$asked = @(Elevated-Starts)
+Test-Check 'B: uninstalling Full asks Windows exactly once more' ($asked.Count -eq 2 -and $asked[1] -match '--uninstall-admin') ($asked -join ' | ')
+Remove-Item Env:ESTEEMWORKS_ASSUME_STANDARD
 Remove-Item $data -Recurse -Force -ErrorAction SilentlyContinue
 Set-Autostart
 $old = Get-ChildItem 'C:\sq\old' -Filter 'StartQueue-Setup-*.exe' | Select-Object -First 1

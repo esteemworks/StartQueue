@@ -90,7 +90,8 @@ public static class PreparedSignIn
         if (state is PreparedSignInState.BlockedByPolicy or PreparedSignInState.HelloRequired or PreparedSignInState.NeedsBitLocker)
             return PreparedSetupState.Managed;
         if (state == PreparedSignInState.Possible && CurrentSid is { } sid && ReadInt(UserKey(sid), OptOutValue) == 0) return PreparedSetupState.Ready;
-        return Setup.UserIsAdmin ? PreparedSetupState.CanSetUp : PreparedSetupState.NeedsAdmin;
+        // Set up fully the admin helper writes the two values, whoever is signed in; otherwise an administrator, once.
+        return Setup.UserIsAdmin || Elevation.AdminMode ? PreparedSetupState.CanSetUp : PreparedSetupState.NeedsAdmin;
     }
 
     /// <summary>

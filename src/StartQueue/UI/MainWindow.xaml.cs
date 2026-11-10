@@ -12,7 +12,7 @@ namespace StartQueue.UI;
 
 public partial class MainWindow : Window
 {
-    enum View { Order, Windows, Services, Settings, Intro }
+    enum View { Order, Windows, Services, Settings }
 
     readonly TrayHost host;
     readonly ObservableCollection<EntryVm> entries = new();
@@ -97,10 +97,22 @@ public partial class MainWindow : Window
         return null;
     }
 
+    // The tabs, made by the kit's frame.
+    readonly RadioButton TabOrder, TabWindows, TabServices;
+    bool followingFrame;
+
     public MainWindow(TrayHost host)
     {
         this.host = host;
         InitializeComponent();
+        // The family's window from the kit: title bar, title with the line of facts, actions, tabs with the gear
+        // (STANDARD, "The window"); the frame keeps the rules of tabs and gear and tells which page to show.
+        Frame.Attach(this);
+        TabOrder = Frame.AddTab("order", Strings.TabOrder);
+        TabWindows = Frame.AddTab("windows", Strings.TabWindows);
+        TabServices = Frame.AddTab("services", Strings.TabServices);
+        Frame.PageChanged += FramePageChanged;
+        PlacePreparedPair();
         // The family's About, Troubleshooting and More from EsteemWorks; "Privacy and notices" sits beside the data folder.
         AboutPage.Build(AboutHost, Ui.Button(Strings.LegalTitle, Legal_Click));
         // The note of "Check" closes by itself, on a click, and when the window moves or loses the focus.
@@ -120,8 +132,6 @@ public partial class MainWindow : Window
         ProfileFieldsHost.Content = profileFields;
         PauseFieldsHost.Content = pauseFields;
         FontWeight = Theme.BodyWeight;
-        Icon = AppIcons.WindowIcon();
-        CaptionIcon.Source = Icon;
         EntryList.ItemsSource = entries;
         PreviewKeyDown += Window_PreviewKeyDown;
         _ = new MiddleScroll(this, ScrollMarker);
@@ -132,6 +142,33 @@ public partial class MainWindow : Window
             CloseOverlay();
             Hide();
         };
+        StartFirstStart();
+    }
+
+    /// <summary>
+    /// Shut down and restart with prepared apps: one pair on the tab line, left of the gear, as before the kit's frame,
+    /// which has no place of its own for it.
+    /// </summary>
+    void PlacePreparedPair()
+    {
+        Root.Children.Remove(PreparedPair);
+        if (Frame.Gear.Parent is not Grid line) return;
+        PreparedPair.Margin = new Thickness(0, -7, 52, 0);
+        line.Children.Add(PreparedPair);
+        Frame.Gear.SizeChanged += (_, _) => PreparedPair.Margin = new Thickness(0, -7, Frame.Gear.ActualWidth + 8, 0);
+    }
+
+    /// <summary>A tab was chosen or the settings opened or closed in the frame: the view for it.</summary>
+    void FramePageChanged()
+    {
+        if (followingFrame) return;
+        var next = Frame.SettingsOpen ? View.Settings : Frame.Page switch
+        {
+            "windows" => View.Windows,
+            "services" => View.Services,
+            _ => View.Order,
+        };
+        if (next != view) ShowView(next);
     }
 
     public bool ShowsWindowsView => IsVisible && view == View.Windows;
@@ -148,111 +185,53 @@ public partial class MainWindow : Window
     // ---------- First start ----------
 
     IntroView? intro;
-    readonly List<(RadioButton Button, Border Circle, TextBlock Number, string Name)> steps = [];
-
-    /// <summary>The introduction of a new install, at the given step, in place of the tabs.</summary>
-    public void ShowIntroduction(int step = IntroView.Welcome)
-    {
-        if (intro == null)
-        {
-            intro = new IntroView(host);
-            intro.StepChanged += SyncSteps;
-            IntroHost.Content = intro;
-        }
-        ShowView(View.Intro);
-        intro.ShowStep(step);
-    }
-
-    bool InIntro => view == View.Intro || (view == View.Settings && lastTab == View.Intro);
 
     /// <summary>
-    /// What the first start of a new install shows: the introduction while it is open, the preview bar and "Switch on"
-    /// while the user looks around, the normal window once switched on. Installs from before 1.7 never see either.
+    /// A new installation not switched on yet (STANDARD.md, "First start"): the kit's frame shows StartQueue's steps in
+    /// place of the tabs, and looking around with its note and "Switch on". Where the user stands is kept in config.json,
+    /// so the window opens the same way again. Installations from before and switched on ones see none of it.
     /// </summary>
-    void SyncFirstStart(Config config)
+    void StartFirstStart()
     {
-        // The window drawn for pictures shows what it is told to.
+        var config = host.Config;
+        if (config.SwitchedOn) return;
+        // The kit's mark of a new installation and StartQueue's list say the same; should only the list say it (the mark
+        // went, a list from before it), the kit is told in this process, writing nothing.
+        if (!KitIntro.Pending) KitIntro.ForSnapshot = true;
+        intro = new IntroView(host);
+        Frame.StartIntro(
+        [
+            new IntroStep("welcome", () => Strings.IntroStepWelcome, () => intro.Page(IntroView.Welcome)),
+            new IntroStep("takeover", () => Strings.IntroStepTakeOver, () => intro.Page(IntroView.TakeOver)),
+            new IntroStep("ready", () => Strings.IntroStepSwitchOn, () => intro.Page(IntroView.Ready)),
+        ]);
+        if (config.FirstStart == FirstStart.LookingAround) Frame.LookAround();
+        // From here on what the user does is kept; opening the window as it was is no change.
+        Frame.IntroChanged += IntroChanged;
+    }
+
+    /// <summary>The introduction moved on, was left to look around, or ended: header, actions and the saved state.</summary>
+    void IntroChanged()
+    {
+        // The window drawn for pictures changes nothing.
         if (!offScreen)
         {
-            if (config.FirstStart == FirstStart.Welcome && !InIntro)
-            {
-                ShowIntroduction();
-                return;
-            }
-            if (config.FirstStart != FirstStart.Welcome && InIntro)
-            {
-                lastTab = View.Order;
-                if (view == View.Intro) ShowView(View.Order);
-            }
+            if (Frame.InIntro) host.SetFirstStart(FirstStart.Welcome);
+            else if (Frame.LookingAround) host.SetFirstStart(FirstStart.LookingAround);
         }
-        var inIntro = InIntro;
-        var looking = config.FirstStart == FirstStart.LookingAround;
-        TabsPanel.Visibility = inIntro ? Visibility.Collapsed : Visibility.Visible;
-        StepsPanel.Visibility = inIntro ? Visibility.Visible : Visibility.Collapsed;
-        HeroActions.Visibility = inIntro ? Visibility.Collapsed : Visibility.Visible;
-        PreviewBar.Visibility = looking && !inIntro ? Visibility.Visible : Visibility.Collapsed;
-        PreviewSwitchOnButton.Visibility = looking ? Visibility.Visible : Visibility.Collapsed;
+        Sync();
+    }
+
+    /// <summary>What the first start changes outside the frame: the actions of the header and the line of facts.</summary>
+    void SyncFirstStart(Config config)
+    {
+        var looking = Frame.LookingAround;
+        // While looking around "Switch on" is the main action, added by the kit at the end.
         AddButton.Visibility = looking ? Visibility.Collapsed : Visibility.Visible;
         // Shutting down with prepared apps prepares what StartQueue starts: nothing before it is switched on.
         PreparedPair.Visibility = config.SwitchedOn ? Visibility.Visible : Visibility.Collapsed;
-        if (inIntro) intro?.Sync();
+        if (Frame.InIntro) intro?.Sync();
     }
-
-    /// <summary>The steps of the introduction in the tab line: done ones with a check, the current one marked.</summary>
-    void SyncSteps()
-    {
-        if (steps.Count == 0)
-        {
-            foreach (var (name, index) in new[] { Strings.IntroStepWelcome, Strings.IntroStepTakeOver, Strings.IntroStepSwitchOn }.Select((n, i) => (n, i)))
-            {
-                var number = new TextBlock { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-                var circle = new Border { Width = 20, Height = 20, CornerRadius = new CornerRadius(10), BorderThickness = new Thickness(1), Margin = new Thickness(0, 0, 8, 0), Child = number };
-                circle.SetResourceReference(Border.BorderBrushProperty, "HeroLine");
-                var label = new TextBlock { Text = name, VerticalAlignment = VerticalAlignment.Center };
-                var button = new RadioButton
-                {
-                    GroupName = "IntroSteps",
-                    Content = new StackPanel { Orientation = Orientation.Horizontal, Children = { circle, label } },
-                };
-                button.SetResourceReference(StyleProperty, "HeroTab");
-                var step = index;
-                button.Click += (_, _) =>
-                {
-                    if (view == View.Settings) ShowView(View.Intro);
-                    intro?.ShowStep(step);
-                };
-                StepsPanel.Children.Add(button);
-                steps.Add((button, circle, number, name));
-            }
-        }
-        var current = intro?.Step ?? IntroView.Welcome;
-        for (var i = 0; i < steps.Count; i++)
-        {
-            var (button, circle, number, name) = steps[i];
-            var done = i < current;
-            button.IsChecked = i == current && view == View.Intro;
-            number.Text = done ? "" : (i + 1).ToString();
-            number.FontFamily = done ? (FontFamily)FindResource("IconFont") : FontFamily;
-            if (i == current)
-            {
-                circle.Background = Brushes.White;
-                number.SetResourceReference(TextBlock.ForegroundProperty, "HeroBg");
-            }
-            else
-            {
-                circle.Background = Brushes.Transparent;
-                number.SetResourceReference(TextBlock.ForegroundProperty, "HeroText");
-            }
-            // As the kit's introduction names its steps.
-            System.Windows.Automation.AutomationProperties.SetName(button, Strings.F(Strings.IntroStepName, i + 1, steps.Count, name,
-                done ? Strings.IntroStepDone : i == current ? Strings.IntroStepCurrent : Strings.IntroStepLater));
-        }
-    }
-
-    void PreviewContinue_Click(object sender, RoutedEventArgs e) => host.ContinueSetup();
-
-    /// <summary>"Switch on" in the preview: the last step of the introduction, which shows once more what happens.</summary>
-    void PreviewSwitchOn_Click(object sender, RoutedEventArgs e) => host.ContinueSetup(IntroView.Ready);
 
     /// <summary>Draws every view into PNG files from a window placed off screen, so nothing takes the focus.</summary>
     public async Task SnapshotAsync(string folder, bool maximizeTest = false, bool colorsOnly = false)
@@ -287,12 +266,14 @@ public partial class MainWindow : Window
                 for (var waited = 0; host.Report == null && waited < 20; waited++) await Task.Delay(500);
                 foreach (var introStep in new[] { IntroView.Welcome, IntroView.TakeOver, IntroView.Ready })
                 {
-                    ShowIntroduction(introStep);
+                    Frame.ShowStep(introStep);
                     await Task.Delay(1200); // icons
-                    intro!.Sync();
+                    intro?.Sync();
                     await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                     SavePng(Root, Path.Combine(folder, $"intro-{introStep + 1}.png"));
                 }
+                // The views below as while looking around.
+                Frame.LookAround();
             }
             foreach (var next in new[] { View.Order, View.Windows, View.Services, View.Settings })
             {
@@ -997,13 +978,13 @@ public partial class MainWindow : Window
         // Before switching on: what would happen, never a count of what StartQueue starts.
         if (config.FirstStart == FirstStart.Welcome) summary = Strings.IntroNotOn;
         else if (config.FirstStart == FirstStart.LookingAround) summary = enabled == 1 ? Strings.PreviewSummaryOne : Strings.F(Strings.PreviewSummary, enabled);
-        SummaryText.Text = summary;
-        // The last run is a fact of its own, so it gets a line of its own.
-        LastRunText.Text = run is { Items.Count: > 0 } && config.SwitchedOn
+        // The last run is a fact of its own, so it gets a line of its own under the summary.
+        var lastRun = run is { Items.Count: > 0 } && config.SwitchedOn
             ? Strings.F(run.AtSignIn ? Strings.SummaryLastSignIn : Strings.SummaryLastRun, run.StartedAt, run.Items.Count, run.Items.Max(i => i.Seconds))
               + (run.Items.Any(i => i.Failed) ? Strings.F(Strings.SummaryFailed, run.Items.Count(i => i.Failed)) : "")
             : "";
-        LastRunText.Visibility = LastRunText.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        Frame.Summary.Text = lastRun.Length > 0 ? summary + "\n" + lastRun : summary;
+        Frame.Summary.LineHeight = 19;
         TabOrder.Content = $"{Strings.TabOrder}  {total}";
         TabWindows.Content = host.Report == null ? Strings.TabWindows : $"{Strings.TabWindows}  {host.Report.Items.Count}";
         if (TabServices.Content == null) TabServices.Content = Strings.TabServices;
@@ -1080,81 +1061,31 @@ public partial class MainWindow : Window
     {
         if (next != View.Settings) lastTab = next;
         view = next;
-        IntroHost.Visibility = next == View.Intro ? Visibility.Visible : Visibility.Collapsed;
         OrderView.Visibility = next == View.Order ? Visibility.Visible : Visibility.Collapsed;
         WindowsView.Visibility = next == View.Windows ? Visibility.Visible : Visibility.Collapsed;
         ServicesView.Visibility = next == View.Services ? Visibility.Visible : Visibility.Collapsed;
         SettingsView.Visibility = next == View.Settings ? Visibility.Visible : Visibility.Collapsed;
-        GearButton.IsChecked = next == View.Settings;
-        if (next == View.Settings)
+        // The frame shows the same: its tab, or the settings with the gear as × (it keeps the rules of both).
+        followingFrame = true;
+        try
         {
-            // Neither tab is chosen while the settings are open, so a click on either leads back.
-            TabOrder.IsChecked = false;
-            TabWindows.IsChecked = false;
-            TabServices.IsChecked = false;
+            if (next == View.Settings) Frame.SettingsOpen = true;
+            else Frame.ShowTab(next switch { View.Windows => "windows", View.Services => "services", _ => "order" });
         }
-        if (next == View.Order) TabOrder.IsChecked = true;
-        if (next == View.Windows)
+        finally
         {
-            TabWindows.IsChecked = true;
-            _ = host.RefreshReportAsync();
+            followingFrame = false;
         }
-        if (next == View.Services)
-        {
-            TabServices.IsChecked = true;
-            _ = LoadServicesAsync();
-        }
+        if (next == View.Windows) _ = host.RefreshReportAsync();
+        if (next == View.Services) _ = LoadServicesAsync();
         if (next == View.Settings)
         {
             var settings = new SettingsVm(host);
             SettingsView.DataContext = settings;
             AccentHost.Content = EsteemWorks.Kit.UI.AccentRow.Segments(host.Config.Settings.Accent.ToKit(), profiles: true, settings.PickAccent);
         }
-        if (next == View.Intro) TabOrder.IsChecked = TabWindows.IsChecked = TabServices.IsChecked = false;
         SyncFirstStart(host.Config);
-        if (InIntro) SyncSteps();
     }
-
-    void Tab_Checked(object sender, RoutedEventArgs e)
-    {
-        if (OrderView == null) return;
-        var next = TabWindows.IsChecked == true ? View.Windows : TabServices.IsChecked == true ? View.Services : View.Order;
-        if (next != view) ShowView(next);
-    }
-
-    // Checked/Unchecked rather than Click, so keyboard and screen readers (toggle) work the same way.
-    void Gear_Changed(object sender, RoutedEventArgs e)
-    {
-        // Open settings: the gear turns into × that closes them.
-        var open = GearButton.IsChecked == true;
-        GearIcon.Text = open ? "\uE8BB" : "\uE713";
-        GearIcon.FontSize = open ? 12 : 15;
-        var label = open ? Strings.CloseSettings : Strings.TabSettings;
-        GearButton.ToolTip = label;
-        System.Windows.Automation.AutomationProperties.SetName(GearButton, label);
-        Motion.TurnIn(GearTurn);
-        if (OrderView == null) return;
-        var next = GearButton.IsChecked == true ? View.Settings : lastTab;
-        if (next != view) ShowView(next);
-    }
-
-    // ---------- Title bar ----------
-
-    void Window_StateChanged(object? sender, EventArgs e)
-    {
-        var maximized = WindowState == WindowState.Maximized;
-        // A maximized chrome-less window reaches past the screen edge by its resize border.
-        Root.Margin = maximized ? new Thickness(7) : new Thickness(0);
-        MaxButton.Content = maximized ? "" : "";
-        MaxButton.ToolTip = maximized ? Strings.Restore : Strings.Maximize;
-    }
-
-    void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-
-    void Maximize_Click(object sender, RoutedEventArgs e) =>
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-
-    void Close_Click(object sender, RoutedEventArgs e) => Close();
 
     // ---------- Selection and keyboard ----------
 
@@ -1173,7 +1104,7 @@ public partial class MainWindow : Window
     void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (Overlay.Visibility == Visibility.Visible) return;
-        if (InIntro && e.Key != Key.Escape) return;
+        if (Frame.InIntro && e.Key != Key.Escape) return;
         if (e.Key == Key.F5)
         {
             _ = ScanAsync();

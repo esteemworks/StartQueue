@@ -31,7 +31,9 @@ public static class Setup
     // ---------- What this user may do ----------
 
     /// <summary>The signed-in user is an administrator (UAC asks to confirm, not for another account's password).</summary>
-    public static bool UserIsAdmin => Elevation.IsElevated || ElevationType() == TokenElevationTypeLimited;
+    public static bool UserIsAdmin => Elevation.IsElevated || ElevationType() == TokenElevationTypeLimited ||
+        // The sandbox test acts as an administrator under UAC (ESTEEMWORKS_ASSUME_STANDARD=1) on an account without it.
+        (Elevation.AssumeStandard && new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator));
 
     /// <summary>Running elevated through UAC, so the same user also has a token with normal rights.</summary>
     public static bool CanDropElevation => ElevationType() == TokenElevationTypeFull;

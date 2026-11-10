@@ -73,9 +73,10 @@ public sealed record ReadyItem(int Number, string Name)
 }
 
 /// <summary>
-/// The first start of a new install (STANDARD.md, "First start"): Welcome, Take over, Switch on, in the window
-/// in place of the tabs. Nothing changes in Windows before "Switch StartQueue on"; "Look around first" opens the normal
-/// window as a preview. What is unticked here stays with Windows.
+/// The steps of the first start of a new install (STANDARD.md, "First start"): Welcome, Take over, Switch on. The kit's
+/// KitFrame.StartIntro shows them in place of the tabs, with "Back", "Look around first", "Next" and at the end "Switch
+/// StartQueue on"; nothing changes in Windows before that. What is unticked here and the choice for new entries go to
+/// the tray (<see cref="TrayHost.IntroLeave"/>, <see cref="TrayHost.IntroMode"/>), which applies them when switched on.
 /// </summary>
 public partial class IntroView : UserControl
 {
@@ -83,40 +84,34 @@ public partial class IntroView : UserControl
     const int ReadyListMost = 12;
 
     readonly TrayHost host;
-    readonly HashSet<Guid> leave = [];
-    NewEntryMode mode;
+    HashSet<Guid> leave => host.IntroLeave;
+    NewEntryMode mode
+    {
+        get => host.IntroMode;
+        set => host.IntroMode = value;
+    }
     bool loading;
     string? foundKey;
 
-    /// <summary>The step shown, 0 to 2; the window's step line follows it.</summary>
+    /// <summary>The step shown, 0 to 2.</summary>
     public int Step { get; private set; }
-
-    public event Action? StepChanged;
 
     public IntroView(TrayHost host)
     {
         this.host = host;
         InitializeComponent();
-        mode = host.Config.Settings.NewEntries;
-        ShowStep(Welcome);
     }
 
-    public void ShowStep(int step)
+    /// <summary>The step <paramref name="step"/>, for the kit's frame to show (IntroStep.Build).</summary>
+    public FrameworkElement Page(int step)
     {
         Step = Math.Clamp(step, Welcome, Ready);
         foundKey = null;
         WelcomePage.Visibility = Step == Welcome ? Visibility.Visible : Visibility.Collapsed;
         TakeOverPage.Visibility = Step == TakeOver ? Visibility.Visible : Visibility.Collapsed;
         ReadyPage.Visibility = Step == Ready ? Visibility.Visible : Visibility.Collapsed;
-        BackButton.Visibility = Step == Welcome ? Visibility.Collapsed : Visibility.Visible;
-        WelcomeHint.Visibility = Step == Welcome ? Visibility.Visible : Visibility.Collapsed;
-        NextButton.Visibility = Step == Ready ? Visibility.Collapsed : Visibility.Visible;
-        SwitchOnButton.Visibility = Step == Ready ? Visibility.Visible : Visibility.Collapsed;
-        Scroll.ScrollToHome();
         Sync();
-        StepChanged?.Invoke();
-        // The keyboard starts on the main button of each step.
-        Dispatcher.BeginInvoke(() => (Step == Ready ? SwitchOnButton : NextButton).Focus(), System.Windows.Threading.DispatcherPriority.Input);
+        return this;
     }
 
     /// <summary>Fills the step from what the sweep found and the Windows autostart report; called by the window's Sync.</summary>
@@ -201,25 +196,6 @@ public partial class IntroView : UserControl
         mode = ModeDisabled.IsChecked == true ? NewEntryMode.TakeOverDisabled
             : ModeNotify.IsChecked == true ? NewEntryMode.NotifyOnly
             : NewEntryMode.TakeOverEnabled;
-    }
-
-    void Back_Click(object sender, RoutedEventArgs e) => ShowStep(Step - 1);
-
-    void Next_Click(object sender, RoutedEventArgs e) => ShowStep(Step + 1);
-
-    void LookAround_Click(object sender, RoutedEventArgs e) => host.LookAround();
-
-    async void SwitchOn_Click(object sender, RoutedEventArgs e)
-    {
-        SwitchOnButton.IsEnabled = false;
-        try
-        {
-            await host.SwitchOnAsync(leave.ToList(), mode);
-        }
-        finally
-        {
-            SwitchOnButton.IsEnabled = true;
-        }
     }
 
     void SetUpFully_Click(object sender, RoutedEventArgs e) => host.SetUpAdminFeatures();

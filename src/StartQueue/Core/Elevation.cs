@@ -8,8 +8,18 @@ public static class Elevation
     public const string TaskFolder = @"\StartQueue\";
     public const string ElevatedTaskName = "Elevated";
 
-    public static bool IsElevated { get; } =
-        new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+    /// <summary>
+    /// For the sandbox test (the kit's ESTEEMWORKS_ASSUME_STANDARD=1): its account has no UAC token split, so everything
+    /// runs elevated and nothing would ever ask. With it StartQueue acts as an administrator under UAC does and asks
+    /// wherever it would ask, so the test can count the prompts.
+    /// </summary>
+    public static bool AssumeStandard => KitElevation.AssumeStandard;
+
+    /// <summary>This process runs with admin rights, as the kit sees it (never with <see cref="AssumeStandard"/>).</summary>
+    public static bool IsElevated => KitApp.IsElevated;
+
+    /// <summary>The admin helper task exists now (after "Set up fully", before StartQueue starts again).</summary>
+    public static bool ElevatedTaskRegistered() => ElevatedTaskExists();
 
     /// <summary>
     /// Installed with admin rights: install.ps1 then registers the elevated helper task. Without it StartQueue
@@ -71,18 +81,9 @@ public static class Elevation
         return process?.ExitCode == 0;
     }
 
-    /// <summary>Runs StartQueue once with a UAC prompt. Returns false if the user cancelled.</summary>
-    public static bool RunSelfElevated(string arguments)
-    {
-        try
-        {
-            using var process = Process.Start(new ProcessStartInfo(Paths.Exe, arguments) { UseShellExecute = true, Verb = "runas" });
-            process?.WaitForExit();
-            return process?.ExitCode == 0;
-        }
-        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
-        {
-            return false;
-        }
-    }
+    /// <summary>
+    /// Runs StartQueue once with a UAC prompt and waits for it, through the kit, which logs every such start ("Elevated
+    /// start: ..."), so the sandbox test can count them. Returns false if the user cancelled.
+    /// </summary>
+    public static bool RunSelfElevated(string arguments) => KitElevation.Run(arguments, Timeout.Infinite);
 }

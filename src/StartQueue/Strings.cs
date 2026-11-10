@@ -345,7 +345,6 @@ public static class Strings
     public static string SetupMenuModern => T("context menu in the Windows 11 menu", "Kontextmenü im Windows-11-Menü");
     public static string SetupMenuClassic => T("context menu under \"Show more options\"", "Kontextmenü unter „Weitere Optionen anzeigen“");
     public static string SetupMenuNone => T("no context menu", "kein Kontextmenü");
-    public static string CloseSettings => T("Close settings", "Einstellungen schließen");
     public static string SettingsAppearance => T("General", "Allgemein");
     public static string SettingsAppearanceHelp => T("How this window looks and speaks.", "Wie dieses Fenster aussieht und spricht.");
     public static string SettingsTheme => T("Color mode of this window", "Farbmodus dieses Fensters");
@@ -380,9 +379,6 @@ public static class Strings
         "Änderungen an Run-Schlüsseln und Autostart-Ordnern bemerkt StartQueue ohnehin sofort. Die vollständige Prüfung findet zusätzlich neue Startaufgaben von Store-Apps.");
     public static string EveryMinutes => T("every {0} minutes", "alle {0} Minuten");
     public static string Never => T("never", "nie");
-    public static string SettingsDevice => T("This device", "Dieses Gerät");
-    public static string SettingsDeviceHelp => T("How StartQueue is set up on this PC: with or without admin rights, sign-in start and context menu.",
-        "Wie StartQueue auf diesem PC eingerichtet ist: mit oder ohne Adminrechte, Start bei der Anmeldung und Kontextmenü.");
     public static string LegalTitle => T("Privacy and notices", "Datenschutz und Hinweise");
 
     /// <summary>The sections of "Privacy and notices": what is read and stored, how StartQueue was made, license, liability.</summary>
@@ -413,9 +409,6 @@ public static class Strings
     ];
 
     // ---------- Window chrome and navigation ----------
-    public static string Minimize => T("Minimize", "Minimieren");
-    public static string Maximize => T("Maximize", "Maximieren");
-    public static string Restore => T("Restore", "Wiederherstellen");
     public static string Close => T("Close", "Schließen");
 
     // ---------- Services ----------
@@ -792,16 +785,6 @@ public static class Strings
     public static string IntroStepWelcome => T("Welcome", "Willkommen");
     public static string IntroStepTakeOver => T("Take over", "Übernehmen");
     public static string IntroStepSwitchOn => T("Switch on", "Einschalten");
-    public static string IntroStepName => T("Step {0} of {1}: {2}, {3}", "Schritt {0} von {1}: {2}, {3}");
-    public static string IntroStepDone => T("done", "erledigt");
-    public static string IntroStepCurrent => T("current step", "aktueller Schritt");
-    public static string IntroStepLater => T("still to come", "kommt noch");
-    public static string IntroBack => T("Back", "Zurück");
-    public static string IntroNext => T("Next", "Weiter");
-    public static string IntroLookAround => T("Look around first", "Erst umsehen");
-    public static string IntroLookAroundTip => T("Opens StartQueue as a preview. It changes nothing in Windows until you switch it on.",
-        "Öffnet StartQueue als Vorschau. Es ändert nichts an Windows, bis du es einschaltest.");
-    public static string IntroSwitchOnButton => T("Switch StartQueue on", "StartQueue einschalten");
 
     public static string IntroWelcomeLabel => T("WELCOME", "WILLKOMMEN");
     public static string IntroWelcomeTitle => T("Your apps start after sign-in in your order.", "Deine Apps starten nach der Anmeldung in deiner Reihenfolge.");
@@ -817,7 +800,6 @@ public static class Strings
         "Bisher hat StartQueue nur nachgesehen und nichts geändert. Im Autostart stehen {0} Einträge.");
     public static string IntroWelcomeFoundOne => T("So far StartQueue has only looked and changed nothing. The autostart holds 1 entry.",
         "Bisher hat StartQueue nur nachgesehen und nichts geändert. Im Autostart steht 1 Eintrag.");
-    public static string IntroWelcomeHint => T("You can also look around first. StartQueue then changes nothing.", "Du kannst dich auch erst umsehen. StartQueue ändert dann nichts.");
 
     public static string IntroTakeOverTitle => T("Which apps should StartQueue start?", "Welche Apps soll StartQueue starten?");
     public static string IntroTakeOverText => T("StartQueue takes the chosen apps out of the Windows autostart and starts them itself. Windows goes on starting all others as before.",
@@ -871,11 +853,6 @@ public static class Strings
     public static string PreviewSummary => T("Preview: {0} apps would start in this order. Nothing is taken over yet.",
         "Vorschau: {0} Apps würden in dieser Reihenfolge starten. Noch ist nichts übernommen.");
     public static string PreviewSummaryOne => T("Preview: 1 app would start. Nothing is taken over yet.", "Vorschau: 1 App würde starten. Noch ist nichts übernommen.");
-    public static string PreviewBar => T("You are looking around. StartQueue changes nothing in Windows until you switch it on. What you arrange here stays.",
-        "Du siehst dich um. StartQueue ändert nichts an Windows, bis du es einschaltest. Was du hier ordnest, bleibt erhalten.");
-    public static string PreviewContinue => T("Continue setup", "Einrichtung fortsetzen");
-    public static string PreviewSwitchOn => T("Switch on", "Einschalten");
-    public static string PreviewSwitchOnTip => T("Shows once more what happens, then StartQueue takes over.", "Zeigt noch einmal, was passiert, dann übernimmt StartQueue.");
     public static string StillInWindowsChip => T("still with Windows", "noch bei Windows");
     public static string StillInWindowsTip => T("Windows still starts this app. StartQueue takes it over with these settings when you switch it on.",
         "Diese App startet noch Windows. StartQueue übernimmt sie mit diesen Einstellungen, wenn du es einschaltest.");

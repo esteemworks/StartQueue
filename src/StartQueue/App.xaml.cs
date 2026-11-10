@@ -92,6 +92,13 @@ public partial class App : Application
                     Setup.InstallAdmin();
                     Shutdown();
                     return;
+                // "Set up fully" from the command line, as in the settings: one UAC prompt, then the Windows 11 menu.
+                case "--setup-full":
+                    UseSavedLanguage();
+                    var full = KitSetup.SetUpFull();
+                    if (full) Setup.SetUpContextMenu();
+                    Shutdown(full ? 0 : 1);
+                    return;
                 case "--setup-menu":
                     UseSavedLanguage();
                     Setup.SetUpContextMenu();

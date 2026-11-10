@@ -111,7 +111,7 @@ Download `StartQueue-Setup-<version>.exe` from the [latest release](../../releas
 
 **At the first start StartQueue changes nothing.** It shows what it found in the Windows autostart, and you choose in three steps: which apps it takes over (untick the ones Windows should keep), what happens when an app adds itself later, and when it switches on. **Look around first** opens StartQueue as a preview: every app shows in the order marked *still with Windows*, and what you arrange there stays when you switch on. Until then Windows starts everything as before. For deployments, `StartQueue.exe --switch-on` switches it on with everything found.
 
-Full can also be set up later under **Settings > This device > Set up fully**. A newer setup simply updates, without the question and without the introduction: your list and settings stay and StartQueue goes on as before. Uninstall through **Windows Settings > Apps**: every entry StartQueue took over goes back to Windows, your list stays for a later installation.
+Full can also be set up later under **Settings > General > Set up fully** (one UAC prompt). A newer setup simply updates, without the question and without the introduction: your list and settings stay and StartQueue goes on as before. Uninstall through **Windows Settings > Apps**: every entry StartQueue took over goes back to Windows, your list stays for a later installation.
 
 > [!NOTE]
 > The setup is not signed with a public code signing certificate yet. Windows SmartScreen therefore warns about an unknown publisher: choose "More info", then "Run anyway". With Smart App Control or policies like AppLocker, WDAC or ASR rules, Windows may block it. No scanner on VirusTotal flags the setup of version 1.6.0: [report](https://www.virustotal.com/gui/file/9f92102955845bea803ef4345d204794dc94b2067e7be6c906ff1e7deeff7920).
@@ -252,7 +252,7 @@ Explorer only loads context menus in the Windows 11 menu from a signed package. 
 | `package` | manifest of the context menu package |
 | `installer` | setup (Inno Setup) |
 
-Command line: `--autostart` (sign-in), `--add <file>`, `--show`, `--switch-on` (ends the first start, as the button does), `--elevated` (admin task), `--restore <id>`, `--restore-all`, `--service <action> <name>` (one service change, through the admin helper or UAC). Settings: `--export <file.zip>`, `--import <file.zip>` (a running StartQueue takes them over at once; exit code 1 when it failed). For setup and uninstall: `--setup [--admin] [--new]`, `--setup-admin`, `--uninstall`. For diagnostics: `--scan-report <file>`, `--snapshot <folder>` (before switching on with the steps of the introduction), `--perf <file>`.
+Command line: `--autostart` (sign-in), `--add <file>`, `--show`, `--switch-on` (ends the first start, as the button does), `--elevated` (admin task), `--restore <id>`, `--restore-all`, `--service <action> <name>` (one service change, through the admin helper or UAC). Settings: `--export <file.zip>`, `--import <file.zip>` (a running StartQueue takes them over at once; exit code 1 when it failed). For setup and uninstall: `--setup [--admin] [--new]`, `--setup-admin`, `--setup-full` (Set up fully, one UAC prompt), `--uninstall`. For diagnostics: `--scan-report <file>`, `--snapshot <folder>` (before switching on with the steps of the introduction), `--perf <file>`.
 
 `build.ps1 -Setup` signs the program files, the setup and its uninstaller with a public certificate when signing is
 set up on the PC (environment variables, see EsteemWorks.Kit's `tools\sign.ps1`); otherwise it builds them as before

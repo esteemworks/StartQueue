@@ -41,6 +41,8 @@ public sealed class TrayHost : IDisposable
         Theme.Apply(config.Settings.Theme, config.Settings.Accent.ToKit());
         CleanUpShortcuts();
         notified = config.Entries.Where(e => e.IsNew).Select(e => e.Id).ToHashSet();
+        IntroMode = config.Settings.NewEntries;
+        KitIntro.SwitchedOn += KitSwitchedOn;
         // Siblings read this to know that StartQueue starts them; also after an update from a version without it.
         FamilyApps.Publish(config);
 
@@ -1052,26 +1054,43 @@ public sealed class TrayHost : IDisposable
 
     // ---------- First start ----------
 
-    /// <summary>"Look around first": the normal window as a preview, StartQueue still changes nothing in Windows.</summary>
-    public void LookAround()
+    /// <summary>The entries unticked in the introduction's step "Take over": they stay with Windows when switched on.</summary>
+    public HashSet<Guid> IntroLeave { get; } = [];
+
+    /// <summary>What happens to new autostart entries, as chosen in the introduction.</summary>
+    public NewEntryMode IntroMode { get; set; }
+
+    /// <summary>
+    /// Where the first start stands, as the kit's frame shows it: the introduction open, or looking around. Kept in
+    /// config.json, so the window opens the same way again and the sweep knows it (also in the admin helper).
+    /// </summary>
+    public void SetFirstStart(FirstStart state)
     {
-        Change(c => c.FirstStart = FirstStart.LookingAround);
-        Log.Info("First start: looking around before switching on");
+        if (config.SwitchedOn || config.FirstStart == state) return;
+        Change(c =>
+        {
+            if (!c.SwitchedOn) c.FirstStart = state;
+        }, reloadWindow: false);
+        Log.Info(state == FirstStart.LookingAround ? "First start: looking around before switching on" : "First start: back in the introduction");
     }
 
-    /// <summary>"Continue setup" from the preview, at the given step of the introduction.</summary>
-    public void ContinueSetup(int step = 0)
+    /// <summary>
+    /// Switched on by the kit (the frame's "Switch StartQueue on" in the introduction or while looking around, or
+    /// --switch-on): what was unticked stays with Windows, the rest is taken over now.
+    /// </summary>
+    void KitSwitchedOn() => dispatcher.BeginInvoke(() =>
     {
-        Change(c => c.FirstStart = FirstStart.Welcome, reloadWindow: false);
-        window?.ShowIntroduction(step);
-    }
+        if (!config.SwitchedOn) _ = SwitchOnAsync(IntroLeave.ToList(), IntroMode);
+    });
 
     /// <summary>--switch-on: as the button, with everything found taken over and the new-entry setting as it is.</summary>
     public void SwitchOnFromCommandLine()
     {
         if (config.SwitchedOn) return;
         Log.Info("Switching on from the command line");
-        _ = SwitchOnAsync([], config.Settings.NewEntries);
+        IntroLeave.Clear();
+        // The kit ends its introduction in every open window and tells StartQueue (KitSwitchedOn).
+        KitIntro.SwitchOn();
     }
 
     /// <summary>
@@ -1081,8 +1100,6 @@ public sealed class TrayHost : IDisposable
     public async Task SwitchOnAsync(IReadOnlyCollection<Guid> leave, NewEntryMode newEntries)
     {
         Change(c => Introduction.SwitchOn(c, leave, newEntries));
-        // The family's mark of a new installation goes with it.
-        KitIntro.SwitchOn();
         await SweepAsync(userTriggered: true);
         var needAdmin = await Task.Run(Introduction.TakeOverTasks);
         if (needAdmin.Count > 0 && Elevation.AdminMode)
@@ -1099,10 +1116,15 @@ public sealed class TrayHost : IDisposable
     string lastProfileState = $"{Profiles.Active(DateTime.Now)?.Id}|{Profiles.Manual(DateTime.Now)?.Since:o}";
     public bool RestartRequested { get; private set; }
 
-    /// <summary>Sets up the admin features (one UAC prompt) and starts StartQueue again, which then runs in admin mode.</summary>
+    /// <summary>
+    /// "Set up fully" (Settings, General, or the introduction): the admin tier through the kit (KitSetup.SetUpFull), one
+    /// UAC prompt for its elevated pass, which is StartQueue's --setup-admin with the family's event log in it; then
+    /// StartQueue starts again and runs in admin mode, asking Windows nothing more.
+    /// </summary>
     public void SetUpAdminFeatures()
     {
-        if (!Elevation.RunSelfElevated("--setup-admin")) return;
+        if (Elevation.IsElevated) Setup.InstallAdmin();
+        else if (!KitSetup.SetUpFull() && !Elevation.ElevatedTaskRegistered()) return;
         // The Windows 11 context menu needs the certificate trust just set up; this part runs as the user.
         Elevation.RunSelf("--setup-menu");
         RestartRequested = true;
@@ -1118,6 +1140,7 @@ public sealed class TrayHost : IDisposable
 
     public void Dispose()
     {
+        KitIntro.SwitchedOn -= KitSwitchedOn;
         periodic.Stop();
         repeatTimer.Stop();
         watcher.Dispose();
