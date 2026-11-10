@@ -226,6 +226,18 @@ public static class Services
             });
         }
 
+        // Set up fully: through the admin helper, without asking Windows. In Basis through UAC.
+        if (AdminHelper.Available)
+        {
+            var code = await Task.Run(() => AdminHelper.Run(["--service", action.ToString(), name]));
+            return code switch
+            {
+                0 => null,
+                null => Strings.AdminHelperNoAnswer,
+                _ => new Win32Exception(code.Value).Message,
+            };
+        }
+
         try
         {
             using var process = Process.Start(new ProcessStartInfo(Environment.ProcessPath!, $"--service {action} \"{name}\"")

@@ -34,22 +34,25 @@ public static class NativeAutostart
         return items;
     }
 
+    /// <summary>The entry an autostart item would become, without touching Windows: the preview before switching on.</summary>
+    public static Entry Describe(NativeItem item) => new()
+    {
+        Name = item.DisplayName,
+        Kind = item.Kind,
+        Target = item.Target,
+        Arguments = item.Arguments,
+        ResolvedTarget = item.ResolvedTarget,
+        ProcessName = item.ProcessName,
+        PackageExecutable = item.PackageExecutable,
+        RunElevated = item.RunElevated,
+        Enabled = item.Enabled,
+        Origin = item.Origin,
+    };
+
     public static Entry TakeOver(NativeItem item)
     {
         var origin = item.Origin;
-        var entry = new Entry
-        {
-            Name = item.DisplayName,
-            Kind = item.Kind,
-            Target = item.Target,
-            Arguments = item.Arguments,
-            ResolvedTarget = item.ResolvedTarget,
-            ProcessName = item.ProcessName,
-            PackageExecutable = item.PackageExecutable,
-            RunElevated = item.RunElevated,
-            Enabled = item.Enabled,
-            Origin = origin,
-        };
+        var entry = Describe(item);
 
         switch (origin.Kind)
         {

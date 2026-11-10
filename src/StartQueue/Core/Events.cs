@@ -11,6 +11,7 @@ static class Events
     public const int PreparedSignInUndone = 1101;
     public const int ServiceChanged = 1102;
     public const int WindowsDelayChanged = 1103;
+    public const int SwitchedOn = 1104;
 
     // 2100s: the Windows autostart put right
     public const int EntryTakenOver = 2100;

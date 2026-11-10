@@ -42,7 +42,7 @@ Every app that starts with Windows ends up in **one list**, wherever it put itse
 StartQueue starts your apps right after sign-in. On the author's PC the first app now starts about 8 seconds after sign-in instead of about 60. The header and every row show the last sign-in: when each app was started, counted from the moment you signed in, and which ones failed.
 
 ### Apps ready when you sit down
-**Shut down, prepare apps** (the power button at the top right, or the tray menu) uses the automatic sign-in Windows already has for updates: at the next start Windows signs you in by itself and locks the screen right away, so your apps start while the lock screen shows. After that start StartQueue tells you whether it worked. Setting it up needs admin rights once: the setup does it, or one click in the settings. Before every shutdown StartQueue says whether it can work on this PC. Where your organization requires Windows Hello or blocks the automatic sign-in, StartQueue says so and changes nothing.
+**Shut down, prepare apps** (the power button at the top right, or the tray menu) uses the automatic sign-in Windows already has for updates: at the next start Windows signs you in by itself and locks the screen right away, so your apps start while the lock screen shows. After that start StartQueue tells you whether it worked. Setting it up takes one click in the settings; set up fully, Windows asks nothing, otherwise it asks once. Before every shutdown StartQueue says whether it can work on this PC. Where your organization requires Windows Hello or blocks the automatic sign-in, StartQueue says so and changes nothing.
 
 ### The Windows autostart stays clean
 When an app adds itself to the autostart again, StartQueue notices at once, takes it over, marks it as new and tells you. You choose: take over and start, take over but switched off, or only notify. Updaters that run every few hours keep running on their schedule.
@@ -63,7 +63,7 @@ Per app: normal window, minimized, or in the background (straight to the notific
 Keep an app's parameters as they are, **add** your own after them (the app's ones stay untouched), or **replace** the whole line, starting from the one in use. This works for shortcuts too.
 
 ### Windows services, like services.msc
-A separate **Services** view lists every Windows service: change the startup type (automatic, delayed, manual, disabled), start, stop or restart, search, sort and filter by startup type or state. Services of apps are kept apart from Windows services, and before you change a Windows service StartQueue tells you what can go wrong. Services are only managed, never taken over, and every change asks through UAC, just like services.msc.
+A separate **Services** view lists every Windows service: change the startup type (automatic, delayed, manual, disabled), start, stop or restart, search, sort and filter by startup type or state. Services of apps are kept apart from Windows services, and before you change a Windows service StartQueue tells you what can go wrong. Services are only managed, never taken over. Set up fully, a change asks nothing more; otherwise it asks through UAC, just like services.msc.
 
 ### Admin apps without the UAC prompt
 Apps that need administrator rights start in your order too, without a UAC prompt at every sign-in. This needs the installation with admin rights.
@@ -97,19 +97,21 @@ Light and dark following Windows, StartQueue's ember colors, the Windows accent 
 
 ## Download and install
 
-Download `StartQueue-Setup-<version>.exe` from the [latest release](../../releases/latest) and run it, on Windows 11 or 10, 64 bit. The setup brings its own .NET. Without admin rights, StartQueue manages your own autostart entries. The full feature set needs an installation with admin rights: if you are an administrator, the setup offers it (one UAC prompt).
+Download `StartQueue-Setup-<version>.exe` from the [latest release](../../releases/latest) and run it, on Windows 11 or 10, 64 bit. The setup brings its own .NET and asks one question: **Basic, without admin rights** (chosen), or **Full, with admin rights** if you are an administrator. Full asks Windows once for your confirmation; after that StartQueue asks nothing more.
 
-| | Installed with admin rights | Without admin rights |
+| | Full, with admin rights | Basic, without admin rights |
 | --- | --- | --- |
 | Start at sign-in | right away | right away where Windows allows it, otherwise a little later with the rest of the Windows autostart |
 | Your own autostart entries | taken over | taken over |
-| Entries for all users | taken over | stay with Windows |
+| Entries for all users | taken over and given back without asking | stay with Windows |
 | Start apps as administrator | without UAC prompt | not available |
 | Explorer context menu | in the Windows 11 menu | under "Show more options" |
-| Change Windows services | with UAC prompt | with UAC prompt and an admin account |
-| Set up prepared shutdowns | in the setup or with one click in the settings (UAC prompt) | an administrator has to set it up once |
+| Change Windows services | without UAC prompt | with UAC prompt and an admin account |
+| Set up prepared shutdowns | with one click in the settings | an administrator has to set it up once |
 
-The installation with admin rights can also be done later under **Settings > About**. A newer setup simply updates, your list and settings stay. Uninstall through **Windows Settings > Apps**: every entry StartQueue took over goes back to Windows, your list stays for a later installation.
+**At the first start StartQueue changes nothing.** It shows what it found in the Windows autostart, and you choose in three steps: which apps it takes over (untick the ones Windows should keep), what happens when an app adds itself later, and when it switches on. **Look around first** opens StartQueue as a preview: every app shows in the order marked *still with Windows*, and what you arrange there stays when you switch on. Until then Windows starts everything as before. For deployments, `StartQueue.exe --switch-on` switches it on with everything found.
+
+Full can also be set up later under **Settings > This device > Set up fully**. A newer setup simply updates, without the question and without the introduction: your list and settings stay and StartQueue goes on as before. Uninstall through **Windows Settings > Apps**: every entry StartQueue took over goes back to Windows, your list stays for a later installation.
 
 > [!NOTE]
 > The setup is not signed with a public code signing certificate yet. Windows SmartScreen therefore warns about an unknown publisher: choose "More info", then "Run anyway". With Smart App Control or policies like AppLocker, WDAC or ASR rules, Windows may block it. No scanner on VirusTotal flags the setup of version 1.6.0: [report](https://www.virustotal.com/gui/file/9f92102955845bea803ef4345d204794dc94b2067e7be6c906ff1e7deeff7920).
@@ -134,7 +136,8 @@ flowchart LR
 - **Watching:** changes to the Run keys and startup folders are noticed immediately; a full check, also through **Scan** or <kbd>F5</kbd>, finds new startup tasks, sign-in tasks and services.
 - **Prepared shutdown:** StartQueue runs `shutdown /sg` (or `/g` to restart). Windows then signs in automatically after the start and locks at once, as it does after updates. Setting it up switches on that Windows option for your account and, if the PC only allows Windows Hello sign-in, switches that off; **Undo** puts back exactly what was there before.
 - **Settings over versions:** a new version takes over the list and settings of every earlier one; when their shape changes, the old file is backed up first under `%APPDATA%\StartQueue\backups` and taken over step by step. Before every update, import and restore StartQueue saves the current state there too, the last five stay. A list that cannot be read is never replaced: StartQueue keeps a copy, says so under About and offers an earlier state.
-- **Admin rights:** the task `\StartQueue\Elevated` takes over entries for all users and starts apps as administrator. The tray app itself always runs with normal rights.
+- **First start:** a new installation (the setup's `--setup --new`) changes nothing in Windows until it is switched on. Until then each scan only fills the preview; a sign-in starts nothing through StartQueue. Switching on takes over what is ticked, with everything set for it in the preview; what is unticked goes on the keep list as *left with Windows by you*. An update or an installation over a list that stayed counts as switched on.
+- **Admin rights:** the task `\StartQueue\Elevated` (the admin helper) takes over entries for all users, gives them back, starts apps as administrator, changes services and sets up prepared shutdowns, so a full setup never shows a UAC prompt. The tray app hands it each change and waits for its answer; the helper takes only these few commands. The tray app itself always runs with normal rights.
 - **Apps of the EsteemWorks family** such as [DynaTones](https://github.com/esteemworks/DynaTones) are taken over quietly: first in the order, not marked as new. StartQueue tells them that it starts them (`HKCU\Software\EsteemWorks\Apps\StartQueue\Starts`), so their own "Start with Windows" switch shows the truth and turns StartQueue's entry on and off instead of writing the Run key again. A family app installed for all users stays in Windows, where it starts for everyone. Uninstalling StartQueue gives every family app its own start back.
 
 ## Keyboard and mouse
@@ -209,6 +212,7 @@ offered to administrators, or with **Set up** under Troubleshooting. Both ask fo
 | 1100, 1101 | Automatic sign-in for prepared shutdowns set up, undone |
 | 1102 | A Windows service changed from the services view |
 | 1103 | Windows' startup delay switched off or back on |
+| 1104 | StartQueue switched on at the end of its first start |
 | 2004 | The list could not be read; a copy is under `backups`, About offers an earlier state (3103 up to 1.5.2) |
 | 2100 | An autostart entry or sign-in task taken over from Windows |
 | 2101 | An entry given back to Windows |
@@ -248,7 +252,7 @@ Explorer only loads context menus in the Windows 11 menu from a signed package. 
 | `package` | manifest of the context menu package |
 | `installer` | setup (Inno Setup) |
 
-Command line: `--autostart` (sign-in), `--add <file>`, `--show`, `--elevated` (admin task), `--restore <id>`, `--restore-all`, `--service <action> <name>` (one service change, run through UAC). Settings: `--export <file.zip>`, `--import <file.zip>` (a running StartQueue takes them over at once; exit code 1 when it failed). For setup and uninstall: `--setup [--admin]`, `--setup-admin`, `--setup-prepared`, `--uninstall`. For diagnostics: `--scan-report <file>`, `--snapshot <folder>`, `--perf <file>`.
+Command line: `--autostart` (sign-in), `--add <file>`, `--show`, `--switch-on` (ends the first start, as the button does), `--elevated` (admin task), `--restore <id>`, `--restore-all`, `--service <action> <name>` (one service change, through the admin helper or UAC). Settings: `--export <file.zip>`, `--import <file.zip>` (a running StartQueue takes them over at once; exit code 1 when it failed). For setup and uninstall: `--setup [--admin] [--new]`, `--setup-admin`, `--uninstall`. For diagnostics: `--scan-report <file>`, `--snapshot <folder>` (before switching on with the steps of the introduction), `--perf <file>`.
 
 `build.ps1 -Setup` signs the program files, the setup and its uninstaller with a public certificate when signing is
 set up on the PC (environment variables, see EsteemWorks.Kit's `tools\sign.ps1`); otherwise it builds them as before

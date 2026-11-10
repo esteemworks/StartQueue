@@ -14,7 +14,14 @@ public enum OriginKind { RunKey, StartupFolder, StartupTask, ScheduledTask }
 public enum WindowMode { Normal, Minimized, Background }
 
 /// <summary>Why an entry stays in the Windows autostart.</summary>
-public enum KeepReason { Unknown, PartOfWindows, PartOfDriver, ReturnedByUser, NotifyOnly }
+public enum KeepReason { Unknown, PartOfWindows, PartOfDriver, ReturnedByUser, NotifyOnly, LeftWithWindows }
+
+/// <summary>
+/// Where a new install stands before it is switched on: Welcome while the introduction is open, LookingAround after
+/// "Look around first" (the normal window as a preview). Done: switched on, and every install from before 1.7.
+/// Saved by name; new names only at the end.
+/// </summary>
+public enum FirstStart { Done, Welcome, LookingAround }
 
 public sealed class KeepNote
 {
@@ -155,6 +162,14 @@ public sealed class Entry
     public DateTime AddedAt { get; set; } = DateTime.Now;
     public NativeOrigin? Origin { get; set; }
 
+    /// <summary>
+    /// Before StartQueue is switched on (<see cref="Config.FirstStart"/>): found in the Windows autostart and shown in the
+    /// order, but Windows still starts it from <see cref="Origin"/>. Switching on takes it over with everything set here.
+    /// Not written while false, so files of before 1.7 stay as they were.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool StillInWindows { get; set; }
+
     public Entry Clone() => JsonSerializer.Deserialize<Entry>(JsonSerializer.Serialize(this, Json.Options), Json.Options)!;
 }
 
@@ -180,6 +195,18 @@ public sealed class Config
     public List<string> ExpectedTakeOvers { get; set; } = new();
 
     public bool InitialImportDone { get; set; }
+
+    /// <summary>
+    /// The first start of a new install: until the user switches StartQueue on, it changes nothing in Windows. Only a
+    /// config.json that does not exist yet starts as <see cref="Core.FirstStart.Welcome"/>; every file of before 1.7 reads
+    /// as Done, so an update changes nothing. Not written once done.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public FirstStart FirstStart { get; set; }
+
+    /// <summary>Switched on: StartQueue takes over and starts at sign-in.</summary>
+    [JsonIgnore]
+    public bool SwitchedOn => FirstStart == FirstStart.Done;
 
     public Settings Settings { get; set; } = new();
 

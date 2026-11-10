@@ -163,7 +163,7 @@
                         <TextBlock x:Name="SummaryText" FontSize="13" Foreground="{DynamicResource HeroText}" Margin="0,6,0,0" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="LastRunText" FontSize="13" Foreground="{DynamicResource HeroText}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,6,0,0">
+                    <StackPanel x:Name="HeroActions" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="16,6,0,0">
                         <!-- Only shown when something needs a look; a click goes there -->
                         <Button x:Name="StatusChip" Height="32" Margin="0,0,8,0" Cursor="Hand" Visibility="Collapsed" Click="Status_Click"
                                 AutomationProperties.Name="{Binding Text, ElementName=StatusText}"
@@ -198,7 +198,15 @@
                                 <TextBlock Text="{x:Static s:Strings.Scan}" Margin="8,0,0,0" />
                             </StackPanel>
                         </Button>
-                        <Button Style="{StaticResource PrimaryButton}" Click="Add_Click"
+                        <!-- Before StartQueue is switched on, in the preview: the main action, in place of adding an app -->
+                        <Button x:Name="PreviewSwitchOnButton" Style="{StaticResource PrimaryButton}" Click="PreviewSwitchOn_Click" Visibility="Collapsed"
+                                ToolTip="{x:Static s:Strings.PreviewSwitchOnTip}" AutomationProperties.Name="{x:Static s:Strings.IntroSwitchOnButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7E8;" FontSize="13" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static s:Strings.PreviewSwitchOn}" Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="AddButton" Style="{StaticResource PrimaryButton}" Click="Add_Click"
                                 ToolTip="{x:Static s:Strings.AddAppTip}" AutomationProperties.Name="{x:Static s:Strings.AddApp}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="13" VerticalAlignment="Center" />
@@ -215,10 +223,12 @@
                         <RadioButton x:Name="TabWindows" Style="{StaticResource HeroTab}" Checked="Tab_Checked" />
                         <RadioButton x:Name="TabServices" Style="{StaticResource HeroTab}" Checked="Tab_Checked" />
                     </StackPanel>
+                    <!-- The first start: the steps of the introduction in place of the tabs (made in code) -->
+                    <StackPanel x:Name="StepsPanel" Orientation="Horizontal" Visibility="Collapsed" />
                     <!-- Centered on the tab labels, which sit above their underline. Left of the gear: shut down and
                          restart with prepared apps, as one pair -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-7,0,0">
-                        <Border Style="{StaticResource HeroPair}" Margin="0,0,8,0">
+                        <Border x:Name="PreparedPair" Style="{StaticResource HeroPair}" Margin="0,0,8,0">
                             <StackPanel Orientation="Horizontal">
                                 <Button Style="{StaticResource HeroPairButton}" Content="&#xE7E8;" Click="ShutDownPrepared_Click"
                                         ToolTip="{x:Static s:Strings.TrayShutDownPrepared}" AutomationProperties.Name="{x:Static s:Strings.TrayShutDownPrepared}" />
@@ -240,7 +250,41 @@
                 </Grid>
             </StackPanel>
         </Border>
-        <Rectangle Grid.Row="1" Height="3" Fill="{DynamicResource AccentGradient}" />
+        <StackPanel Grid.Row="1">
+            <Rectangle Height="3" Fill="{DynamicResource AccentGradient}" />
+            <!-- Looking around before switching on: StartQueue changes nothing in Windows yet -->
+            <Border x:Name="PreviewBar" Background="{DynamicResource NoticeBg}" Padding="32,10" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7B3;" FontSize="16" Foreground="{DynamicResource NoticeText}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <TextBlock Grid.Column="1" FontSize="13" Foreground="{DynamicResource NoticeText}" TextWrapping="Wrap" VerticalAlignment="Center" Text="{x:Static s:Strings.PreviewBar}" />
+                    <Button Grid.Column="2" Margin="16,0,0,0" Cursor="Hand" Click="PreviewContinue_Click" Foreground="{DynamicResource NoticeText}"
+                            AutomationProperties.Name="{x:Static s:Strings.PreviewContinue}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <TextBlock x:Name="Label" Text="{x:Static s:Strings.PreviewContinue}" FontSize="13" FontWeight="SemiBold" Foreground="{TemplateBinding Foreground}"
+                                           TextDecorations="Underline" VerticalAlignment="Center" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Label" Property="Opacity" Value="0.8" />
+                                    </Trigger>
+                                    <Trigger Property="IsKeyboardFocused" Value="True">
+                                        <Setter TargetName="Label" Property="TextDecorations" Value="Baseline" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- ========== First start: introduction ========== -->
+        <ContentControl x:Name="IntroHost" Grid.Row="2" Focusable="False" Visibility="Collapsed" />
 
         <!-- ========== Startup order ========== -->
         <Grid x:Name="OrderView" Grid.Row="2">
@@ -398,6 +442,9 @@
                                     </Grid>
 
                                     <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,12,0">
+                                        <Border Style="{StaticResource Chip}" Visibility="{Binding StillInWindows, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.StillInWindowsTip}">
+                                            <TextBlock Style="{StaticResource ChipLabel}" Text="{x:Static s:Strings.StillInWindowsChip}" />
+                                        </Border>
                                         <Border Style="{StaticResource NewChip}" Visibility="{Binding IsNew, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.NewChipTip}">
                                             <TextBlock Style="{StaticResource NewChipLabel}" Text="{x:Static s:Strings.NewChip}" />
                                         </Border>

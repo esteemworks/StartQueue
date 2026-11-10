@@ -105,6 +105,9 @@ public static class FamilyApps
         try
         {
             var states = config.Entries
+                // One Windows still starts (before StartQueue is switched on) is not StartQueue's: the app's own switch
+                // writes its Run value as without StartQueue.
+                .Where(e => !e.StillInWindows)
                 .Select(e => (App: Of(e), Entry: e))
                 .Where(x => x.App != null)
                 .GroupBy(x => x.App!.Name, StringComparer.OrdinalIgnoreCase)

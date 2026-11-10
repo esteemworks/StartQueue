@@ -31,6 +31,13 @@ public static class Sweeper
             var importing = !config.InitialImportDone;
             var settings = config.Settings;
 
+            // Not switched on yet: only show what would be taken over; Windows keeps starting all of it.
+            if (!config.SwitchedOn)
+            {
+                Preview(config, items, keep, kept);
+                return;
+            }
+
             foreach (var item in items)
             {
                 if (IsSelf(item)) continue;
@@ -84,6 +91,10 @@ public static class Sweeper
 
                 if (match != null)
                 {
+                    // Set up before switching on: the command as the user may have changed it stays, only where it lives
+                    // now changes (a startup folder shortcut moves to StartQueue's folder).
+                    var wasPreview = match.StillInWindows;
+                    var (ownTarget, ownArguments) = (match.Target, match.Arguments);
                     if (match.Kind == EntryKind.Shortcut && !string.Equals(match.Target, taken.Target, StringComparison.OrdinalIgnoreCase)
                         && Paths.IsInside(match.Target, Paths.Shortcuts) && File.Exists(match.Target))
                         File.Delete(match.Target);
@@ -92,8 +103,15 @@ public static class Sweeper
                     match.Target = taken.Target;
                     match.Arguments = taken.Arguments;
                     if (!string.IsNullOrEmpty(taken.ResolvedTarget)) match.ResolvedTarget = taken.ResolvedTarget;
+                    if (wasPreview && item.Origin.Kind != OriginKind.StartupFolder) (match.Target, match.Arguments) = (ownTarget, ownArguments);
                     refreshed++;
-                    if (family != null)
+                    if (match.StillInWindows)
+                    {
+                        // Shown before switching on and taken over now, with what was set for it meanwhile.
+                        match.StillInWindows = false;
+                        Log.Event(Events.EntryTakenOver, LogLevel.Info, $"Took over {item.Origin.Key} as \"{match.Name}\" ({(match.Enabled ? "on" : "off")}), as set before switching on");
+                    }
+                    else if (family != null)
                     {
                         // A family app writes its Run value when it is asked to start with Windows: its own
                         // switch, its setup, or a policy. That is a wish, not an app sneaking back in.
@@ -152,6 +170,53 @@ public static class Sweeper
         });
 
         return new SweepResult(added, refreshed, machineScanNeeded, kept, leftovers, newlyKept);
+    }
+
+    /// <summary>
+    /// Before switching on: every item the sweep would take over shows in the order as an entry marked
+    /// <see cref="Entry.StillInWindows"/>, so it can be ordered and set up; nothing in Windows changes. Machine-wide items
+    /// show only where StartQueue can take them over (admin mode). Items gone from Windows meanwhile leave the preview.
+    /// </summary>
+    static void Preview(Config config, List<NativeItem> items, HashSet<string> keep, List<NativeItem> kept)
+    {
+        var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in items)
+        {
+            if (IsSelf(item)) continue;
+            var key = item.Origin.Key;
+            if (keep.Contains(key))
+            {
+                kept.Add(item);
+                continue;
+            }
+            if (item.Origin.Kind == OriginKind.StartupTask && !config.Settings.ManageStoreApps) continue;
+            var family = FamilyApps.Of(item);
+            if (family != null && item.Origin.NeedsAdmin) continue;
+            if (item.Origin.NeedsAdmin && !Elevation.AdminMode) continue;
+
+            found.Add(key);
+            var match = config.Entries.FirstOrDefault(e => string.Equals(e.Origin?.Key, key, StringComparison.OrdinalIgnoreCase));
+            if (match != null)
+            {
+                // Where it lives in Windows, for taking it over later; the command as the user may have changed it stays.
+                if (match.StillInWindows) match.Origin = item.Origin;
+                continue;
+            }
+            // Added by hand meanwhile: listed already.
+            if (config.Entries.Any(e => SameTarget(e, item))) continue;
+
+            var entry = NativeAutostart.Describe(item);
+            entry.StillInWindows = true;
+            // As the sweep would place it: a family app first, the rest in the order found.
+            config.Entries.Insert(family != null ? 0 : config.Entries.Count, entry);
+            config.AddToProfiles(entry);
+        }
+
+        foreach (var gone in config.Entries.Where(e => e.StillInWindows && e.Origin is { Kind: not OriginKind.ScheduledTask } o && !found.Contains(o.Key)).ToList())
+        {
+            config.Entries.Remove(gone);
+            config.RemoveFromProfiles(gone.Id);
+        }
     }
 
     /// <summary>StartQueue's own logon entry (user mode installs a Run value when no task is allowed).</summary>

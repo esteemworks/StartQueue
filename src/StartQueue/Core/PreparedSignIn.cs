@@ -178,6 +178,8 @@ public static class PreparedSignIn
     {
         var arguments = $"--prepared-signin {sid} {passwordless} {optOut}";
         if (Elevation.IsElevated) return ApplyFromCommandLine([.. arguments.Split(' ').Skip(1)]) == 0;
+        // Set up fully: through the admin helper, without asking Windows. In Basis through UAC.
+        if (AdminHelper.Available) return AdminHelper.Run(arguments.Split(' ')) == 0;
         return Elevation.RunSelfElevated(arguments);
     }
 
@@ -217,24 +219,7 @@ public static class PreparedSignIn
         k.SetValue(name, number, RegistryValueKind.DWord);
     }
 
-    /// <summary>Called by setup.exe when "prepare apps" was ticked; says why if it cannot be done here.</summary>
-    public static int SetUpFromSetup()
-    {
-        switch (SetupState())
-        {
-            case PreparedSetupState.Ready:
-                return 0;
-            case PreparedSetupState.Managed or PreparedSetupState.NeedsAdmin:
-                var reason = Describe(SetupState(), State());
-                Log.Warning($"Automatic sign-in not set up: {reason}");
-                MessageBox(IntPtr.Zero, reason, "StartQueue", 0x40);
-                return 0;
-            default:
-                return SetUp() ? 0 : 1;
-        }
-    }
-
-    /// <summary>One line for the settings and for setup.exe.</summary>
+    /// <summary>One line for the settings.</summary>
     public static string Describe(PreparedSetupState setup, PreparedSignInState state) => setup switch
     {
         PreparedSetupState.Ready => Strings.PreparedStateReady,
@@ -260,9 +245,6 @@ public static class PreparedSignIn
 
     [DllImport("netapi32.dll")]
     static extern int NetApiBufferFree(IntPtr buffer);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    static extern int MessageBox(IntPtr owner, string text, string caption, uint type);
 
     /// <summary>Shuts down or restarts right away. Apps with unsaved work can still stop it, as with every shutdown.</summary>
     public static void ShutDown(bool restart)

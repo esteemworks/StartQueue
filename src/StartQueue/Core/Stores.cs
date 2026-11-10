@@ -94,7 +94,9 @@ public static class ConfigStore
 
     static Config LoadUnlocked()
     {
-        if (!File.Exists(Paths.Config)) return new Config();
+        // No list yet. A new installation (marked by the setup, KitIntro) changes nothing in Windows until it is switched
+        // on (Config.FirstStart); one per device or from before counts as switched on.
+        if (!File.Exists(Paths.Config)) return new Config { FirstStart = KitIntro.Pending ? FirstStart.Welcome : FirstStart.Done };
         try
         {
             return JsonSerializer.Deserialize<Config>(File.ReadAllText(Paths.Config), Json.Options) ?? new Config();
@@ -231,7 +233,10 @@ public static class TaskTakeOver
         var known = false;
         ConfigStore.Update(c =>
         {
-            known = c.Entries.Any(e => string.Equals(e.Origin?.Key, entry.Origin!.Key, StringComparison.OrdinalIgnoreCase));
+            var existing = c.Entries.FirstOrDefault(e => string.Equals(e.Origin?.Key, entry.Origin!.Key, StringComparison.OrdinalIgnoreCase));
+            known = existing != null;
+            // Chosen before switching on: taken over now, as it was set up meanwhile.
+            if (existing != null) existing.StillInWindows = false;
             if (known) return;
             c.Unkeep(entry.Origin!.Key);
             c.Entries.Insert(c.Entries.FindLastIndex(e => e.Enabled) + 1, entry);
@@ -239,5 +244,22 @@ public static class TaskTakeOver
         });
         Log.Event(Events.EntryTakenOver, LogLevel.Info, known ? $"Switched the sign-in start of task {taskPath} off again (already in the list)" : $"Took over scheduled task {taskPath}");
         return entry;
+    }
+
+    /// <summary>Before switching on: the task joins the order as one Windows still starts; its sign-in start stays on.</summary>
+    public static void Preview(string taskPath)
+    {
+        var task = TaskAutostart.Get(taskPath);
+        if (task == null || task.Block != TaskBlock.None) return;
+        var entry = TaskAutostart.ToEntry(task, adminOnly: false);
+        entry.StillInWindows = true;
+        ConfigStore.Update(c =>
+        {
+            if (c.Entries.Any(e => string.Equals(e.Origin?.Key, entry.Origin!.Key, StringComparison.OrdinalIgnoreCase))) return;
+            c.Unkeep(entry.Origin!.Key);
+            c.Entries.Add(entry);
+            c.AddToProfiles(entry);
+        });
+        Log.Info($"Added scheduled task {taskPath} to the preview; Windows starts it until StartQueue is switched on");
     }
 }

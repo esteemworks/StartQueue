@@ -337,6 +337,9 @@ public sealed class EntryVm : INotifyPropertyChanged
         set { if (model.IsNew == value) return; model.IsNew = value; Edited(); }
     }
 
+    /// <summary>Before switching on: Windows still starts it; the row says so.</summary>
+    public bool StillInWindows => model.StillInWindows;
+
     public bool IsProgram => model.Kind == EntryKind.Program;
     public bool HasFileLocation => model.Kind != EntryKind.PackagedApp && File.Exists(LocationFile);
     public string LocationFile => model.Kind is EntryKind.Shortcut or EntryKind.ScheduledTask ? model.ResolvedTarget : Environment.ExpandEnvironmentVariables(model.Target);

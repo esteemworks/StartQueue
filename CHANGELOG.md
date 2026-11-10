@@ -4,6 +4,19 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
 
 ## Unreleased
 
+### Setup and first start
+- **The setup asks one question:** **Basic, without admin rights** (chosen) or **Full, with admin rights**, each with one sentence on what it means for StartQueue. Without admin rights Full is greyed out with the reason. The window is called "StartQueue einrichten" / "Set up StartQueue"; there is no "for all users" dialog any more (`/ALLUSERS` on the command line still works, `/FULL` chooses Full in a silent installation)
+- **Shutting down with prepared apps** is no longer offered in the setup, only in the settings
+- **At the first start StartQueue changes nothing in Windows.** It opens with three steps in place of the tabs: **Welcome**, **Take over** (the apps it found, each with its switch; apps for all users named apart; what happens when an app adds itself later) and **Switch on** (a summary, then **Switch StartQueue on**). Unticked apps stay with Windows, on the keep list as *left with Windows by you*
+- **Look around first** opens StartQueue as a preview: a note under the brand line, every app marked *still with Windows*, **Switch on** in the header. What you arrange there stays when you switch on; a sign-in meanwhile starts nothing through StartQueue
+- `--switch-on` switches StartQueue on from the command line, for deployments
+- **An update changes nothing:** no question, no introduction, StartQueue goes on as before
+
+### Full means no more UAC prompts
+- Set up fully, giving back an entry for all users, changing a Windows service and setting up prepared shutdowns go through StartQueue's admin helper: Windows asks nothing more (uninstalling still asks once). In Basic they ask through UAC as before
+- In the settings the step up is called **Set up fully**
+
+### Appearance
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
 ## 1.6.0

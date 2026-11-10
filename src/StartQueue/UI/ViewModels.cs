@@ -34,6 +34,7 @@ public sealed class WindowsItemVm : INotifyPropertyChanged
         KeepReason.PartOfDriver => (Strings.KeepDriver, Strings.KeepDriverTip),
         KeepReason.ReturnedByUser => (Strings.KeepReturned, Strings.F(Strings.KeepReturnedTip, note.At)),
         KeepReason.NotifyOnly => (Strings.KeepNotify, Strings.F(Strings.KeepNotifyTip, note.At)),
+        KeepReason.LeftWithWindows => (Strings.KeepLeft, Strings.F(Strings.KeepLeftTip, note.At)),
         _ => (Strings.KeepUnknown, Strings.KeepUnknownTip),
     };
 

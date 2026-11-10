@@ -10,7 +10,8 @@ public static class Launcher
         var run = new LastRun { StartedAt = reference, AtSignIn = atSignIn };
         // The profile that applies now decides what starts; without one the entries' own switches do.
         var profile = Profiles.Active(DateTime.Now);
-        var starting = config.Entries.Where(e => Profiles.IsOn(config, e, profile)).ToList();
+        var starting = config.Entries.Where(e => StartsBy(config, e, profile)).ToList();
+        if (!config.SwitchedOn) Log.Info("Startup sequence: StartQueue is not switched on yet, Windows starts everything as before");
         Log.Info(FormattableString.Invariant($"Startup sequence: {starting.Count} apps{(profile == null ? "" : $", profile \"{profile.Name}\"")}, {(DateTime.Now - reference).TotalSeconds:0.0} s after the start reference"));
 
         if (settings.StartDelaySeconds > 0) Thread.Sleep(TimeSpan.FromSeconds(Math.Min(settings.StartDelaySeconds, 600)));
@@ -97,6 +98,13 @@ public static class Launcher
             }
         }) { IsBackground = true, Name = $"Start {entry.Name}" }.Start();
     }
+
+    /// <summary>
+    /// Whether StartQueue starts the entry by itself (at sign-in, again and again) in this profile, or none. Never before
+    /// it is switched on, and never an entry Windows still starts (<see cref="Entry.StillInWindows"/>).
+    /// </summary>
+    public static bool StartsBy(Config config, Entry entry, FamilyProfile? profile) =>
+        config.SwitchedOn && !entry.StillInWindows && Profiles.IsOn(config, entry, profile);
 
     /// <summary>Starts one entry. Entries marked "as administrator" go through the elevated helper task.</summary>
     public static RunOutcome Start(Entry entry)

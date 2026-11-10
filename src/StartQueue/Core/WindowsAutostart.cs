@@ -29,11 +29,15 @@ public static class WindowsAutostart
     public static WindowsReport Analyze(Config config)
     {
         var keep = new HashSet<string>(config.KeepInWindows, StringComparer.OrdinalIgnoreCase);
+        // Before switching on, what StartQueue would take over shows in the order already, marked "still with Windows".
+        var previewed = new HashSet<string>(config.Entries.Where(e => e.StillInWindows && e.Origin != null).Select(e => e.Origin!.Key),
+            StringComparer.OrdinalIgnoreCase);
         var items = new List<WindowsItem>();
         foreach (var item in NativeAutostart.Scan())
         {
             if (Sweeper.IsSelf(item)) continue;
             var key = item.Origin.Key;
+            if (previewed.Contains(key)) continue;
             if (keep.Contains(key)) items.Add(new WindowsItem(item, WindowsItemStatus.Kept, config.NoteFor(key)));
             else if (item.Origin.Kind == OriginKind.StartupTask && !config.Settings.ManageStoreApps) items.Add(new WindowsItem(item, WindowsItemStatus.StoreUnmanaged, null));
             else if (item.Origin.NeedsAdmin && !Elevation.IsElevated)
@@ -42,10 +46,11 @@ public static class WindowsAutostart
         }
         // A task already in StartQueue is not offered again: an app may switch its sign-in start back on
         // (often when it starts), and taking it over a second time would add nothing.
-        var ours = new HashSet<string>(config.Entries.Where(e => e.Origin?.Kind == OriginKind.ScheduledTask).Select(e => e.Origin!.Key),
+        var ours = new HashSet<string>(config.Entries.Where(e => e.Origin?.Kind == OriginKind.ScheduledTask && !e.StillInWindows).Select(e => e.Origin!.Key),
             StringComparer.OrdinalIgnoreCase);
         var tasks = TaskAutostart.List();
         var back = tasks.RemoveAll(t => ours.Contains(TaskAutostart.KeyOf(t.Path)));
+        tasks.RemoveAll(t => previewed.Contains(TaskAutostart.KeyOf(t.Path)));
         return new WindowsReport(items, tasks, DateTime.Now, back);
     }
 }

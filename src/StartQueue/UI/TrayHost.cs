@@ -112,6 +112,9 @@ public sealed class TrayHost : IDisposable
             case "sweep":
                 _ = SweepAsync();
                 break;
+            case "switch-on":
+                SwitchOnFromCommandLine();
+                break;
             // From a family app's own "start with Windows" switch: <app> and on|off.
             case "autostart" when parts.Length == 2:
                 var lines = parts[1].Split('\n', StringSplitOptions.TrimEntries);
@@ -219,7 +222,7 @@ public sealed class TrayHost : IDisposable
         ReportPreparedStart(reference);
         await SweepAsync();
         var profile = Profiles.Active(DateTime.Now);
-        foreach (var late in config.Entries.Where(e => !started.Contains(e.Id) && e.AddedAt >= reference && Profiles.IsOn(config, e, profile)).ToList())
+        foreach (var late in config.Entries.Where(e => !started.Contains(e.Id) && e.AddedAt >= reference && Launcher.StartsBy(config, e, profile)).ToList())
         {
             _ = Task.Run(() =>
             {
@@ -362,6 +365,17 @@ public sealed class TrayHost : IDisposable
     /// <summary>Moves entries from the Windows autostart into StartQueue, from the Windows autostart view.</summary>
     public async Task TakeOverFromWindowsAsync(IReadOnlyCollection<WindowsItem> items)
     {
+        if (!config.SwitchedOn)
+        {
+            // Before switching on: into the preview; Windows keeps starting it until then.
+            Change(c =>
+            {
+                foreach (var item in items.Where(i => i.Status != WindowsItemStatus.MachineLocked)) c.Unkeep(item.Item.Origin.Key);
+            }, reloadWindow: false);
+            await SweepAsync();
+            await RefreshReportAsync();
+            return;
+        }
         var viaAdminTask = false;
         foreach (var item in items.Where(i => i.Status != WindowsItemStatus.MachineLocked))
         {
@@ -400,6 +414,14 @@ public sealed class TrayHost : IDisposable
     /// <summary>Takes over a scheduled task from the Windows autostart view.</summary>
     public async Task TakeOverTaskAsync(TaskInfo task)
     {
+        if (!config.SwitchedOn)
+        {
+            // Before switching on: into the preview, its sign-in start stays on until then.
+            await Task.Run(() => TaskTakeOver.Preview(task.Path));
+            Reload();
+            await RefreshReportAsync();
+            return;
+        }
         try
         {
             await Task.Run(() => TaskTakeOver.Apply(task.Path, adminOnly: false));
@@ -490,7 +512,16 @@ public sealed class TrayHost : IDisposable
         Change(c =>
         {
             var index = c.Entries.FindIndex(x => x.Id == copy.Id);
-            if (index >= 0) c.Entries[index] = copy;
+            if (index < 0) return;
+            // Taken over meanwhile (switched on while the window held an older copy): where it lives now stays.
+            var stored = c.Entries[index];
+            if (stored.StillInWindows != copy.StillInWindows)
+            {
+                copy.StillInWindows = stored.StillInWindows;
+                copy.Origin = stored.Origin;
+                if (stored.Kind == EntryKind.Shortcut) copy.Target = stored.Target;
+            }
+            c.Entries[index] = copy;
         }, reloadWindow: false);
         UpdateTray();
     }
@@ -606,9 +637,13 @@ public sealed class TrayHost : IDisposable
     public void ReturnToWindows(Entry entry)
     {
         if (entry.Origin == null) return;
-        if (entry.Origin.NeedsAdmin && !Elevation.IsElevated)
+        if (entry.Origin.NeedsAdmin && !Elevation.IsElevated && !entry.StillInWindows)
         {
-            if (!Elevation.RunSelfElevated($"--restore {entry.Id}")) return;
+            // Set up fully: through the admin helper, without asking Windows. In Basis through UAC.
+            var done = AdminHelper.Available
+                ? AdminHelper.Run(["--restore", entry.Id.ToString()]) == 0
+                : Elevation.RunSelfElevated($"--restore {entry.Id}");
+            if (!done) return;
         }
         else
         {
@@ -871,7 +906,7 @@ public sealed class TrayHost : IDisposable
     {
         var now = DateTime.Now;
         var profile = Profiles.Active(now);
-        var due = config.Entries.Where(e => e.RepeatMinutes > 0 && Profiles.IsOn(config, e, profile)).ToList();
+        var due = config.Entries.Where(e => e.RepeatMinutes > 0 && Launcher.StartsBy(config, e, profile)).ToList();
         foreach (var id in repeats.Keys.Except(due.Select(e => e.Id)).ToList()) repeats.Remove(id);
         foreach (var entry in due)
         {
@@ -1013,6 +1048,52 @@ public sealed class TrayHost : IDisposable
         }
         UpdateTray();
         window?.Sync();
+    }
+
+    // ---------- First start ----------
+
+    /// <summary>"Look around first": the normal window as a preview, StartQueue still changes nothing in Windows.</summary>
+    public void LookAround()
+    {
+        Change(c => c.FirstStart = FirstStart.LookingAround);
+        Log.Info("First start: looking around before switching on");
+    }
+
+    /// <summary>"Continue setup" from the preview, at the given step of the introduction.</summary>
+    public void ContinueSetup(int step = 0)
+    {
+        Change(c => c.FirstStart = FirstStart.Welcome, reloadWindow: false);
+        window?.ShowIntroduction(step);
+    }
+
+    /// <summary>--switch-on: as the button, with everything found taken over and the new-entry setting as it is.</summary>
+    public void SwitchOnFromCommandLine()
+    {
+        if (config.SwitchedOn) return;
+        Log.Info("Switching on from the command line");
+        _ = SwitchOnAsync([], config.Settings.NewEntries);
+    }
+
+    /// <summary>
+    /// Switches StartQueue on: what the user unticked stays with Windows, the rest is taken over now, by the sweep (and
+    /// the admin helper for machine-wide entries); chosen scheduled tasks have their sign-in start switched off.
+    /// </summary>
+    public async Task SwitchOnAsync(IReadOnlyCollection<Guid> leave, NewEntryMode newEntries)
+    {
+        Change(c => Introduction.SwitchOn(c, leave, newEntries));
+        // The family's mark of a new installation goes with it.
+        KitIntro.SwitchOn();
+        await SweepAsync(userTriggered: true);
+        var needAdmin = await Task.Run(Introduction.TakeOverTasks);
+        if (needAdmin.Count > 0 && Elevation.AdminMode)
+        {
+            foreach (var path in needAdmin) PendingTaskTakeOvers.Add(path);
+            elevatedQuietUntil = DateTime.Now.AddMinutes(1);
+            await Task.Run(Elevation.RunElevatedTask);
+        }
+        Reload();
+        _ = RefreshReportAsync();
+        Log.Event(Events.SwitchedOn, LogLevel.Info, $"StartQueue was switched on: {config.Entries.Count} apps in the order");
     }
 
     string lastProfileState = $"{Profiles.Active(DateTime.Now)?.Id}|{Profiles.Manual(DateTime.Now)?.Since:o}";

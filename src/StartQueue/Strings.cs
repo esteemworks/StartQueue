@@ -244,8 +244,10 @@ public static class Strings
     // ---------- Setting up prepared shutdowns ----------
     public static string SettingsPrepared => T("Prepare apps when switching on", "Apps beim Einschalten vorbereiten");
     public static string SettingsPreparedHelp => T(
-        "For \"Shut down, prepare apps\" in the menu of the StartQueue icon: at the next start Windows signs you in by itself and locks the screen, so your apps start before you sit down.\n\nSetting it up switches on \"Use my sign-in info to automatically finish setting up after an update\" for you. If this PC only allows Windows Hello sign-in, that option is switched off, since Windows needs your password to sign in by itself; Windows Hello keeps working. Needs one UAC prompt and can be undone here.",
-        "Für „Herunterfahren, Apps vorbereiten“ im Menü am StartQueue-Symbol: Beim nächsten Start meldet Windows dich selbst an und sperrt den Bildschirm, deine Apps starten also, bevor du am Rechner sitzt.\n\nEinrichten schaltet für dich „Meine Anmeldeinformationen verwenden, um die Einrichtung nach einem Update automatisch abzuschließen“ ein. Lässt dieser PC nur Windows Hello zu, wird das ausgeschaltet, denn Windows braucht dein Kennwort, um dich selbst anzumelden. Windows Hello funktioniert weiter. Braucht eine UAC-Bestätigung und lässt sich hier rückgängig machen.");
+        "For \"Shut down, prepare apps\" in the menu of the StartQueue icon: at the next start Windows signs you in by itself and locks the screen, so your apps start before you sit down.\n\nSetting it up switches on \"Use my sign-in info to automatically finish setting up after an update\" for you. If this PC only allows Windows Hello sign-in, that option is switched off, since Windows needs your password to sign in by itself; Windows Hello keeps working. Can be undone here.",
+        "Für „Herunterfahren, Apps vorbereiten“ im Menü am StartQueue-Symbol: Beim nächsten Start meldet Windows dich selbst an und sperrt den Bildschirm, deine Apps starten also, bevor du am Rechner sitzt.\n\nEinrichten schaltet für dich „Meine Anmeldeinformationen verwenden, um die Einrichtung nach einem Update automatisch abzuschließen“ ein. Lässt dieser PC nur Windows Hello zu, wird das ausgeschaltet, denn Windows braucht dein Kennwort, um dich selbst anzumelden. Windows Hello funktioniert weiter. Lässt sich hier rückgängig machen.") + AsksOnce;
+    /// <summary>Set up fully the admin helper does it and Windows asks nothing; in Basic it asks once.</summary>
+    static string AsksOnce => Core.Elevation.AdminMode ? "" : T(" Windows asks for your confirmation once.", " Windows fragt einmal nach deiner Bestätigung.");
     public static string PreparedSetUpButton => T("Set up", "Einrichten");
     public static string PreparedUndoButton => T("Undo", "Rückgängig");
     public static string PreparedStateReady => T(
@@ -277,8 +279,8 @@ public static class Strings
         "StartQueue switches on \"Use my sign-in info to automatically finish setting up after an update\" for you. Then \"Shut down, prepare apps\" in the menu of the StartQueue icon works.",
         "StartQueue schaltet für dich „Meine Anmeldeinformationen verwenden, um die Einrichtung nach einem Update automatisch abzuschließen“ ein. Dann funktioniert „Herunterfahren, Apps vorbereiten“ im Menü am StartQueue-Symbol.");
     public static string PreparedSetUpNote => T(
-        "Windows keeps your sign-in for this, protected by Windows, and uses it after Windows updates too. While the apps are prepared the PC is signed in but locked, as after Windows+L. Windows asks for confirmation.",
-        "Windows hebt deine Anmeldung dafür geschützt auf und nutzt sie auch nach Windows-Updates. Während die Apps vorbereitet werden, ist der PC angemeldet, aber gesperrt, wie nach Windows+L. Windows fragt nach einer Bestätigung.");
+        "Windows keeps your sign-in for this, protected by Windows, and uses it after Windows updates too. While the apps are prepared the PC is signed in but locked, as after Windows+L.",
+        "Windows hebt deine Anmeldung dafür geschützt auf und nutzt sie auch nach Windows-Updates. Während die Apps vorbereitet werden, ist der PC angemeldet, aber gesperrt, wie nach Windows+L.") + AsksOnce;
     public static string PreparedSetUpNotePasswordless => T(
         "This PC only allows Windows Hello sign-in. Windows needs your password to sign you in by itself, so that option is switched off: the lock screen then offers the password as well, and Windows Hello keeps working. Make sure you know the password of your account. Windows asks for confirmation.",
         "Dieser PC lässt nur Windows Hello zu. Windows braucht dein Kennwort, um dich selbst anzumelden, deshalb wird das ausgeschaltet: Der Sperrbildschirm bietet dann auch das Kennwort an, Windows Hello funktioniert weiter. Du solltest das Kennwort deines Kontos kennen. Windows fragt nach einer Bestätigung.");
@@ -288,8 +290,8 @@ public static class Strings
         "StartQueue stellt beide Windows-Einstellungen wieder so ein wie vorher. „Herunterfahren, Apps vorbereiten“ ist dann ein normales Herunterfahren.");
     public static string PreparedSetUpFailed => T("Could not set it up", "Einrichten nicht möglich");
     public static string PreparedSetUpFailedText => T(
-        "The UAC prompt was cancelled or Windows did not allow the change. Details are in the log.",
-        "Die UAC-Abfrage wurde abgebrochen oder Windows hat die Änderung nicht zugelassen. Einzelheiten stehen im Protokoll.");
+        "Windows did not allow the change, or its prompt was cancelled. Details are in the log.",
+        "Windows hat die Änderung nicht zugelassen, oder seine Abfrage wurde abgebrochen. Einzelheiten stehen im Protokoll.");
     public static string PreparedShutDown => T("Shut down", "Herunterfahren");
     public static string PreparedRestart => T("Restart", "Neu starten");
     public static string PreparedFailed => T("Could not shut down", "Herunterfahren nicht möglich");
@@ -334,8 +336,9 @@ public static class Strings
     public static string TabSettings => T("Settings", "Einstellungen");
     public static string AddToStartQueue => T("Add to StartQueue", "Zu StartQueue hinzufügen");
     public static string UninstallLeftText => T("These entries could not go back to the Windows autostart, because that needs admin rights:\n\n{0}\n\nYour list stays in {1}.", "Diese Einträge konnten nicht in den Windows-Autostart zurück, weil das Adminrechte braucht:\n\n{0}\n\nDeine Liste bleibt in {1}.");
-    public static string SetUpAdmin => T("Set up admin features", "Adminfunktionen einrichten");
-    public static string SetUpAdminTip => T("Asks once for confirmation (UAC), then StartQueue starts again.", "Fragt einmal nach Bestätigung (UAC), danach startet StartQueue neu.");
+    public static string SetUpAdmin => T("Set up fully", "Vollständig einrichten");
+    public static string SetUpAdminTip => T("Windows asks once for your confirmation, then StartQueue starts again and asks nothing more.",
+        "Windows fragt einmal nach deiner Bestätigung, dann startet StartQueue neu und fragt danach nichts mehr.");
     public static string SetupSignInTask => T("Starts at sign-in through a scheduled task", "Start bei der Anmeldung über eine geplante Aufgabe");
     public static string SetupSignInRun => T("Starts at sign-in through the user's Run entry", "Start bei der Anmeldung über den Run-Eintrag des Benutzers");
     public static string SetupSignInNone => T("No start at sign-in set up, run the setup again", "Kein Start bei der Anmeldung eingerichtet, Setup erneut ausführen");
@@ -420,8 +423,11 @@ public static class Strings
     public static string ServicesSearch => T("Search services", "Dienste suchen");
     public static string ServicesHintShort => T("Only managed here, Windows starts them", "Nur verwaltet, Windows startet sie");
     public static string ServicesHint => T(
-        "The same settings as in services.msc. StartQueue takes no service over: Windows keeps starting them. Every change needs administrator rights and asks through Windows (UAC), just like services.msc.",
-        "Dieselben Einstellungen wie in services.msc. StartQueue übernimmt keinen Dienst: Windows startet sie weiterhin. Jede Änderung braucht Administratorrechte und fragt über Windows nach (UAC), genau wie services.msc.");
+        "The same settings as in services.msc. StartQueue takes no service over: Windows keeps starting them.",
+        "Dieselben Einstellungen wie in services.msc. StartQueue übernimmt keinen Dienst: Windows startet sie weiterhin.") + (Core.Elevation.AdminMode
+        ? T(" Set up fully, a change asks nothing more.", " Vollständig eingerichtet, fragt eine Änderung nichts mehr.")
+        : T(" Every change needs administrator rights and asks through Windows (UAC), just like services.msc.",
+            " Jede Änderung braucht Administratorrechte und fragt über Windows nach (UAC), genau wie services.msc."));
     public static string ServicesRefresh => T("Refresh", "Aktualisieren");
     public static string ServicesSort => T("Sort", "Sortieren");
     public static string ServicesSortName => T("By name", "Nach Name");
@@ -483,6 +489,8 @@ public static class Strings
     public static string ServiceDependents => T("These running services stop along with it: {0}", "Diese laufenden Dienste werden mit beendet: {0}");
     public static string ServiceChangeAnyway => T("Change", "Ändern");
     public static string ServiceFailedTitle => T("\"{0}\" could not be changed", "„{0}“ ließ sich nicht ändern");
+    public static string AdminHelperNoAnswer => T("StartQueue's admin helper did not answer. Nothing was changed; try again in a moment.",
+        "Der Admin-Helfer von StartQueue hat nicht geantwortet. Es wurde nichts geändert; versuch es gleich noch einmal.");
     public static string ServiceCancelled => T("The Windows prompt was cancelled. Nothing was changed.", "Die Windows-Abfrage wurde abgebrochen. Es wurde nichts geändert.");
     public static string ServiceTimeout => T("The service did not respond within 30 seconds.", "Der Dienst hat nicht innerhalb von 30 Sekunden reagiert.");
     public static string TabWindows => T("Windows autostart", "Windows-Autostart");
@@ -549,10 +557,10 @@ public static class Strings
     public static string Scanning => T("Reading the Windows autostart…", "Windows-Autostart wird gelesen …");
 
     // ---------- Settings page ----------
-    public static string ModeAdminTitle => T("Set up with admin rights", "Mit Adminrechten eingerichtet");
-    public static string ModeAdminText => T("StartQueue also manages machine-wide entries and starts apps as administrator when you want, without a UAC prompt.",
-        "StartQueue verwaltet auch systemweite Einträge und startet Apps auf Wunsch als Administrator, ohne UAC-Abfrage.");
-    public static string ModeUserTitle => T("Set up without admin rights", "Ohne Adminrechte eingerichtet");
+    public static string ModeAdminTitle => T("Set up fully, with admin rights", "Vollständig eingerichtet, mit Adminrechten");
+    public static string ModeAdminText => T("StartQueue also manages machine-wide entries and starts apps as administrator when you want. Windows asks nothing more.",
+        "StartQueue verwaltet auch systemweite Einträge und startet Apps auf Wunsch als Administrator. Windows fragt nichts mehr.");
+    public static string ModeUserTitle => T("Set up as Basic, without admin rights", "Als Basis eingerichtet, ohne Adminrechte");
     public static string ModeUserText => T("StartQueue fully manages your own entries. Machine-wide entries stay with Windows, starting as administrator is not available.",
         "Eigene Einträge verwaltet StartQueue vollständig. Systemweite Einträge bleiben bei Windows, Starts als Administrator sind nicht verfügbar.");
     public static string ModeEnabledHelp => T("The app goes to the end of the apps that are on.", "Die App kommt ans Ende der eingeschalteten Apps.");
@@ -596,6 +604,9 @@ public static class Strings
         "Gehört zu einem Gerätetreiber und sollte laufen, bevor Apps das Gerät nutzen.");
     public static string KeepReturned => T("given back by you", "von dir zurückgegeben");
     public static string KeepReturnedTip => T("You gave it back to Windows on {0:g}.", "Du hast es am {0:g} an Windows zurückgegeben.");
+    public static string KeepLeft => T("left with Windows by you", "von dir bei Windows gelassen");
+    public static string KeepLeftTip => T("You left it with Windows on {0:g}, before switching StartQueue on.",
+        "Du hast es am {0:g} bei Windows gelassen, bevor du StartQueue eingeschaltet hast.");
     public static string KeepNotify => T("only reported", "nur gemeldet");
     public static string KeepNotifyTip => T("Added itself on {0:g}. Your setting \"Only tell me\" leaves new entries in Windows.",
         "Hat sich am {0:g} eingetragen. Deine Einstellung „Nur melden“ lässt neue Einträge in Windows.");
@@ -775,4 +786,97 @@ public static class Strings
     public static string TaskTakeOverFailed => T("Could not take over the task", "Aufgabe ließ sich nicht übernehmen");
     public static string TaskNeedsAdmin => T("Changing this task needs admin rights. StartQueue is set up without them on this device.",
         "Diese Aufgabe zu ändern braucht Adminrechte. StartQueue ist auf diesem Gerät ohne Adminrechte eingerichtet.");
+
+    // ---------- First start: introduction and preview, before StartQueue is switched on ----------
+    public static string IntroNotOn => T("Not switched on yet. Windows starts everything as before.", "Noch nicht eingeschaltet. Windows startet alles wie bisher.");
+    public static string IntroStepWelcome => T("Welcome", "Willkommen");
+    public static string IntroStepTakeOver => T("Take over", "Übernehmen");
+    public static string IntroStepSwitchOn => T("Switch on", "Einschalten");
+    public static string IntroStepName => T("Step {0} of {1}: {2}, {3}", "Schritt {0} von {1}: {2}, {3}");
+    public static string IntroStepDone => T("done", "erledigt");
+    public static string IntroStepCurrent => T("current step", "aktueller Schritt");
+    public static string IntroStepLater => T("still to come", "kommt noch");
+    public static string IntroBack => T("Back", "Zurück");
+    public static string IntroNext => T("Next", "Weiter");
+    public static string IntroLookAround => T("Look around first", "Erst umsehen");
+    public static string IntroLookAroundTip => T("Opens StartQueue as a preview. It changes nothing in Windows until you switch it on.",
+        "Öffnet StartQueue als Vorschau. Es ändert nichts an Windows, bis du es einschaltest.");
+    public static string IntroSwitchOnButton => T("Switch StartQueue on", "StartQueue einschalten");
+
+    public static string IntroWelcomeLabel => T("WELCOME", "WILLKOMMEN");
+    public static string IntroWelcomeTitle => T("Your apps start after sign-in in your order.", "Deine Apps starten nach der Anmeldung in deiner Reihenfolge.");
+    public static string IntroWelcomeText => T("StartQueue takes apps out of the Windows autostart and starts them itself: one after the other, with pauses, minimized or in the background, by day of the week if you like.",
+        "StartQueue nimmt Apps aus dem Windows-Autostart und startet sie selbst: nacheinander, mit Pausen, minimiert oder im Hintergrund, auf Wunsch je nach Wochentag.");
+    public static string IntroPointListTitle => T("One list for everything that starts with Windows", "Eine Liste für alles, was mit Windows startet");
+    public static string IntroPointListText => T("Scheduled tasks and services of apps too.", "Auch geplante Aufgaben und Dienste von Apps.");
+    public static string IntroPointFirstTitle => T("What you need first is there first", "Was du zuerst brauchst, ist zuerst da");
+    public static string IntroPointFirstText => T("The rest waits for its turn.", "Der Rest wartet, bis er dran ist.");
+    public static string IntroPointBackTitle => T("Everything can be given back", "Alles lässt sich zurückgeben");
+    public static string IntroPointBackText => T("When you uninstall, every entry goes back where it was.", "Beim Deinstallieren kommt jeder Eintrag dorthin zurück, wo er war.");
+    public static string IntroWelcomeFound => T("So far StartQueue has only looked and changed nothing. The autostart holds {0} entries.",
+        "Bisher hat StartQueue nur nachgesehen und nichts geändert. Im Autostart stehen {0} Einträge.");
+    public static string IntroWelcomeFoundOne => T("So far StartQueue has only looked and changed nothing. The autostart holds 1 entry.",
+        "Bisher hat StartQueue nur nachgesehen und nichts geändert. Im Autostart steht 1 Eintrag.");
+    public static string IntroWelcomeHint => T("You can also look around first. StartQueue then changes nothing.", "Du kannst dich auch erst umsehen. StartQueue ändert dann nichts.");
+
+    public static string IntroTakeOverTitle => T("Which apps should StartQueue start?", "Welche Apps soll StartQueue starten?");
+    public static string IntroTakeOverText => T("StartQueue takes the chosen apps out of the Windows autostart and starts them itself. Windows goes on starting all others as before.",
+        "Ausgewählte Apps nimmt StartQueue aus dem Windows-Autostart und startet sie selbst. Alle anderen startet Windows weiter wie bisher.");
+    public static string IntroAtSignIn => T("AT YOUR SIGN-IN ({0})", "BEI DEINER ANMELDUNG ({0})");
+    public static string IntroChosen => T("{0} chosen", "{0} ausgewählt");
+    public static string IntroNoneFound => T("Nothing starts with Windows for your account yet. You can add apps after switching on.",
+        "Für dein Konto startet noch nichts mit Windows. Apps kannst du nach dem Einschalten hinzufügen.");
+    public static string IntroForAllUsers => T("FOR ALL USERS OF THIS PC ({0})", "FÜR ALLE BENUTZER DIESES PCS ({0})");
+    public static string IntroForAllUsersText => T("Windows goes on starting these. StartQueue can take them over once it is set up fully.",
+        "Diese startet weiter Windows. Übernehmen kann StartQueue sie, wenn es vollständig eingerichtet ist.");
+    public static string IntroForAllUsersNoAdmin => T("Windows goes on starting these. Taking them over needs an administrator of this PC.",
+        "Diese startet weiter Windows. Sie zu übernehmen braucht einen Administrator dieses PCs.");
+    public static string IntroSetUpFully => T("Set up fully", "Vollständig einrichten");
+    public static string IntroSetUpFullyTip => T("Windows asks once for your confirmation, then StartQueue starts again and asks nothing more.",
+        "Windows fragt einmal nach deiner Bestätigung, dann startet StartQueue neu und fragt danach nichts mehr.");
+    public static string IntroLaterLabel => T("WHEN AN APP ADDS ITSELF LATER", "WENN SICH SPÄTER EINE APP EINTRÄGT");
+    public static string IntroModeEnabled => T("Take over", "Übernehmen");
+    public static string IntroModeEnabledHelp => T("StartQueue starts it too, you get a notification.", "StartQueue startet sie mit, du bekommst eine Meldung.");
+    public static string IntroModeDisabled => T("Take over, but switched off", "Übernehmen, aber ausgeschaltet");
+    public static string IntroModeDisabledHelp => T("It is in your list and starts once you switch it on.", "Steht in deiner Liste, startet erst, wenn du sie einschaltest.");
+    public static string IntroModeNotify => T("Only tell me", "Nur melden");
+    public static string IntroModeNotifyHelp => T("It stays in the Windows autostart, you get a notification.", "Bleibt im Windows-Autostart, du bekommst eine Meldung.");
+    public static string IntroWhereRun => T("Registry", "Registrierung");
+    public static string IntroWhereFolder => T("Startup folder", "Autostart-Ordner");
+    public static string IntroWhereTask => T("Task", "Aufgabe");
+    public static string IntroWhereStore => T("Store app", "Store-App");
+
+    public static string IntroReadyTitle => T("Ready to switch on", "Bereit zum Einschalten");
+    public static string IntroReadyText => T("This is how your PC starts from the next sign-in. You can change all of it afterwards under Startup order.",
+        "So startet dein PC ab der nächsten Anmeldung. Ändern kannst du alles danach unter Startreihenfolge.");
+    public static string IntroReadyStarts => T("StartQueue starts", "StartQueue startet");
+    public static string IntroReadyNothing => T("Nothing yet; you add apps with \"Add app\".", "Noch nichts; Apps fügst du mit „App hinzufügen“ hinzu.");
+    public static string IntroReadyMore => T("and {0} more", "und {0} weitere");
+    public static string IntroReadyWindows => T("Windows keeps starting", "Windows startet weiter");
+    public static string IntroReadyWindowsAll => T("{0} apps for all users of this PC", "{0} Apps für alle Benutzer dieses PCs");
+    public static string IntroReadyWindowsAllOne => T("1 app for all users of this PC", "1 App für alle Benutzer dieses PCs");
+    public static string IntroReadyWindowsLeft => T("{0} apps you leave with Windows", "{0} Apps, die du Windows lässt");
+    public static string IntroReadyWindowsLeftOne => T("1 app you leave with Windows", "1 App, die du Windows lässt");
+    public static string IntroReadyWindowsNone => T("Nothing of yours", "Nichts von dir");
+    public static string IntroReadyNew => T("New autostart entries", "Neue Autostart-Einträge");
+    public static string IntroReadyNewEnabled => T("Take over, you get a notification", "Übernehmen, du bekommst eine Meldung");
+    public static string IntroReadyNewDisabled => T("Take over switched off, you get a notification", "Ausgeschaltet übernehmen, du bekommst eine Meldung");
+    public static string IntroReadyNewNotify => T("Leave in Windows, you get a notification", "In Windows lassen, du bekommst eine Meldung");
+    public static string IntroReadySetUp => T("Set up", "Eingerichtet");
+    public static string IntroReadyBasis => T("Without admin rights", "Ohne Adminrechte");
+    public static string IntroReadyFull => T("Fully, with admin rights", "Vollständig, mit Adminrechten");
+    public static string IntroReadyGiveBack => T("Giving back works any time: when you uninstall, every entry goes back where it was.",
+        "Zurückgeben geht jederzeit: Beim Deinstallieren kommt jeder Eintrag dorthin zurück, wo er war.");
+
+    public static string PreviewSummary => T("Preview: {0} apps would start in this order. Nothing is taken over yet.",
+        "Vorschau: {0} Apps würden in dieser Reihenfolge starten. Noch ist nichts übernommen.");
+    public static string PreviewSummaryOne => T("Preview: 1 app would start. Nothing is taken over yet.", "Vorschau: 1 App würde starten. Noch ist nichts übernommen.");
+    public static string PreviewBar => T("You are looking around. StartQueue changes nothing in Windows until you switch it on. What you arrange here stays.",
+        "Du siehst dich um. StartQueue ändert nichts an Windows, bis du es einschaltest. Was du hier ordnest, bleibt erhalten.");
+    public static string PreviewContinue => T("Continue setup", "Einrichtung fortsetzen");
+    public static string PreviewSwitchOn => T("Switch on", "Einschalten");
+    public static string PreviewSwitchOnTip => T("Shows once more what happens, then StartQueue takes over.", "Zeigt noch einmal, was passiert, dann übernimmt StartQueue.");
+    public static string StillInWindowsChip => T("still with Windows", "noch bei Windows");
+    public static string StillInWindowsTip => T("Windows still starts this app. StartQueue takes it over with these settings when you switch it on.",
+        "Diese App startet noch Windows. StartQueue übernimmt sie mit diesen Einstellungen, wenn du es einschaltest.");
 }

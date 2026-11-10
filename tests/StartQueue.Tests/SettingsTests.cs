@@ -11,6 +11,8 @@ namespace StartQueue.Tests;
 /// Settings of every released version are taken over (STANDARD.md, section 3, "Restorable"): each file in
 /// tests\fixtures is config.json as that version wrote it, and today's StartQueue has to read all of it.
 /// </summary>
+// One data folder per process (STARTQUEUE_DATA): the classes that use it run one after the other.
+[Collection("Data folder")]
 public class SettingsTests : IDisposable
 {
     readonly string temp = Path.Combine(Path.GetTempPath(), "startqueue-settings-" + Guid.NewGuid().ToString("N"));

@@ -12,7 +12,7 @@ namespace StartQueue.UI;
 
 public partial class MainWindow : Window
 {
-    enum View { Order, Windows, Services, Settings }
+    enum View { Order, Windows, Services, Settings, Intro }
 
     readonly TrayHost host;
     readonly ObservableCollection<EntryVm> entries = new();
@@ -145,6 +145,115 @@ public partial class MainWindow : Window
 
     public void ShowSettings() => ShowView(View.Settings);
 
+    // ---------- First start ----------
+
+    IntroView? intro;
+    readonly List<(RadioButton Button, Border Circle, TextBlock Number, string Name)> steps = [];
+
+    /// <summary>The introduction of a new install, at the given step, in place of the tabs.</summary>
+    public void ShowIntroduction(int step = IntroView.Welcome)
+    {
+        if (intro == null)
+        {
+            intro = new IntroView(host);
+            intro.StepChanged += SyncSteps;
+            IntroHost.Content = intro;
+        }
+        ShowView(View.Intro);
+        intro.ShowStep(step);
+    }
+
+    bool InIntro => view == View.Intro || (view == View.Settings && lastTab == View.Intro);
+
+    /// <summary>
+    /// What the first start of a new install shows: the introduction while it is open, the preview bar and "Switch on"
+    /// while the user looks around, the normal window once switched on. Installs from before 1.7 never see either.
+    /// </summary>
+    void SyncFirstStart(Config config)
+    {
+        // The window drawn for pictures shows what it is told to.
+        if (!offScreen)
+        {
+            if (config.FirstStart == FirstStart.Welcome && !InIntro)
+            {
+                ShowIntroduction();
+                return;
+            }
+            if (config.FirstStart != FirstStart.Welcome && InIntro)
+            {
+                lastTab = View.Order;
+                if (view == View.Intro) ShowView(View.Order);
+            }
+        }
+        var inIntro = InIntro;
+        var looking = config.FirstStart == FirstStart.LookingAround;
+        TabsPanel.Visibility = inIntro ? Visibility.Collapsed : Visibility.Visible;
+        StepsPanel.Visibility = inIntro ? Visibility.Visible : Visibility.Collapsed;
+        HeroActions.Visibility = inIntro ? Visibility.Collapsed : Visibility.Visible;
+        PreviewBar.Visibility = looking && !inIntro ? Visibility.Visible : Visibility.Collapsed;
+        PreviewSwitchOnButton.Visibility = looking ? Visibility.Visible : Visibility.Collapsed;
+        AddButton.Visibility = looking ? Visibility.Collapsed : Visibility.Visible;
+        // Shutting down with prepared apps prepares what StartQueue starts: nothing before it is switched on.
+        PreparedPair.Visibility = config.SwitchedOn ? Visibility.Visible : Visibility.Collapsed;
+        if (inIntro) intro?.Sync();
+    }
+
+    /// <summary>The steps of the introduction in the tab line: done ones with a check, the current one marked.</summary>
+    void SyncSteps()
+    {
+        if (steps.Count == 0)
+        {
+            foreach (var (name, index) in new[] { Strings.IntroStepWelcome, Strings.IntroStepTakeOver, Strings.IntroStepSwitchOn }.Select((n, i) => (n, i)))
+            {
+                var number = new TextBlock { FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+                var circle = new Border { Width = 20, Height = 20, CornerRadius = new CornerRadius(10), BorderThickness = new Thickness(1), Margin = new Thickness(0, 0, 8, 0), Child = number };
+                circle.SetResourceReference(Border.BorderBrushProperty, "HeroLine");
+                var label = new TextBlock { Text = name, VerticalAlignment = VerticalAlignment.Center };
+                var button = new RadioButton
+                {
+                    GroupName = "IntroSteps",
+                    Content = new StackPanel { Orientation = Orientation.Horizontal, Children = { circle, label } },
+                };
+                button.SetResourceReference(StyleProperty, "HeroTab");
+                var step = index;
+                button.Click += (_, _) =>
+                {
+                    if (view == View.Settings) ShowView(View.Intro);
+                    intro?.ShowStep(step);
+                };
+                StepsPanel.Children.Add(button);
+                steps.Add((button, circle, number, name));
+            }
+        }
+        var current = intro?.Step ?? IntroView.Welcome;
+        for (var i = 0; i < steps.Count; i++)
+        {
+            var (button, circle, number, name) = steps[i];
+            var done = i < current;
+            button.IsChecked = i == current && view == View.Intro;
+            number.Text = done ? "" : (i + 1).ToString();
+            number.FontFamily = done ? (FontFamily)FindResource("IconFont") : FontFamily;
+            if (i == current)
+            {
+                circle.Background = Brushes.White;
+                number.SetResourceReference(TextBlock.ForegroundProperty, "HeroBg");
+            }
+            else
+            {
+                circle.Background = Brushes.Transparent;
+                number.SetResourceReference(TextBlock.ForegroundProperty, "HeroText");
+            }
+            // As the kit's introduction names its steps.
+            System.Windows.Automation.AutomationProperties.SetName(button, Strings.F(Strings.IntroStepName, i + 1, steps.Count, name,
+                done ? Strings.IntroStepDone : i == current ? Strings.IntroStepCurrent : Strings.IntroStepLater));
+        }
+    }
+
+    void PreviewContinue_Click(object sender, RoutedEventArgs e) => host.ContinueSetup();
+
+    /// <summary>"Switch on" in the preview: the last step of the introduction, which shows once more what happens.</summary>
+    void PreviewSwitchOn_Click(object sender, RoutedEventArgs e) => host.ContinueSetup(IntroView.Ready);
+
     /// <summary>Draws every view into PNG files from a window placed off screen, so nothing takes the focus.</summary>
     public async Task SnapshotAsync(string folder, bool maximizeTest = false, bool colorsOnly = false)
     {
@@ -171,6 +280,19 @@ public partial class MainWindow : Window
                     SavePng(Root, Path.Combine(folder, $"color-{color.Id}.png"));
                 }
                 return;
+            }
+            // A new install not switched on yet: the three steps of the introduction first.
+            if (!host.Config.SwitchedOn)
+            {
+                for (var waited = 0; host.Report == null && waited < 20; waited++) await Task.Delay(500);
+                foreach (var introStep in new[] { IntroView.Welcome, IntroView.TakeOver, IntroView.Ready })
+                {
+                    ShowIntroduction(introStep);
+                    await Task.Delay(1200); // icons
+                    intro!.Sync();
+                    await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                    SavePng(Root, Path.Combine(folder, $"intro-{introStep + 1}.png"));
+                }
             }
             foreach (var next in new[] { View.Order, View.Windows, View.Services, View.Settings })
             {
@@ -530,6 +652,7 @@ public partial class MainWindow : Window
         SyncProfileBar(config, shown);
         SyncHeader(config, run);
         SyncWindows();
+        SyncFirstStart(config);
     }
 
     /// <summary>One profile in the profile bar; Standard has no id.</summary>
@@ -871,9 +994,12 @@ public partial class MainWindow : Window
         var summary = Profiles.All.Count == 0 ? Strings.F(Strings.Summary, enabled, total)
             : Strings.F(Strings.SummaryProfile, enabled, total, shown?.Name ?? Strings.ProfileStandard)
               + (active?.Id == shown?.Id ? Strings.SummaryAppliesNow : Strings.F(Strings.SummaryOtherApplies, active?.Name ?? Strings.ProfileStandard));
+        // Before switching on: what would happen, never a count of what StartQueue starts.
+        if (config.FirstStart == FirstStart.Welcome) summary = Strings.IntroNotOn;
+        else if (config.FirstStart == FirstStart.LookingAround) summary = enabled == 1 ? Strings.PreviewSummaryOne : Strings.F(Strings.PreviewSummary, enabled);
         SummaryText.Text = summary;
         // The last run is a fact of its own, so it gets a line of its own.
-        LastRunText.Text = run is { Items.Count: > 0 }
+        LastRunText.Text = run is { Items.Count: > 0 } && config.SwitchedOn
             ? Strings.F(run.AtSignIn ? Strings.SummaryLastSignIn : Strings.SummaryLastRun, run.StartedAt, run.Items.Count, run.Items.Max(i => i.Seconds))
               + (run.Items.Any(i => i.Failed) ? Strings.F(Strings.SummaryFailed, run.Items.Count(i => i.Failed)) : "")
             : "";
@@ -954,6 +1080,7 @@ public partial class MainWindow : Window
     {
         if (next != View.Settings) lastTab = next;
         view = next;
+        IntroHost.Visibility = next == View.Intro ? Visibility.Visible : Visibility.Collapsed;
         OrderView.Visibility = next == View.Order ? Visibility.Visible : Visibility.Collapsed;
         WindowsView.Visibility = next == View.Windows ? Visibility.Visible : Visibility.Collapsed;
         ServicesView.Visibility = next == View.Services ? Visibility.Visible : Visibility.Collapsed;
@@ -983,6 +1110,9 @@ public partial class MainWindow : Window
             SettingsView.DataContext = settings;
             AccentHost.Content = EsteemWorks.Kit.UI.AccentRow.Segments(host.Config.Settings.Accent.ToKit(), profiles: true, settings.PickAccent);
         }
+        if (next == View.Intro) TabOrder.IsChecked = TabWindows.IsChecked = TabServices.IsChecked = false;
+        SyncFirstStart(host.Config);
+        if (InIntro) SyncSteps();
     }
 
     void Tab_Checked(object sender, RoutedEventArgs e)
@@ -1043,6 +1173,7 @@ public partial class MainWindow : Window
     void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (Overlay.Visibility == Visibility.Visible) return;
+        if (InIntro && e.Key != Key.Escape) return;
         if (e.Key == Key.F5)
         {
             _ = ScanAsync();

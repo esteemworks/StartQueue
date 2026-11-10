@@ -76,19 +76,16 @@ public partial class App : Application
                 case "--prepared-signin":
                     Shutdown(PreparedSignIn.ApplyFromCommandLine([.. args.Skip(1)]));
                     return;
-                // Called by setup.exe when "prepare apps" was ticked.
-                case "--setup-prepared":
-                    UseSavedLanguage();
-                    Shutdown(PreparedSignIn.SetUpFromSetup());
-                    return;
                 case "--restore-all":
                     HelperModes.RestoreAll();
                     Shutdown();
                     return;
-                // Called by setup.exe and its uninstaller; --setup --admin also sets up the admin features.
+                // Called by setup.exe and its uninstaller; --setup --admin also sets up the admin features, --new marks a
+                // new installation, which changes nothing in Windows until the user switches it on.
                 case "--setup":
                     UseSavedLanguage();
-                    Setup.Install(admin: args.Skip(1).Contains("--admin", StringComparer.OrdinalIgnoreCase));
+                    Setup.Install(admin: args.Skip(1).Contains("--admin", StringComparer.OrdinalIgnoreCase),
+                        isNew: args.Skip(1).Contains("--new", StringComparer.OrdinalIgnoreCase));
                     Shutdown();
                     return;
                 case "--setup-admin":
@@ -149,6 +146,7 @@ public partial class App : Application
             var message = mode switch
             {
                 "--autostart" => "sweep",
+                "--switch-on" => "switch-on",
                 "--add" when path != null => "add\n" + path,
                 KitUpdate.UpdatedArgument => null,
                 _ => "show",
@@ -160,7 +158,7 @@ public partial class App : Application
 
         KitDiagnostics.Start(args);
         // Siblings of the family may send these over the pipe; the tray takes them as from a second start.
-        Family.Register("show", "add", "reload", "sweep", "autostart");
+        Family.Register("show", "add", "reload", "sweep", "autostart", "switch-on");
         System.Windows.Forms.Application.SetColorMode(System.Windows.Forms.SystemColorMode.System);
         host = new TrayHost(
             autostart: mode == "--autostart",
@@ -168,6 +166,8 @@ public partial class App : Application
             pendingAdd: mode == "--add" ? path : null);
         // After an update (--updated) only a note from the tray: no window, no startup order.
         KitUpdate.Start(args);
+        // From the command line (deployment, tests), as the button at the end of the introduction.
+        if (mode == "--switch-on") host.SwitchOnFromCommandLine();
         if (EarlyStart.Sequence != null) Log.Info($"Sign-in start: tray ready {SignIn.Since(EarlyStart.Reference)}");
     }
 
@@ -201,6 +201,9 @@ static class HelperModes
 {
     public static void Elevated()
     {
+        // Someone is waiting for these: a change from the window that needs administrator rights (AdminHelper).
+        AdminHelper.RunAll(Execute);
+
         foreach (var taskPath in PendingTaskTakeOvers.TakeAll())
         {
             try
@@ -235,6 +238,15 @@ static class HelperModes
         Ipc.Send("elevated-done");
     }
 
+    /// <summary>One request to the admin helper: the same command line that would otherwise run through UAC.</summary>
+    static int Execute(string[] args) => args switch
+    {
+        ["--restore", var id] => Restore(Guid.Parse(id)) ? 0 : 1,
+        ["--prepared-signin", .. var rest] => PreparedSignIn.ApplyFromCommandLine(rest),
+        ["--service", var action, var name] => Services.ApplyFromCommandLine(action, name),
+        _ => 87,
+    };
+
     /// <summary>Gives one entry back to the Windows autostart and keeps it there.</summary>
     public static bool Restore(Guid id)
     {
@@ -248,6 +260,18 @@ static class HelperModes
     public static void ReturnToWindows(Entry entry)
     {
         var key = entry.Origin!.Key;
+        if (entry.StillInWindows)
+        {
+            // Shown before switching on and never taken: Windows has it already, it only leaves the order.
+            ConfigStore.Update(c =>
+            {
+                c.Keep(key, KeepReason.LeftWithWindows);
+                c.Entries.RemoveAll(x => x.Id == entry.Id);
+                c.RemoveFromProfiles(entry.Id);
+            });
+            Log.Info($"Left \"{entry.Name}\" with Windows before switching on ({key})");
+            return;
+        }
         // Keep-list first, so the watcher does not take the entry straight back.
         ConfigStore.Update(c => c.Keep(key, KeepReason.ReturnedByUser));
         try
@@ -266,7 +290,8 @@ static class HelperModes
     /// <summary>Used by uninstall.ps1: every taken-over entry goes back where it came from.</summary>
     public static void RestoreAll()
     {
-        foreach (var entry in ConfigStore.Load().Entries.Where(e => e.Origin != null))
+        // One still with Windows (StartQueue was never switched on) is there already; restoring it would add it twice.
+        foreach (var entry in ConfigStore.Load().Entries.Where(e => e.Origin != null && !e.StillInWindows))
         {
             try
             {

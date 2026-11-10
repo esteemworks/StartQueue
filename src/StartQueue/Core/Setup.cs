@@ -39,10 +39,13 @@ public static class Setup
     // ---------- Install ----------
 
     /// <summary>The user part; with <paramref name="admin"/> also the admin part, after one UAC prompt.</summary>
-    public static void Install(bool admin)
+    /// <param name="isNew">A new installation for this user (--new): StartQueue changes nothing in Windows until switched on.</param>
+    public static void Install(bool admin, bool isNew = false)
     {
-        Log.Info($"Setup in {Folder}{(admin ? " with admin features" : "")}");
+        Log.Info($"Setup in {Folder}{(admin ? " with admin features" : "")}{(isNew ? ", new installation" : "")}");
         StopOtherInstances();
+        // Before the first start, so it opens with the introduction; a data folder with a list counts as switched on.
+        if (isNew) KitIntro.MarkNew();
         RegisterSignIn();
         if (admin && UserIsAdmin)
         {
@@ -266,6 +269,9 @@ public static class Setup
     static List<string> RestoreAll()
     {
         var left = new List<string>();
+        // Shown before switching on, never taken: Windows has it already, and restoring it would add it a second time
+        // (a startup folder shortcut as "name (2)").
+        ConfigStore.Update(c => c.Entries.RemoveAll(e => e.StillInWindows));
         foreach (var entry in ConfigStore.Load().Entries.Where(e => e.Origin != null))
         {
             try
