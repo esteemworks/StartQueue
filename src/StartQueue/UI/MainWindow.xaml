@@ -246,14 +246,14 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="ProfileCondition" Style="{StaticResource Help}" FontSize="13" VerticalAlignment="Center" />
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
-                                <Button x:Name="ProfileScheduleButton" Style="{StaticResource GhostButton}" Height="28" Margin="0,0,4,0" Click="ProfileSchedule_Click"
+                                <Button x:Name="ProfileScheduleButton" Style="{StaticResource QuietButton}" Height="28" Margin="0,0,4,0" Click="ProfileSchedule_Click"
                                         Content="{x:Static s:Strings.ProfileBackToSchedule}" ToolTip="{x:Static s:Strings.ProfileBackToScheduleTip}" Visibility="Collapsed" />
-                                <Button x:Name="ProfileOrderButton" Style="{StaticResource GhostButton}" Height="28" Margin="0,0,4,0" Click="ProfileOrder_Click"
+                                <Button x:Name="ProfileOrderButton" Style="{StaticResource QuietButton}" Height="28" Margin="0,0,4,0" Click="ProfileOrder_Click"
                                         Content="{x:Static s:Strings.ProfileOrderShort}" ToolTip="{x:Static s:Strings.ProfileOrderTip}" />
-                                <Button x:Name="ProfilePauseButton" Style="{StaticResource GhostButton}" Height="28" Click="ShownProfilePause_Click" />
-                                <Button x:Name="ProfilePauseEditButton" Style="{StaticResource GhostButton}" Height="28" Margin="4,0,0,0"
+                                <Button x:Name="ProfilePauseButton" Style="{StaticResource QuietButton}" Height="28" Click="ShownProfilePause_Click" />
+                                <Button x:Name="ProfilePauseEditButton" Style="{StaticResource QuietButton}" Height="28" Margin="4,0,0,0"
                                         Content="{x:Static s:Strings.ProfilePauseEdit}" Click="ShownProfilePauseEdit_Click" />
-                                <Button x:Name="ProfileEditButton" Style="{StaticResource GhostButton}" Height="28" Margin="4,0,0,0"
+                                <Button x:Name="ProfileEditButton" Style="{StaticResource QuietButton}" Height="28" Margin="4,0,0,0"
                                         Content="{x:Static s:Strings.ProfileEdit}" Click="ShownProfileEdit_Click" />
                             </StackPanel>
                         </Grid>
@@ -270,8 +270,8 @@
                         <TextBlock Style="{StaticResource InfoGlyph}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
-                        <Button x:Name="MarkSeenButton" Style="{StaticResource GhostButton}" Content="{x:Static s:Strings.AllSeen}" Click="MarkSeen_Click" />
-                        <Button Style="{StaticResource GhostButton}" Content="{x:Static s:Strings.StartAllNow}" Click="RunSequence_Click" Margin="4,0,0,0"
+                        <Button x:Name="MarkSeenButton" Style="{StaticResource QuietButton}" Content="{x:Static s:Strings.AllSeen}" Click="MarkSeen_Click" />
+                        <Button Style="{StaticResource QuietButton}" Content="{x:Static s:Strings.StartAllNow}" Click="RunSequence_Click" Margin="4,0,0,0"
                                 ToolTip="{x:Static s:Strings.RunSequenceTip}" />
                     </StackPanel>
                 </Grid>
@@ -489,7 +489,7 @@
                             <!-- Own start parameters: as before, added to the app's own ones, or in their place -->
                             <Grid Margin="0,24,0,8">
                                 <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.SectionParameters}" VerticalAlignment="Center" />
-                                <Button Style="{StaticResource GhostButton}" Height="24" Padding="8,0" HorizontalAlignment="Right" Click="ParametersInfo_Click"
+                                <Button Style="{StaticResource QuietButton}" Height="24" Padding="8,0" HorizontalAlignment="Right" Click="ParametersInfo_Click"
                                         ToolTip="{Binding ParametersHelp}" AutomationProperties.Name="{x:Static s:Strings.ParamHowItWorks}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE946;" FontSize="12" VerticalAlignment="Center" />
@@ -530,7 +530,7 @@
                             </StackPanel>
                             <Grid Margin="0,24,0,8">
                                 <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.SectionWhat}" VerticalAlignment="Center" />
-                                <Button x:Name="EditButton" Style="{StaticResource GhostButton}" Content="{x:Static s:Strings.EditDetails}" Height="24" Padding="8,0"
+                                <Button x:Name="EditButton" Style="{StaticResource QuietButton}" Content="{x:Static s:Strings.EditDetails}" Height="24" Padding="8,0"
                                         HorizontalAlignment="Right" Click="Edit_Click" />
                             </Grid>
                             <TextBlock x:Name="WhatText" Style="{StaticResource Value}" Text="{Binding Subtitle}" />
@@ -575,7 +575,7 @@
                                         <TextBlock Text="{x:Static s:Strings.StartNow}" Margin="8,0,0,0" />
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource GhostButton}" FontSize="14" Content="{x:Static s:Strings.MoreActions}" Margin="8,0,0,0" Click="More_Click" />
+                                <Button Style="{StaticResource QuietButton}" FontSize="14" Content="{x:Static s:Strings.MoreActions}" Margin="8,0,0,0" Click="More_Click" />
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -764,7 +764,7 @@
                                     <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding Count}" Margin="8,0,0,0" />
                                     <TextBlock Style="{StaticResource InfoGlyph}" FontSize="11" />
                                 </StackPanel>
-                                <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Right" Content="{Binding ToggleText}" Click="ServiceSection_Click"
+                                <Button Style="{StaticResource QuietButton}" HorizontalAlignment="Right" Content="{Binding ToggleText}" Click="ServiceSection_Click"
                                         Visibility="{Binding CanFold, Converter={StaticResource BoolToVisibility}}" />
                             </Grid>
                         </DataTemplate>

@@ -18,6 +18,9 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
 - In the settings the step up is called **Set up fully** and sits under **General**; the card "This device" is gone
 
 ### Appearance
+- **Calmer colors:** switches and radio buttons in one solid tone instead of the gradient; side actions such as Order, Change pause, Edit, Mark all seen and Start all now in neutral text, the accent stays on Add app and Add profile
+- **A row shows its actions** (start now, remove, more) while it is hovered, chosen or has the keyboard focus, not on every row at once
+- **Menus grow out of their button** and close at once
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
 ## 1.6.0
