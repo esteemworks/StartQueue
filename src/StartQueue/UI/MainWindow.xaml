@@ -80,7 +80,8 @@
                     <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}"
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     <Grid Grid.Column="3" Width="148" Margin="12,0,0,0">
-                        <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.Add}" FontSize="13" Padding="0"
+                        <!-- One primary per view: Done is the dialog's; each row's Add is a secondary button -->
+                        <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Add}" FontSize="13" Padding="0"
                                 Click="AddCandidate_Click" Visibility="{Binding CanAdd, Converter={StaticResource BoolToVisibility}}" />
                         <TextBlock Text="{Binding DoneText}" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                    Visibility="{Binding IsDone, Converter={StaticResource BoolToVisibility}}">
@@ -367,7 +368,7 @@
                                         </TextBlock.Style>
                                     </TextBlock>
 
-                                    <StackPanel Grid.Column="6" Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="6" Style="{StaticResource RowActions}" Margin="10,0,0,0" VerticalAlignment="Center">
                                         <Button Style="{StaticResource RowAction}" Content="&#xE768;" Click="StartNow_Click"
                                                 ToolTip="{x:Static s:Strings.StartNow}" AutomationProperties.Name="{x:Static s:Strings.StartNow}" />
                                         <Button Style="{StaticResource RowAction}" Content="&#xE74D;" Click="RowRemove_Click" Margin="2,0"
@@ -825,12 +826,12 @@
                                                    VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{x:Static s:Strings.ServiceTriggerTip}"
                                                    Visibility="{Binding HasTrigger, Converter={StaticResource BoolToVisibility}}" />
                                     </Grid>
-                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <Button Style="{StaticResource IconButton}" Content="&#xE768;" IsEnabled="{Binding CanStart}" Click="ServiceStart_Click"
+                                    <StackPanel Grid.Column="4" Style="{StaticResource RowActions}" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <Button Style="{StaticResource RowAction}" Content="&#xE768;" IsEnabled="{Binding CanStart}" Click="ServiceStart_Click"
                                                 ToolTip="{x:Static s:Strings.ServiceStart}" AutomationProperties.Name="{x:Static s:Strings.ServiceStart}" />
-                                        <Button Style="{StaticResource IconButton}" Content="&#xE71A;" IsEnabled="{Binding CanStop}" Click="ServiceStop_Click"
+                                        <Button Style="{StaticResource RowAction}" Content="&#xE71A;" IsEnabled="{Binding CanStop}" Click="ServiceStop_Click"
                                                 ToolTip="{x:Static s:Strings.ServiceStop}" AutomationProperties.Name="{x:Static s:Strings.ServiceStop}" />
-                                        <Button Style="{StaticResource IconButton}" Content="&#xE72C;" IsEnabled="{Binding CanRestart}" Click="ServiceRestart_Click"
+                                        <Button Style="{StaticResource RowAction}" Content="&#xE72C;" IsEnabled="{Binding CanRestart}" Click="ServiceRestart_Click"
                                                 ToolTip="{x:Static s:Strings.ServiceRestart}" AutomationProperties.Name="{x:Static s:Strings.ServiceRestart}" />
                                     </StackPanel>
                                 </Grid>

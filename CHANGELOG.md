@@ -25,6 +25,8 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
 - **Search fields** in Services and in Add app: Ctrl+F jumps into them, Esc clears the text, a clear button appears once there is text; in Add app an empty field's Esc closes the dialog
 - **Notifications** at the bottom of the window: Undo after removing an app is one of them; several stay at once (the newest in front, hover unfolds them), the time stops while the pointer is on them or the window is in the background, F6 moves to them and back
 - The counts on the tabs roll to their new value when they change while the window is open
+- **Add app:** the Add button of each app is a plain button now; Done stays the one main button of the dialog
+- **Services:** start, stop and restart show on the row under the pointer or with the keyboard focus, like the actions in the startup order
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
 ## 1.6.0
