@@ -20,7 +20,11 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
 ### Appearance
 - **Calmer colors:** switches and radio buttons in one solid tone instead of the gradient; side actions such as Order, Change pause, Edit, Mark all seen and Start all now in neutral text, the accent stays on Add app and Add profile
 - **A row shows its actions** (start now, remove, more) while it is hovered, chosen or has the keyboard focus, not on every row at once
-- **Menus grow out of their button** and close at once
+- **Menus grow out of their button** and close at once; opened from the keyboard they show at once with the first entry highlighted, Home and End and the first letter of an entry work
+- **The keyboard, as in every EsteemWorks app:** the tabs and segments are one Tab stop each, the arrow keys move and choose, Home and End jump; a question about removing puts the focus on Cancel first, Tab stays inside it, and the focus goes back where it was when it closes
+- **Search fields** in Services and in Add app: Ctrl+F jumps into them, Esc clears the text, a clear button appears once there is text; in Add app an empty field's Esc closes the dialog
+- **Notifications** at the bottom of the window: Undo after removing an app is one of them; several stay at once (the newest in front, hover unfolds them), the time stops while the pointer is on them or the window is in the background, F6 moves to them and back
+- The counts on the tabs roll to their new value when they change while the window is open
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
 ## 1.6.0

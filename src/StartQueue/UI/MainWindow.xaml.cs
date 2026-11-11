@@ -787,6 +787,7 @@ public partial class MainWindow : Window
     {
         FillProfileOrder();
         ConfirmCard.Visibility = AddCard.Visibility = ProfileCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
+        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(ProfileOrderCard, fromScale: 0.96);
     }
@@ -986,9 +987,9 @@ public partial class MainWindow : Window
             : "";
         Frame.Summary.Text = lastRun.Length > 0 ? summary + "\n" + lastRun : summary;
         Frame.Summary.LineHeight = 19;
-        TabOrder.Content = $"{Strings.TabOrder}  {total}";
-        TabWindows.Content = host.Report == null ? Strings.TabWindows : $"{Strings.TabWindows}  {host.Report.Items.Count}";
-        if (TabServices.Content == null) TabServices.Content = Strings.TabServices;
+        Frame.SetCount(TabOrder, Strings.TabOrder, total);
+        Frame.SetCount(TabWindows, Strings.TabWindows, host.Report?.Items.Count);
+        if (TabServices.Content == null) Frame.SetCount(TabServices, Strings.TabServices, null);
 
         var newCount = config.Entries.Count(e => e.IsNew);
         var leftovers = Elevation.AdminMode ? host.LastSweep?.Leftovers ?? 0 : 0;
@@ -1038,7 +1039,7 @@ public partial class MainWindow : Window
         TasksCount.Text = tasks.Count.ToString();
         TakeOverAllTasksButton.Visibility = tasks.Any(t => t.CanTakeOver) ? Visibility.Visible : Visibility.Collapsed;
         TasksEmpty.Visibility = report.Tasks.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        TabWindows.Content = $"{Strings.TabWindows}  {items.Count}";
+        Frame.SetCount(TabWindows, Strings.TabWindows, items.Count);
     }
 
     public void Select(Guid id)
@@ -1227,37 +1228,15 @@ public partial class MainWindow : Window
         if (undo != null) ShowUndo(Strings.F(Strings.RemovedText, vm.Name), undo);
     }
 
-    // ---------- Undo bar ----------
+    // ---------- Notifications, Undo among them ----------
 
-    readonly System.Windows.Threading.DispatcherTimer undoTimer = new() { Interval = TimeSpan.FromSeconds(8) };
-    Action? undoAction;
+    KitNotices? notices;
+    FocusReturn? overlayFocus;
 
-    void ShowUndo(string text, Action undo)
-    {
-        undoAction = undo;
-        UndoText.Text = text;
-        Motion.Appear(UndoBar, fromY: 12);
-        undoTimer.Stop();
-        undoTimer.Tick -= UndoTimer_Tick;
-        undoTimer.Tick += UndoTimer_Tick;
-        undoTimer.Start();
-    }
+    /// <summary>The kit's notifications at the bottom of the window: at most three, the time stops while hovered.</summary>
+    KitNotices Notices => notices ??= new KitNotices(NoticeLayer);
 
-    void UndoTimer_Tick(object? sender, EventArgs e) => HideUndo();
-
-    void HideUndo()
-    {
-        undoTimer.Stop();
-        undoAction = null;
-        UndoBar.Visibility = Visibility.Collapsed;
-    }
-
-    void Undo_Click(object sender, RoutedEventArgs e)
-    {
-        var action = undoAction;
-        HideUndo();
-        action?.Invoke();
-    }
+    void ShowUndo(string text, Action undo) => Notices.ShowUndo(text, undo);
 
     async Task ReturnAsync(EntryVm vm)
     {
@@ -1579,6 +1558,7 @@ public partial class MainWindow : Window
         ProfileDeleteButton.Visibility = newProfile ? Visibility.Collapsed : Visibility.Visible;
 
         ConfirmCard.Visibility = AddCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
+        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(ProfileCard, fromScale: 0.96);
         if (!offScreen) Dispatcher.BeginInvoke(profileFields.FocusName);
@@ -1661,6 +1641,7 @@ public partial class MainWindow : Window
         PauseRemoveButton.Visibility = pauseFields.HadPause ? Visibility.Visible : Visibility.Collapsed;
 
         ConfirmCard.Visibility = AddCard.Visibility = ProfileCard.Visibility = Visibility.Collapsed;
+        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(PauseCard, fromScale: 0.96);
     }
@@ -1702,7 +1683,7 @@ public partial class MainWindow : Window
             if (ServicesList.ItemsSource == null)
                 ServicesList.ItemsSource = new System.Windows.Data.ListCollectionView(services.Rows) { Filter = row => ((ServiceRow)row).IsShown };
             else (ServicesList.ItemsSource as System.Windows.Data.ListCollectionView)?.Refresh();
-            TabServices.Content = $"{Strings.TabServices}  {list.Count}";
+            Frame.SetCount(TabServices, Strings.TabServices, list.Count);
             servicesLoadedAt = DateTime.Now;
         }
         catch (Exception ex)
@@ -1854,6 +1835,7 @@ public partial class MainWindow : Window
             LegalContent.Children.Add(body);
         }
         ConfirmCard.Visibility = AddCard.Visibility = ProfileCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
+        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(LegalCard, fromScale: 0.96);
     }
@@ -1899,11 +1881,14 @@ public partial class MainWindow : Window
         ConfirmOk.Content = okText;
         ConfirmOk.Style = (Style)FindResource(danger ? "DangerButton" : "PrimaryButton");
         ConfirmCancel.Visibility = showCancel ? Visibility.Visible : Visibility.Collapsed;
+        var first = danger && showCancel ? ConfirmCancel : ConfirmOk;
 
         AddCard.Visibility = Visibility.Collapsed;
+        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(ConfirmCard, fromScale: 0.96);
-        Dispatcher.BeginInvoke(() => ConfirmOk.Focus());
+        // For a removal the first focus is on Cancel, so a hasty Enter does no harm (design system, Dialogs).
+        Dispatcher.BeginInvoke(() => first.Focus());
         return confirm.Task;
     }
 
@@ -1934,7 +1919,13 @@ public partial class MainWindow : Window
         PauseCard.Visibility = Visibility.Collapsed;
         LegalCard.Visibility = Visibility.Collapsed;
         ProfileOrderCard.Visibility = Visibility.Collapsed;
-        if (!offScreen) EntryList.Focus();
+        // Back to the control that opened the dialog; the list when that control is gone.
+        if (!offScreen)
+        {
+            if (overlayFocus != null) overlayFocus.Restore();
+            else EntryList.Focus();
+        }
+        overlayFocus = null;
     }
 
     void Overlay_KeyDown(object sender, KeyEventArgs e)
@@ -1954,12 +1945,13 @@ public partial class MainWindow : Window
     async void OpenAddDialog()
     {
         ConfirmCard.Visibility = Visibility.Collapsed;
+        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(AddCard, fromScale: 0.96);
         AddSearch.Text = "";
         AddList.ItemsSource = null;
         AddLoading.Visibility = Visibility.Visible;
-        if (!offScreen) AddSearch.Focus();
+        if (!offScreen) AddSearch.FocusSearch();
 
         // The rows come in after the fade-in, so building them does not stall it.
         var fadeIn = Task.Delay(Motion.Enabled ? 200 : 0);
@@ -1980,13 +1972,6 @@ public partial class MainWindow : Window
         addModel.Filter(AddSearch.Text.Trim());
         rows.Refresh();
         if (FindScrollViewer(AddList) is { } scroller) scroller.ScrollToTop();
-    }
-
-    void AddSearch_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key != Key.Escape) return;
-        CloseOverlay();
-        e.Handled = true;
     }
 
     void AddCandidate_Click(object sender, RoutedEventArgs e)

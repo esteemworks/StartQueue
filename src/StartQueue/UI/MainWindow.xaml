@@ -280,6 +280,7 @@
                     <ListBox x:Name="EntryList" Style="{StaticResource PlainList}" ItemContainerStyle="{StaticResource EntryItem}" AllowDrop="True"
                              VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.VirtualizationMode="Recycling"
                              AutomationProperties.Name="{x:Static s:Strings.TabOrder}"
+                             KeyboardNavigation.TabNavigation="Continue"
                              SelectionChanged="EntryList_SelectionChanged"
                              PreviewMouseLeftButtonDown="EntryList_PreviewMouseLeftButtonDown"
                              PreviewMouseMove="EntryList_PreviewMouseMove"
@@ -476,7 +477,7 @@
                             </StackPanel>
                             <!-- Three equal segments across the panel; fixed when a shortcut or task decides, or there is no window -->
                             <Border Style="{StaticResource SegmentGroup}" HorizontalAlignment="Stretch" IsEnabled="{Binding WindowEditable}" ToolTip="{Binding WindowNote}" ToolTipService.ShowOnDisabled="True">
-                                <UniformGrid Rows="1">
+                                <UniformGrid kit:KitKeys.Roving="True" Rows="1">
                                     <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="StartWindow" Content="{x:Static s:Strings.WindowNormal}" IsChecked="{Binding WindowNormal}" />
                                     <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="StartWindow" Content="{x:Static s:Strings.WindowMinimized}" IsChecked="{Binding WindowMinimized}" />
                                     <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="StartWindow" Content="{x:Static s:Strings.WindowBackground}" IsChecked="{Binding WindowBackground}"
@@ -498,7 +499,7 @@
                                 </Button>
                             </Grid>
                             <Border Style="{StaticResource SegmentGroup}" HorizontalAlignment="Stretch">
-                                <UniformGrid Rows="1">
+                                <UniformGrid kit:KitKeys.Roving="True" Rows="1">
                                     <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="Parameters" Content="{x:Static s:Strings.ParamAsBefore}" IsChecked="{Binding ParamAsBefore}"
                                                  ToolTip="{x:Static s:Strings.ParamAsBeforeTip}" />
                                     <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Parameters" Content="{x:Static s:Strings.ParamAdd}" IsChecked="{Binding ParamAdd}"
@@ -703,21 +704,17 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Grid>
-                        <TextBox x:Name="ServicesSearch" Style="{StaticResource FieldBox}" Height="34" Width="300" Padding="32,0,8,0" TextChanged="ServicesSearch_TextChanged"
-                                 Tag="{x:Static s:Strings.ServicesSearch}" AutomationProperties.Name="{x:Static s:Strings.ServicesSearch}" />
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE721;" FontSize="14" Foreground="{DynamicResource Text4}"
-                                   Margin="12,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" />
-                    </Grid>
+                    <!-- The kit's search field: Esc clears, Ctrl+F finds it -->
+                    <kit:SearchBox x:Name="ServicesSearch" Width="300" Placeholder="{x:Static s:Strings.ServicesSearch}" TextChanged="ServicesSearch_TextChanged" />
                     <!-- Sorted the same way in both sections -->
-                    <ComboBox x:Name="ServicesSortBox" Width="190" Height="34" Margin="8,0,0,0" FontSize="13" SelectedIndex="0" SelectionChanged="ServicesSort_Changed"
+                    <ComboBox x:Name="ServicesSortBox" Width="190" Height="32" Margin="8,0,0,0" FontSize="13" SelectedIndex="0" SelectionChanged="ServicesSort_Changed"
                               AutomationProperties.Name="{x:Static s:Strings.ServicesSort}" ToolTip="{x:Static s:Strings.ServicesSort}">
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortName}" />
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortStart}" />
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortState}" />
                     </ComboBox>
                     <!-- Start types and state to show; several at once, the menu stays open while ticking -->
-                    <Button x:Name="ServicesFilterButton" Style="{StaticResource SecondaryButton}" Height="34" Margin="8,0,0,0" Click="ServicesFilter_Click"
+                    <Button x:Name="ServicesFilterButton" Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Click="ServicesFilter_Click"
                             ToolTip="{x:Static s:Strings.ServicesFilterTip}" AutomationProperties.Name="{Binding Text, ElementName=ServicesFilterText}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71C;" FontSize="12" VerticalAlignment="Center" />
@@ -862,7 +859,7 @@
                                 <TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsTheme}" />
                             </StackPanel>
                             <Border Grid.Column="1" Style="{StaticResource SegmentGroup}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
                                     <RadioButton Style="{StaticResource FirstSegment}" GroupName="Theme" Content="{x:Static s:Strings.ThemeSystem}" IsChecked="{Binding ThemeSystem}" />
                                     <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="{x:Static s:Strings.ThemeLight}" IsChecked="{Binding ThemeLight}" />
                                     <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="{x:Static s:Strings.ThemeDark}" IsChecked="{Binding ThemeDark}" />
@@ -1036,7 +1033,7 @@
                             <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsScanHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsScanInterval}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
                             <!-- Five segments as wide as the three of the appearance card (5 x 81.6 = 3 x 136) -->
                             <Border Grid.Column="1" Style="{StaticResource SegmentGroup}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
                                     <RadioButton Style="{StaticResource FirstSegment}" Width="81.6" GroupName="Scan" Content="5 min" IsChecked="{Binding Scan5}" />
                                     <RadioButton Style="{StaticResource Segment}" Width="81.6" GroupName="Scan" Content="10 min" IsChecked="{Binding Scan10}" />
                                     <RadioButton Style="{StaticResource Segment}" Width="81.6" GroupName="Scan" Content="30 min" IsChecked="{Binding Scan30}" />
@@ -1053,17 +1050,8 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- ========== What "Check" found: a short note below the button that goes away by itself ========== -->
-        <Border x:Name="UndoBar" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,24"
-                CornerRadius="8" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1" Padding="16,0,8,0" Height="48">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="24" ShadowDepth="6" Direction="270" Opacity="0.3" Color="Black" />
-            </Border.Effect>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="UndoText" FontSize="14" Foreground="{DynamicResource Text1}" VerticalAlignment="Center" />
-                <Button Style="{StaticResource GhostButton}" FontSize="14" Content="{x:Static s:Strings.Undo}" Margin="16,0,0,0" Click="Undo_Click" />
-            </StackPanel>
-        </Border>
+        <!-- ========== The kit's notifications (KitNotices), among them Undo after removing an app ========== -->
+        <Grid x:Name="NoticeLayer" />
 
         <!-- ========== Overlay for in-app dialogs ========== -->
         </kit:KitFrame>
@@ -1095,8 +1083,9 @@
                 </Grid>
             </Border>
         </Popup>
-        <!-- ========== Undo bar after removing an app ========== -->
-        <Grid x:Name="Overlay" Background="{DynamicResource Overlay}" Visibility="Collapsed" KeyDown="Overlay_KeyDown">
+        <!-- ========== Dialogs in the window; Tab stays inside while one is open ========== -->
+        <Grid x:Name="Overlay" Background="{DynamicResource Overlay}" Visibility="Collapsed" KeyDown="Overlay_KeyDown"
+              KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle">
 
             <!-- Confirm / message -->
             <!-- Shadows sit on separate, empty borders: an effect on the card itself would redraw the whole card on every change -->
@@ -1296,13 +1285,9 @@
                             <Button Style="{StaticResource IconButton}" Content="&#xE8BB;" FontSize="11" HorizontalAlignment="Right" Click="AddClose_Click"
                                     ToolTip="{x:Static s:Strings.Close}" AutomationProperties.Name="{x:Static s:Strings.Close}" />
                         </Grid>
-                        <Grid Margin="0,14,0,0">
-                            <TextBox x:Name="AddSearch" Style="{StaticResource FieldBox}" Height="36" Padding="32,0,8,0" TextChanged="AddSearch_TextChanged"
-                                     Tag="{x:Static s:Strings.SearchPlaceholder}"
-                                     KeyDown="AddSearch_KeyDown" AutomationProperties.Name="{x:Static s:Strings.SearchPlaceholder}" />
-                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE721;" FontSize="14" Foreground="{DynamicResource Text4}"
-                                       Margin="12,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" />
-                        </Grid>
+                        <!-- The kit's search field; empty, Esc goes on to the dialog and closes it -->
+                        <kit:SearchBox x:Name="AddSearch" Margin="0,14,0,0" Placeholder="{x:Static s:Strings.SearchPlaceholder}" PassEscapeWhenEmpty="True"
+                                       TextChanged="AddSearch_TextChanged" />
                     </StackPanel>
                     <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0"
                             CornerRadius="0,0,10,10" Padding="24,14">
