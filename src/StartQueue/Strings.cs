@@ -309,6 +309,10 @@ public static class Strings
         "Prüfe „Meine Anmeldeinformationen verwenden, um die Einrichtung nach einem Update automatisch abzuschließen“ unter Einstellungen > Konten > Anmeldeoptionen.");
     public static string TrayOneNew => T("1 new autostart entry", "1 neuer Autostart-Eintrag");
     public static string TrayNew => T("{0} new autostart entries", "{0} neue Autostart-Einträge");
+    // The status line in the tray menu's head and the tooltip.
+    public static string TrayNotOn => T("Not switched on yet", "Noch nicht eingeschaltet");
+    public static string TrayOn => T("On, {0} apps at sign-in", "Eingeschaltet, {0} Apps bei der Anmeldung");
+    public static string TrayOnProfile => T("On, {0} apps in \"{1}\"", "Eingeschaltet, {0} Apps in „{1}“");
     public static string NotifyNewTitle => T("New autostart entry", "Neuer Autostart-Eintrag");
     public static string NotifyNewText => T(
         "\"{0}\" added itself to the Windows autostart. StartQueue took it over and starts it at the end of your list.",

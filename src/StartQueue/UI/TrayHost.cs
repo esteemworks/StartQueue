@@ -158,7 +158,7 @@ public sealed class TrayHost : IDisposable
             // The tray menu, drawn without opening it (the kit's KitTray).
             try
             {
-                tray.SaveMenuPicture(Path.Combine(args[0], "tray.png"));
+                tray.SaveMenuPicture(Path.Combine(args[0], "tray.png"), scale);
             }
             catch (Exception ex)
             {
@@ -798,11 +798,16 @@ public sealed class TrayHost : IDisposable
     {
         var newCount = config.Entries.Count(e => e.IsNew);
         tray.Badge = newCount > 0;
+        // One line under the name, in the tooltip and the menu's head: what needs a look first, else what StartQueue does.
+        var active = Profiles.Active(DateTime.Now);
+        var starting = config.Entries.Count(e => Profiles.IsOn(config, e, active));
         tray.Status = newCount switch
         {
-            0 => "",
             1 => Strings.TrayOneNew,
-            _ => Strings.F(Strings.TrayNew, newCount),
+            > 1 => Strings.F(Strings.TrayNew, newCount),
+            _ when !config.SwitchedOn => Strings.TrayNotOn,
+            _ when active != null => Strings.F(Strings.TrayOnProfile, starting, active.Name),
+            _ => Strings.F(Strings.TrayOn, starting),
         };
     }
 
@@ -811,13 +816,14 @@ public sealed class TrayHost : IDisposable
     /// <summary>StartQueue's own entries in the tray menu, between "Open StartQueue" and "Quit".</summary>
     void AddMenuEntries()
     {
-        tray.Add(Strings.TrayScan, () => _ = SweepAsync(userTriggered: true));
-        tray.Add(Strings.RunSequence, RunSequenceNow);
+        // The app's main actions, then folders, then Windows' own steps; the kit adds the head and Quit.
+        tray.Add(Strings.TrayScan, () => _ = SweepAsync(userTriggered: true), "\uE72C");
+        tray.Add(Strings.RunSequence, RunSequenceNow, "\uE768");
         tray.AddSeparator();
-        tray.Add(Strings.TrayDataFolder, () => Process.Start(new ProcessStartInfo(Paths.Data) { UseShellExecute = true }));
+        tray.Add(Strings.TrayDataFolder, () => Process.Start(new ProcessStartInfo(Paths.Data) { UseShellExecute = true }), "\uE838");
         tray.AddSeparator();
-        tray.Add(Strings.TrayShutDownPrepared, () => ShutDownPrepared(restart: false));
-        tray.Add(Strings.TrayRestartPrepared, () => ShutDownPrepared(restart: true));
+        tray.Add(Strings.TrayShutDownPrepared, () => ShutDownPrepared(restart: false), "\uE7E8");
+        tray.Add(Strings.TrayRestartPrepared, () => ShutDownPrepared(restart: true), "\uE777");
     }
 
     // ---------- Shutting down with prepared apps ----------

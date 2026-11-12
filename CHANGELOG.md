@@ -34,7 +34,7 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
   - Every movement takes the family's times and curve: hovering fades in, a press shrinks a button to 97 percent, dialogs fade in from 96 percent, the note under **Scan** grows out of the button instead of out of the middle
   - **Tooltips** wait 600 ms, and once one has shown, the next comes at once; they look like the menus (white or dark card, thin line, soft shadow)
   - Spacing on the family's scale, icons in buttons at one size
-  - **The tray menu** looks like the menus in the window: light or dark with the app, taller rows, rounded corners
+  - **The tray menu is new:** a head with StartQueue's tile, its name and what it does right now (such as *On, 6 apps in "Work"* or *1 new autostart entry*; a click opens StartQueue), each entry with its icon, Quit last; light or dark with the app, and it grows out of the corner at the tray. From the keyboard: Win+B, the arrow keys to StartQueue's icon, then Enter, Shift+F10 or the menu key; the arrow keys, Home, End and a letter move in it, Esc closes it and goes back to the icon
 - **Services, Filter:** the menu shows a check mark next to each ticked start type and state; before, it showed the names of the start types where the icon goes
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
