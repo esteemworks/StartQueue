@@ -25,11 +25,7 @@ public partial class MainWindow : Window
     TaskCompletionSource<bool>? confirm;
     AddAppModel? addModel;
     Guid? shownProfile;
-    Guid? dialogProfile;
-    bool newProfile;
     /// <summary>The profile editor's and the pause dialog's fields, the same in every app of the family.</summary>
-    readonly ProfileFields profileFields = new(Profiles.App);
-    readonly ProfilePauseFields pauseFields = new();
     bool offScreen; // Diagnostics window: never takes the keyboard focus.
 
     /// <summary>
@@ -133,8 +129,6 @@ public partial class MainWindow : Window
             };
         // The list starts with the switches of the profile that applies now.
         shownProfile = Profiles.Active(DateTime.Now)?.Id;
-        ProfileFieldsHost.Content = profileFields;
-        PauseFieldsHost.Content = pauseFields;
         FontWeight = Theme.BodyWeight;
         EntryList.ItemsSource = entries;
         PreviewKeyDown += Window_PreviewKeyDown;
@@ -344,36 +338,16 @@ public partial class MainWindow : Window
             SavePng(Root, Path.Combine(folder, "add.png"));
             CloseOverlay();
             ShowView(View.Order);
-            // Shown only, never saved: a profile with hours, then one all day.
-            OpenProfileDialog(null, new FamilyProfile
+            // Shown only, never saved: a profile with hours, then one all day; the kit's pages of the tab.
+            KitProfiles.OpenEditor(ProfileBarHost, ProfileHost, null, new FamilyProfile
             {
                 Name = Strings.T("Office", "Büro"), From = "07:00", To = "18:00",
                 Days = [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday],
             });
-            await Task.Delay(400);
-            SavePng(Root, Path.Combine(folder, "profile.png"));
-            OpenProfileDialog(null, new FamilyProfile { Name = Strings.T("Holidays", "Urlaub"), Days = [DayOfWeek.Saturday, DayOfWeek.Sunday] });
-            await Task.Delay(300);
-            SavePng(Root, Path.Combine(folder, "profile-allday.png"));
-            CloseOverlay();
-            if (Profiles.All.Count > 1)
-            {
-                ProfileOrder_Click(this, new RoutedEventArgs());
-                await Task.Delay(400);
-                SavePng(Root, Path.Combine(folder, "profile-order.png"));
-                CloseOverlay();
-            }
-            if (Profiles.All.FirstOrDefault() is { } paused)
-            {
-                // Shown only, not saved: a planned period with times.
-                var demo = paused.Clone();
-                demo.PauseFrom = DateTime.Today.AddDays(2).AddHours(8);
-                demo.PauseUntil = DateTime.Today.AddDays(4).AddHours(18);
-                OpenPauseDialog(paused.Id, demo);
-                await Task.Delay(400);
-                SavePng(Root, Path.Combine(folder, "pause.png"));
-                CloseOverlay();
-            }
+            await PagePicture(folder, "profile.png");
+            KitSubpage.Back(OrderHost, focus: false);
+            // The other pages of the tab (all day, order, pause) are pictured from the window in use, in the sandbox:
+            // in this second window a page did not give way to the next one (12.11.2026, still open).
             OpenInfo(Strings.LegalTitle, Strings.LegalSections(Paths.Data));
             await Task.Delay(400);
             SavePng(Root, Path.Combine(folder, "legal.png"));
@@ -476,12 +450,8 @@ public partial class MainWindow : Window
                 rowMenu.DataContext = entries[0];
                 SaveLoose(rowMenu, Path.Combine(folder, "menu-row.png"));
             }
-            if (ProfileTabs.Items.OfType<ProfileTab>().FirstOrDefault(p => p.IsCustom) is { } customTab)
-            {
-                var profileMenu = (ContextMenu)FindResource("ProfileMenu");
-                profileMenu.DataContext = customTab;
-                SaveLoose(profileMenu, Path.Combine(folder, "menu-profile.png"));
-            }
+            // The menu of the first profile's chip in the kit's bar.
+            if (FindChip(ProfileBarHost) is { ContextMenu: { } profileMenu }) SaveLoose(profileMenu, Path.Combine(folder, "menu-profile.png"));
             // The filter menu belongs to its button; a copy of its entries is drawn.
             ShowView(View.Services);
             await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
@@ -667,6 +637,28 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>A page of the startup order tab (KitSubpage) for the snapshot: laid out first, then drawn.</summary>
+    async Task PagePicture(string folder, string name)
+    {
+        OrderHost.UpdateLayout();
+        await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        Root.UpdateLayout();
+        Log.Info($"Snapshot {name}: {KitSubpage.Depth(OrderHost)} page(s) open");
+        SavePng(Root, Path.Combine(folder, name));
+    }
+
+    /// <summary>The first chip of a profile (not No profile) in the bar, for the snapshot.</summary>
+    static RadioButton? FindChip(DependencyObject parent)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is RadioButton { Tag: Guid } chip) return chip;
+            if (FindChip(child) is { } found) return found;
+        }
+        return null;
+    }
+
     void SavePng(FrameworkElement element, string file)
     {
         var screen = VisualTreeHelper.GetDpi(this);
@@ -739,337 +731,62 @@ public partial class MainWindow : Window
         SyncFirstStart(config);
     }
 
-    /// <summary>One profile in the profile bar; Standard has no id.</summary>
-    sealed record ProfileTab(Guid? Id, string Name, bool IsActive, bool IsShown, bool IsPaused, bool CanMoveLeft, bool CanMoveRight, string Tip, Brush Swatch,
-        DateTime? EndOfHours = null)
-    {
-        public bool IsCustom => Id != null;
-        // Screen readers read the item around the chip by this; a record would say "ProfileTab { Id = ... }".
-        public override string ToString() => Name;
-        public string PauseLabel => IsPaused ? Strings.ProfileResume : Strings.ProfilePause;
-        public bool CanUseUntil => EndOfHours != null;
-        public string UseUntilLabel => EndOfHours is { } end ? Strings.F(Strings.ProfileUseUntil, Strings.ProfileMoment(end)) : "";
-    }
+    ProfileHost? profileHost;
+    ProfileBar? profileBar;
+    FamilyProfile? editingProfile;
 
     /// <summary>
-    /// The profile bar above the list: every profile left to right in order of precedence, Standard last. The one
-    /// selected is the frame for the list and the details: their switches are its switches.
+    /// What StartQueue gives the kit's profile pieces: the profile the list shows, which apps start in a profile
+    /// (StartQueue's own, in config.json) and its own questions and notices.
+    /// </summary>
+    ProfileHost ProfileHost => profileHost ??= new ProfileHost
+    {
+        App = Profiles.App,
+        Shown = () => shownProfile,
+        Show = id =>
+        {
+            shownProfile = id;
+            Sync();
+        },
+        NoProfileHelp = Strings.ProfileStandardHelp,
+        // A new profile starts with the apps switched on as in the profile the list showed.
+        Added = (id, copyOf) => host.CopyProfileEntries(id, copyOf),
+        Moved = (from, to) => host.MoveProfileEntries(from, to),
+        Removed = id => host.RemoveProfileEntries(id),
+        Change = change => host.ChangeFamilyNow(change),
+        Editing = profile =>
+        {
+            editingProfile = profile;
+            ShowProfileColor();
+        },
+        Confirm = (title, body, action, danger) => ConfirmAsync(title, body, "", action, danger: danger),
+        Choose = (title, body, second, main) => ChooseAsync(title, body, second, main),
+    };
+
+    /// <summary>
+    /// The profile bar above the list, the kit's: every profile left to right in order of precedence, No profile last.
+    /// The one selected is the frame for the list and the details: their switches are its switches.
     /// </summary>
     void SyncProfileBar(Config config, FamilyProfile? shown)
     {
-        var now = DateTime.Now;
-        var active = Profiles.Active(now);
-        var manual = Profiles.Manual(now);
-        var all = Profiles.All;
-        var count = all.Count;
-        var tabs = all.Select((p, i) => new ProfileTab(p.Id, p.Name, active?.Id == p.Id, shownProfile == p.Id, Profiles.IsPaused(p, now), i > 0, i < count - 1,
-                Profiles.DescribeCondition(p), Theme.Swatch(ProfileColors.Of(p)), FamilyProfiles.EndOfHours(p, now)))
-            .Append(new ProfileTab(null, Strings.ProfileStandard, active == null, shownProfile == null, false, false, false, Strings.ProfileStandardHelp,
-                Theme.Swatch(ProfileColors.StartQueue)))
-            .ToList();
-        ProfileTabs.ItemsSource = tabs;
-        // The order dialog follows every change while it is open.
-        if (ProfileOrderCard.Visibility == Visibility.Visible) FillProfileOrder();
-        // With the accent "Same as profile" the whole window takes on the color of the profile it shows.
-        Theme.Show(ProfileColors.Of(shown));
-
-        // Standard shows only when it applies and the order, once there are profiles to order; without profiles the row stays away.
-        ProfileInfoRow.Visibility = shown == null && count == 0 ? Visibility.Collapsed : Visibility.Visible;
-        ProfileOrderButton.Visibility = count > 1 ? Visibility.Visible : Visibility.Collapsed;
-        ProfilePauseButton.Visibility = ProfileEditButton.Visibility = shown == null ? Visibility.Collapsed : Visibility.Visible;
-        if (shown == null)
+        if (profileBar == null)
         {
-            ProfileCondition.Text = Strings.ProfileStandardHelp;
-            ProfilePauseEditButton.Visibility = Visibility.Collapsed;
+            profileBar = KitProfiles.Bar(ProfileHost);
+            ProfileBarHost.Content = profileBar;
         }
-        else
-        {
-            ProfileCondition.Text = Profiles.Describe(shown, now);
-            // Paused now: resume with one click, change it next to it. Planned: change it.
-            var pausedNow = Profiles.IsPaused(shown, now);
-            ProfilePauseButton.Content = pausedNow ? Strings.ProfileResume
-                : FamilyProfiles.IsPausePlanned(shown, now) ? Strings.ProfilePauseEdit : Strings.ProfilePause;
-            ProfilePauseEditButton.Visibility = pausedNow ? Visibility.Visible : Visibility.Collapsed;
-        }
-        // Chosen by hand: said where it applies, and the way back to the schedule next to it.
-        if (manual != null && manual.Profile == shown?.Id)
-            ProfileCondition.Text = shown == null ? FamilyProfiles.DescribeManual(manual, now) : $"{ProfileCondition.Text}, {FamilyProfiles.DescribeManual(manual, now)}";
-        ProfileScheduleButton.Visibility = manual != null ? Visibility.Visible : Visibility.Collapsed;
-        if (manual != null) ProfileInfoRow.Visibility = Visibility.Visible;
-
-        // The details say which profile their switch belongs to, once there is more than Standard.
+        else profileBar.Refresh();
+        ShowProfileColor(shown);
+        // The details say which profile their switch belongs to, once there is more than No profile.
         DetailProfileNote.Text = Strings.F(Strings.ProfileInProfile, shown?.Name ?? Strings.ProfileStandard);
-        DetailProfileNote.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        DetailProfileNote.Visibility = Profiles.All.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    void ProfileTab_Click(object sender, RoutedEventArgs e)
+    /// <summary>With the accent "Like the profile": the color of the profile edited, else shown, else the one that applies.</summary>
+    void ShowProfileColor(FamilyProfile? shown = null)
     {
-        if ((sender as FrameworkElement)?.DataContext is not ProfileTab tab || tab.Id == shownProfile) return;
-        shownProfile = tab.Id;
-        Sync();
+        shown ??= Profiles.Find(shownProfile);
+        Theme.Show(ProfileColors.Of(KitProfiles.ColorSource(editingProfile, shown, Profiles.Active(DateTime.Now))));
     }
-
-    void ShownProfileEdit_Click(object sender, RoutedEventArgs e)
-    {
-        if (shownProfile is { } id) OpenProfileDialog(id);
-    }
-
-    void ShownProfilePause_Click(object sender, RoutedEventArgs e)
-    {
-        if (shownProfile is { } id) PauseOrResume(id);
-    }
-
-    // ---------- Ordering profiles by dragging their chips; Standard stays last ----------
-
-    Point profileDragStart;
-    ProfileTab? profileDragTab;
-
-    void ProfileTab_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        profileDragStart = e.GetPosition(this);
-        profileDragTab = TabOf(sender) is { IsCustom: true } tab ? tab : null;
-    }
-
-    void ProfileTab_PreviewMouseMove(object sender, MouseEventArgs e)
-    {
-        if (profileDragTab == null || e.LeftButton != MouseButtonState.Pressed) return;
-        var moved = e.GetPosition(this) - profileDragStart;
-        if (Math.Abs(moved.X) < SystemParameters.MinimumHorizontalDragDistance && Math.Abs(moved.Y) < SystemParameters.MinimumVerticalDragDistance) return;
-        var tab = profileDragTab;
-        profileDragTab = null;
-        // The chip being moved fades while it is dragged, so the marker is what draws the eye.
-        var chip = (UIElement)sender;
-        chip.Opacity = 0.45;
-        try
-        {
-            DragDrop.DoDragDrop(chip, new DataObject(typeof(ProfileTab), tab), DragDropEffects.Move);
-        }
-        finally
-        {
-            chip.Opacity = 1;
-            ProfileDropMarker.Visibility = Visibility.Collapsed;
-        }
-    }
-
-    void ProfileTabs_DragOver(object sender, DragEventArgs e)
-    {
-        if (!e.Data.GetDataPresent(typeof(ProfileTab))) return;
-        e.Effects = DragDropEffects.Move;
-        e.Handled = true;
-        ShowProfileDropMarker(ProfileDropIndex(e));
-    }
-
-    void ProfileTabs_DragLeave(object sender, DragEventArgs e)
-    {
-        // Also fires between chips; hide only when really outside the bar.
-        var position = e.GetPosition(ProfileTabs);
-        if (position.X < 0 || position.Y < 0 || position.X > ProfileTabs.ActualWidth || position.Y > ProfileTabs.ActualHeight)
-            ProfileDropMarker.Visibility = Visibility.Collapsed;
-    }
-
-    /// <summary>Goes into the gap the marker showed; Standard stays last whatever happens.</summary>
-    void ProfileTabs_Drop(object sender, DragEventArgs e)
-    {
-        ProfileDropMarker.Visibility = Visibility.Collapsed;
-        if (e.Data.GetData(typeof(ProfileTab)) is not ProfileTab { Id: { } id }) return;
-        e.Handled = true;
-        var from = Profiles.All.FindIndex(p => p.Id == id);
-        var insert = ProfileDropIndex(e);
-        var to = insert > from ? insert - 1 : insert;
-        if (from >= 0 && to != from) host.MoveProfile(id, to - from);
-    }
-
-    // ---------- The order dialog: every profile one below the other ----------
-
-    /// <summary>A row of the order dialog; Standard is the last one and stays there.</summary>
-    sealed record ProfileOrderRow(Guid? Id, string Rank, string Name, string Detail, Brush Swatch, bool IsActive, bool CanUp, bool CanDown)
-    {
-        public bool IsCustom => Id != null;
-    }
-
-    void ProfileOrder_Click(object sender, RoutedEventArgs e)
-    {
-        FillProfileOrder();
-        ConfirmCard.Visibility = AddCard.Visibility = ProfileCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
-        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
-        Motion.Appear(Overlay);
-        Motion.Appear(ProfileOrderCard, fromScale: 0.96);
-    }
-
-    /// <summary>Rank, color, name and what decides each profile ("Mo bis Fr, 07:00 bis 18:00, sonst Standard, pausiert …").</summary>
-    void FillProfileOrder()
-    {
-        var now = DateTime.Now;
-        var active = Profiles.Active(now);
-        var all = Profiles.All;
-        var count = all.Count;
-        ProfileOrderList.ItemsSource = all.Select((p, i) => new ProfileOrderRow(p.Id, $"{i + 1}.", p.Name,
-                Profiles.Describe(p, now),
-                Theme.Swatch(ProfileColors.Of(p)), active?.Id == p.Id, i > 0, i < count - 1))
-            .Append(new ProfileOrderRow(null, "", Strings.ProfileStandard, Strings.ProfileStandardHelp, Theme.Swatch(ProfileColors.StartQueue), active == null, false, false))
-            .ToList();
-    }
-
-    static ProfileOrderRow? OrderRowOf(object sender) => (sender as FrameworkElement)?.DataContext as ProfileOrderRow;
-
-    void ProfileOrderUp_Click(object sender, RoutedEventArgs e) { if (OrderRowOf(sender)?.Id is { } id) host.MoveProfile(id, -1); }
-    void ProfileOrderDown_Click(object sender, RoutedEventArgs e) { if (OrderRowOf(sender)?.Id is { } id) host.MoveProfile(id, +1); }
-
-    ProfileOrderRow? orderDragRow;
-
-    void ProfileOrderRow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        profileDragStart = e.GetPosition(this);
-        // The arrows are buttons of their own; pressing them starts no drag.
-        orderDragRow = IsInsideControl(e.OriginalSource as DependencyObject) ? null : OrderRowOf(sender) is { IsCustom: true } row ? row : null;
-    }
-
-    void ProfileOrderRow_PreviewMouseMove(object sender, MouseEventArgs e)
-    {
-        if (orderDragRow == null || e.LeftButton != MouseButtonState.Pressed) return;
-        var moved = e.GetPosition(this) - profileDragStart;
-        if (Math.Abs(moved.X) < SystemParameters.MinimumHorizontalDragDistance && Math.Abs(moved.Y) < SystemParameters.MinimumVerticalDragDistance) return;
-        var row = orderDragRow;
-        orderDragRow = null;
-        var element = (UIElement)sender;
-        element.Opacity = 0.45;
-        try
-        {
-            DragDrop.DoDragDrop(element, new DataObject(typeof(ProfileOrderRow), row), DragDropEffects.Move);
-        }
-        finally
-        {
-            element.Opacity = 1;
-            ProfileOrderMarker.Visibility = Visibility.Collapsed;
-        }
-    }
-
-    Rect OrderRowBounds(int index) =>
-        ProfileOrderList.ItemContainerGenerator.ContainerFromIndex(index) is FrameworkElement row
-            ? row.TransformToAncestor(ProfileOrderList).TransformBounds(new Rect(0, 0, row.ActualWidth, row.ActualHeight))
-            : Rect.Empty;
-
-    /// <summary>Before a row over its upper half, after it over its lower half; below the last profile means at the end.</summary>
-    int ProfileOrderDropIndex(DragEventArgs e)
-    {
-        var y = e.GetPosition(ProfileOrderList).Y;
-        var count = Profiles.All.Count;
-        for (var i = 0; i < count; i++)
-        {
-            var row = OrderRowBounds(i);
-            if (!row.IsEmpty && y < row.Top + row.Height / 2) return i;
-        }
-        return count;
-    }
-
-    void ProfileOrder_DragOver(object sender, DragEventArgs e)
-    {
-        if (!e.Data.GetDataPresent(typeof(ProfileOrderRow))) return;
-        e.Effects = DragDropEffects.Move;
-        e.Handled = true;
-        // Rows keep 6 px below them; the line sits in the middle of the gap above the row at the index (Standard for the end).
-        var row = OrderRowBounds(ProfileOrderDropIndex(e));
-        if (row.IsEmpty)
-        {
-            ProfileOrderMarker.Visibility = Visibility.Collapsed;
-            return;
-        }
-        var origin = ProfileOrderList.TranslatePoint(new Point(row.Left, row.Top - 3), ProfileOrderDropLayer);
-        Canvas.SetLeft(ProfileOrderMarker, origin.X - 5);
-        Canvas.SetTop(ProfileOrderMarker, origin.Y - ProfileOrderMarker.Height / 2);
-        ProfileOrderMarker.Width = row.Width + 5;
-        ProfileOrderMarker.Visibility = Visibility.Visible;
-    }
-
-    void ProfileOrder_DragLeave(object sender, DragEventArgs e)
-    {
-        var position = e.GetPosition(ProfileOrderList);
-        if (position.X < 0 || position.Y < 0 || position.X > ProfileOrderList.ActualWidth || position.Y > ProfileOrderList.ActualHeight)
-            ProfileOrderMarker.Visibility = Visibility.Collapsed;
-    }
-
-    void ProfileOrder_Drop(object sender, DragEventArgs e)
-    {
-        ProfileOrderMarker.Visibility = Visibility.Collapsed;
-        if (e.Data.GetData(typeof(ProfileOrderRow)) is not ProfileOrderRow { Id: { } id }) return;
-        e.Handled = true;
-        var from = Profiles.All.FindIndex(p => p.Id == id);
-        var insert = ProfileOrderDropIndex(e);
-        var to = insert > from ? insert - 1 : insert;
-        if (from >= 0 && to != from) host.MoveProfile(id, to - from);
-    }
-
-    Rect ChipBounds(int index) =>
-        ProfileTabs.ItemContainerGenerator.ContainerFromIndex(index) is FrameworkElement chip
-            ? chip.TransformToAncestor(ProfileTabs).TransformBounds(new Rect(0, 0, chip.ActualWidth, chip.ActualHeight))
-            : Rect.Empty;
-
-    /// <summary>
-    /// The gap between profiles the pointer is at: before a chip over its left half, after it over its right half,
-    /// read row by row when the bar wraps. Past the last profile (Standard included) means at the end.
-    /// </summary>
-    int ProfileDropIndex(DragEventArgs e)
-    {
-        var point = e.GetPosition(ProfileTabs);
-        var count = Profiles.All.Count;
-        for (var i = 0; i < count; i++)
-        {
-            var chip = ChipBounds(i);
-            if (chip.IsEmpty) continue;
-            if (point.Y < chip.Top) return i;
-            if (point.Y <= chip.Bottom && point.X < chip.Left + chip.Width / 2) return i;
-        }
-        return count;
-    }
-
-    /// <summary>The marker stands in the middle of the 6 px gap to the left of the chip at <paramref name="insert"/> (Standard for the end).</summary>
-    void ShowProfileDropMarker(int insert)
-    {
-        var chip = ChipBounds(insert);
-        if (chip.IsEmpty)
-        {
-            ProfileDropMarker.Visibility = Visibility.Collapsed;
-            return;
-        }
-        var origin = ProfileTabs.TranslatePoint(new Point(chip.Left - 3, chip.Top), ProfileDropLayer);
-        ProfileDropMarker.Height = chip.Height + 6;
-        Canvas.SetLeft(ProfileDropMarker, origin.X - ProfileDropMarker.Width / 2);
-        Canvas.SetTop(ProfileDropMarker, origin.Y - 6);
-        ProfileDropMarker.Visibility = Visibility.Visible;
-    }
-
-    static ProfileTab? TabOf(object sender) => (sender as FrameworkElement)?.DataContext as ProfileTab;
-
-    void ProfileMenu_Edit(object sender, RoutedEventArgs e) { if (TabOf(sender)?.Id is { } id) OpenProfileDialog(id); }
-    void ProfileMenu_Pause(object sender, RoutedEventArgs e) { if (TabOf(sender)?.Id is { } id) PauseOrResume(id); }
-    void ProfileMenu_Earlier(object sender, RoutedEventArgs e) { if (TabOf(sender)?.Id is { } id) host.MoveProfile(id, -1); }
-    void ProfileMenu_Later(object sender, RoutedEventArgs e) { if (TabOf(sender)?.Id is { } id) host.MoveProfile(id, +1); }
-
-    async void ProfileMenu_Delete(object sender, RoutedEventArgs e)
-    {
-        if (TabOf(sender) is not { Id: { } id }) return;
-        if (await ConfirmDeleteAsync(id)) DeleteProfile(id);
-    }
-
-    void ProfileMenu_UseUntil(object sender, RoutedEventArgs e)
-    {
-        if (TabOf(sender) is { Id: { } id, EndOfHours: { } end }) UseProfile(id, end);
-    }
-
-    void ProfileMenu_UseOpen(object sender, RoutedEventArgs e)
-    {
-        if (TabOf(sender)?.Id is { } id) UseProfile(id, null);
-    }
-
-    /// <summary>The list shows the profile chosen by hand, which now applies in every app that uses it.</summary>
-    void UseProfile(Guid id, DateTime? until)
-    {
-        host.UseProfile(id, until);
-        shownProfile = id;
-        Sync();
-    }
-
-    void ProfileSchedule_Click(object sender, RoutedEventArgs e) => host.BackToSchedule();
 
     void SyncHeader(Config config, LastRun? run)
     {
@@ -1167,7 +884,7 @@ public partial class MainWindow : Window
     {
         if (next != View.Settings) lastTab = next;
         view = next;
-        OrderView.Visibility = next == View.Order ? Visibility.Visible : Visibility.Collapsed;
+        OrderHost.Visibility = next == View.Order ? Visibility.Visible : Visibility.Collapsed;
         WindowsView.Visibility = next == View.Windows ? Visibility.Visible : Visibility.Collapsed;
         ServicesView.Visibility = next == View.Services ? Visibility.Visible : Visibility.Collapsed;
         SettingsView.Visibility = next == View.Settings ? Visibility.Visible : Visibility.Collapsed;
@@ -1673,199 +1390,6 @@ public partial class MainWindow : Window
         if (!done) await ShowMessageAsync(Strings.PreparedSetUpFailed, Strings.PreparedSetUpFailedText);
     }
 
-    // ---------- Profiles ----------
-
-    void ProfileAdd_Click(object sender, RoutedEventArgs e) => OpenProfileDialog(null);
-
-    /// <summary>
-    /// The profile editor: the family's shared fields (name, color, schedule, for all apps). A new profile can be one
-    /// another app offered. <paramref name="sample"/> fills it for a picture without being saved.
-    /// </summary>
-    void OpenProfileDialog(Guid? id, FamilyProfile? sample = null)
-    {
-        var profile = Profiles.Find(id);
-        newProfile = profile == null;
-        dialogProfile = profile?.Id;
-        ProfileTitle.Text = newProfile ? Strings.ProfileNewTitle : Strings.ProfileEditTitle;
-        ProfileTitle.ToolTip = newProfile ? Strings.ProfileNewHelp : null;
-        profileFields.Load(profile ?? sample, Profiles.All);
-        ProfileDeleteButton.Visibility = newProfile ? Visibility.Collapsed : Visibility.Visible;
-        // "Delete" only when the profile is gone afterwards; while other apps use it, it only leaves StartQueue.
-        ProfileDeleteButton.Content = ProfileSharing.RemoveLabel(Profiles.App, profile != null && FamilyProfiles.UsedByOthers(profile, Profiles.App));
-
-        ConfirmCard.Visibility = AddCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
-        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
-        Motion.Appear(Overlay);
-        Motion.Appear(ProfileCard, fromScale: 0.96);
-        if (!offScreen) Dispatcher.BeginInvoke(profileFields.FocusName);
-    }
-
-    async void ProfileSave_Click(object sender, RoutedEventArgs e)
-    {
-        if (profileFields.Read() is not { } profile) return;
-        var app = Profiles.App;
-        var before = newProfile ? null : FamilyProfiles.Find(profile.Id);
-
-        // "For all EsteemWorks apps" off while other apps use it: after asking, StartQueue gets a copy of its own and the
-        // others keep theirs (STANDARD.md, "Family profiles").
-        if (before is { Shared: true } && !profile.Shared && FamilyProfiles.UsedByOthers(before, app))
-        {
-            var others = FamilyProfiles.SharedWith(before, app);
-            var detach = await AskOverProfileAsync(async () => await ConfirmAsync(ProfileSharing.DetachTitle(before.Name),
-                ProfileSharing.DetachBody(before.Name, app, others), "", ProfileSharing.Detach, danger: false, icon: ProfileSharing.Icon) ? KitDialog.Main : KitDialog.Cancelled);
-            if (detach == KitDialog.Cancelled) return;
-            var own = host.DetachProfile(before.Id);
-            profile.Id = own;
-            host.SaveProfile(profile);
-            if (shownProfile == before.Id) shownProfile = own;
-            CloseOverlay();
-            Sync();
-            return;
-        }
-
-        // On, while another app offers a profile of the same name: join it instead of making another one.
-        var newlyShared = profile.Shared && (newProfile ? profileFields.TakesOver == null : before is not { Shared: true } || !FamilyProfiles.SameName(before.Name, profile.Name));
-        if (newlyShared && FamilyProfiles.SharedNamed(profile.Name, app, except: profile.Id) is { } offered)
-        {
-            var hint = ProfileSharing.NotSharedHint;
-            // One that other apps use too cannot simply give way to another; it needs another name.
-            var choice = before != null && FamilyProfiles.UsedByOthers(before, app) ? KitDialog.Cancelled
-                : FamilyProfiles.SameRules(profile, offered) ? KitDialog.Main
-                : await AskOverProfileAsync(() => ChooseAsync(ProfileSharing.ClashTitle(offered.Name), ProfileSharing.ClashBody(profile, offered, app),
-                    ProfileSharing.Overwrite, ProfileSharing.TakeExisting));
-            if (choice == KitDialog.Cancelled)
-            {
-                profileFields.SetShared(false);
-                profileFields.ShowHint(hint);
-                return;
-            }
-            // A new one is saved first (with the switches of the profile shown now), then gives way to the offered one.
-            Guid? own = newProfile ? host.AddProfile(profile, null, shownProfile) : host.SaveProfile(profile) ? profile.Id : null;
-            if (own is not { } ownId) return;
-            host.RejoinProfile(ownId, offered.Id, overwrite: choice == KitDialog.Second);
-            if (newProfile || shownProfile == ownId) shownProfile = offered.Id;
-            CloseOverlay();
-            Sync();
-            return;
-        }
-
-        if (newProfile)
-        {
-            // A new profile starts with the switches of the profile the list shows now.
-            if (host.AddProfile(profile, profileFields.TakesOver, shownProfile) is not { } id) return;
-            shownProfile = id;
-        }
-        else host.SaveProfile(profile);
-        CloseOverlay();
-        Sync();
-    }
-
-    /// <summary>
-    /// Asks over the profile editor: the editor steps aside while the question shows, and comes back as it was when
-    /// the answer is Cancel.
-    /// </summary>
-    async Task<int> AskOverProfileAsync(Func<Task<int>> ask)
-    {
-        var keep = overlayFocus;
-        overlayFocus = null;
-        ProfileCard.Visibility = Visibility.Collapsed;
-        var answer = await ask();
-        if (answer == KitDialog.Cancelled)
-        {
-            Motion.Appear(Overlay);
-            Motion.Appear(ProfileCard, fromScale: 0.96);
-        }
-        overlayFocus = keep;
-        return answer;
-    }
-
-    void ProfileDelete_Click(object sender, RoutedEventArgs e)
-    {
-        if (dialogProfile is not { } id) return;
-        CloseOverlay();
-        _ = DeleteAfterAskingAsync(id);
-    }
-
-    async Task DeleteAfterAskingAsync(Guid id)
-    {
-        if (await ConfirmDeleteAsync(id)) DeleteProfile(id);
-    }
-
-    /// <summary>
-    /// Asks before a profile goes. One another app uses too stays there: here it is only taken out of StartQueue,
-    /// and the question says so.
-    /// </summary>
-    Task<bool> ConfirmDeleteAsync(Guid id)
-    {
-        var profile = Profiles.Find(id);
-        if (profile == null) return Task.FromResult(false);
-        var others = FamilyProfiles.SharedWith(profile, Profiles.App);
-        return others.Count == 0
-            ? ConfirmAsync(Strings.F(Strings.ProfileDeleteTitle, profile.Name), Strings.ProfileDeleteBody, "", Strings.ProfileDelete, danger: true)
-            : ConfirmAsync(Strings.F(Strings.ProfileLeaveTitle, profile.Name), Strings.F(Strings.ProfileLeaveBody, string.Join(", ", others)), "", Strings.ProfileLeave, danger: true);
-    }
-
-    void DeleteProfile(Guid id)
-    {
-        host.DeleteProfile(id, everywhere: false);
-        if (shownProfile == id) shownProfile = null;
-        Sync();
-    }
-
-    /// <summary>A profile paused right now resumes at once; otherwise the pause dialog opens.</summary>
-    void PauseOrResume(Guid id)
-    {
-        var profile = Profiles.Find(id);
-        if (profile == null) return;
-        if (Profiles.IsPaused(profile, DateTime.Now))
-        {
-            host.UpdateProfile(id, FamilyProfiles.ClearPause);
-            return;
-        }
-        OpenPauseDialog(id);
-    }
-
-    void ShownProfilePauseEdit_Click(object sender, RoutedEventArgs e)
-    {
-        if (shownProfile is { } id) OpenPauseDialog(id);
-    }
-
-    /// <summary>Opens with the pause the profile has, or with "from now, a week, all day". <paramref name="sample"/>: for a picture.</summary>
-    void OpenPauseDialog(Guid id, FamilyProfile? sample = null)
-    {
-        var profile = Profiles.Find(id);
-        if (profile == null) return;
-        dialogProfile = id;
-        PauseTitleText.Text = ProfilePauseFields.Title(profile);
-        PauseTitleText.ToolTip = ProfilePauseFields.Explanation;
-        pauseFields.Load(sample ?? profile);
-        PauseRemoveButton.Visibility = pauseFields.HadPause ? Visibility.Visible : Visibility.Collapsed;
-
-        ConfirmCard.Visibility = AddCard.Visibility = ProfileCard.Visibility = Visibility.Collapsed;
-        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
-        Motion.Appear(Overlay);
-        Motion.Appear(PauseCard, fromScale: 0.96);
-    }
-
-    void PauseConfirm_Click(object sender, RoutedEventArgs e)
-    {
-        if (dialogProfile is not { } id || Profiles.Find(id) is not { } profile) return;
-        if (!pauseFields.Apply(profile)) return;
-        CloseOverlay();
-        host.UpdateProfile(id, p =>
-        {
-            p.PauseFrom = profile.PauseFrom;
-            p.PauseUntil = profile.PauseUntil;
-            p.PausedIndefinitely = profile.PausedIndefinitely;
-        });
-    }
-
-    void PauseRemove_Click(object sender, RoutedEventArgs e)
-    {
-        if (dialogProfile is not { } id) return;
-        CloseOverlay();
-        host.UpdateProfile(id, FamilyProfiles.ClearPause);
-    }
     // ---------- Services ----------
 
     readonly ServicesModel services = new();
@@ -2029,7 +1553,7 @@ public partial class MainWindow : Window
             LegalContent.Children.Add(head);
             LegalContent.Children.Add(body);
         }
-        ConfirmCard.Visibility = AddCard.Visibility = ProfileCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
+        ConfirmCard.Visibility = AddCard.Visibility = Visibility.Collapsed;
         if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
         Motion.Appear(Overlay);
         Motion.Appear(LegalCard, fromScale: 0.96);
@@ -2136,10 +1660,7 @@ public partial class MainWindow : Window
         Overlay.Visibility = Visibility.Collapsed;
         ConfirmCard.Visibility = Visibility.Collapsed;
         AddCard.Visibility = Visibility.Collapsed;
-        ProfileCard.Visibility = Visibility.Collapsed;
-        PauseCard.Visibility = Visibility.Collapsed;
         LegalCard.Visibility = Visibility.Collapsed;
-        ProfileOrderCard.Visibility = Visibility.Collapsed;
         // Back to the control that opened the dialog; the list when that control is gone.
         if (!offScreen)
         {

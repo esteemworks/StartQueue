@@ -1006,6 +1006,28 @@ public sealed class TrayHost : IDisposable
     /// <summary>Name, color, schedule, pause, offered or not: for every app that uses the profile.</summary>
     public bool SaveProfile(FamilyProfile profile) => ChangeFamily(() => FamilyProfiles.Save(profile));
 
+    /// <summary>For the kit's profile pieces: a change of the family's profiles, said when it fails.</summary>
+    public bool ChangeFamilyNow(Action change) => ChangeFamily(change);
+
+    /// <summary>A new profile starts with the apps switched on as in <paramref name="copyOf"/> (null: No profile).</summary>
+    public void CopyProfileEntries(Guid id, Guid? copyOf) => Change(c =>
+    {
+        var source = Profiles.Find(copyOf);
+        c.ProfileEntries[id] = c.Entries.Where(e => Profiles.IsOn(c, e, source)).Select(e => e.Id).ToList();
+    });
+
+    /// <summary>Which apps start in a profile moves to another (stopping or joining a shared profile).</summary>
+    public void MoveProfileEntries(Guid from, Guid to) => Change(c =>
+    {
+        var on = c.ProfileEntries.TryGetValue(from, out var list) ? list
+            : FamilyProfiles.Find(from) is { } profile ? c.Entries.Where(e => Profiles.IsOn(c, e, profile)).Select(e => e.Id).ToList() : [];
+        c.ProfileEntries.Remove(from);
+        c.ProfileEntries[to] = on;
+    });
+
+    /// <summary>A profile is gone from StartQueue: which apps started in it goes too.</summary>
+    public void RemoveProfileEntries(Guid id) => Change(c => c.ProfileEntries.Remove(id));
+
     /// <summary>The entries that start in the profile now.</summary>
     List<Guid> StartingIn(Guid profile) =>
         Profiles.Find(profile) is { } p ? config.Entries.Where(e => Profiles.IsOn(config, e, p)).Select(e => e.Id).ToList() : [];

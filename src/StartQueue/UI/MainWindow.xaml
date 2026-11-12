@@ -32,22 +32,6 @@
                       Style="{StaticResource DangerMenuItem}" />
         </ContextMenu>
 
-        <!-- Profile menu: right click on a profile in the profile bar -->
-        <ContextMenu x:Key="ProfileMenu" x:Shared="False">
-            <MenuItem Header="{x:Static s:Strings.ProfileEdit}" Tag="&#xE70F;" Click="ProfileMenu_Edit" />
-            <MenuItem Header="{Binding PauseLabel}" Tag="&#xE769;" Click="ProfileMenu_Pause" />
-            <Separator />
-            <!-- By hand, for every app that uses the profile: up to the end of its hours or until switched back -->
-            <MenuItem Header="{Binding UseUntilLabel}" Tag="&#xE768;" Click="ProfileMenu_UseUntil"
-                      Visibility="{Binding CanUseUntil, Converter={StaticResource BoolToVisibility}}" />
-            <MenuItem Header="{x:Static s:Strings.ProfileUseOpen}" Tag="&#xE768;" Click="ProfileMenu_UseOpen" />
-            <Separator />
-            <MenuItem Header="{x:Static s:Strings.ProfileEarlier}" Tag="&#xE76B;" Click="ProfileMenu_Earlier" IsEnabled="{Binding CanMoveLeft}" />
-            <MenuItem Header="{x:Static s:Strings.ProfileLater}" Tag="&#xE76C;" Click="ProfileMenu_Later" IsEnabled="{Binding CanMoveRight}" />
-            <Separator />
-            <MenuItem Header="{x:Static s:Strings.ProfileDelete}" Tag="&#xE74D;" Click="ProfileMenu_Delete" Style="{StaticResource DangerMenuItem}" />
-        </ContextMenu>
-
         <Style x:Key="EntryItem" TargetType="ListBoxItem" BasedOn="{StaticResource RowItem}">
             <Setter Property="ContextMenu" Value="{StaticResource RowMenu}" />
             <Style.Triggers>
@@ -174,6 +158,8 @@
             </kit:KitFrame.Actions>
 
         <!-- ========== Startup order ========== -->
+        <!-- A host for pages (KitSubpage): a profile's editor, pause and order take the place of the tab -->
+        <ContentControl x:Name="OrderHost" kit:KitSubpage.IsHost="True" Focusable="False" IsTabStop="False">
         <Grid x:Name="OrderView">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -181,85 +167,10 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Margin="24,16,12,20">
-                <!-- Profiles: the frame for the list below. Left to right in order of precedence, Standard last. -->
-                <Border DockPanel.Dock="Top" Margin="0,0,24,16" Padding="16,12" CornerRadius="8" Background="{DynamicResource Surface}"
-                        BorderBrush="{DynamicResource Line}" BorderThickness="1">
-                    <StackPanel>
-                        <WrapPanel Orientation="Horizontal" ToolTip="{x:Static s:Strings.ProfileBarTip}">
-                            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.ProfileBarLabel}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                            <Grid>
-                                <ItemsControl x:Name="ProfileTabs" Focusable="False" AllowDrop="True" Background="Transparent"
-                                              DragOver="ProfileTabs_DragOver" Drop="ProfileTabs_Drop" DragLeave="ProfileTabs_DragLeave">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <RadioButton GroupName="ShownProfile" IsChecked="{Binding IsShown, Mode=OneWay}" Click="ProfileTab_Click" ToolTip="{Binding Tip}"
-                                                     AutomationProperties.Name="{Binding Name}"
-                                                     PreviewMouseLeftButtonDown="ProfileTab_PreviewMouseDown" PreviewMouseMove="ProfileTab_PreviewMouseMove">
-                                            <RadioButton.Style>
-                                                <Style TargetType="RadioButton" BasedOn="{StaticResource ProfileChip}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsCustom}" Value="True">
-                                                            <Setter Property="ContextMenu" Value="{StaticResource ProfileMenu}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </RadioButton.Style>
-                                            <StackPanel Orientation="Horizontal">
-                                                <!-- The profile's color; the profile that applies now gets a ring around it -->
-                                                <Grid Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,8,0">
-                                                    <Ellipse Width="8" Height="8" Fill="{Binding Swatch}" />
-                                                    <Ellipse Stroke="{Binding Swatch}" StrokeThickness="1.5" ToolTip="{x:Static s:Strings.ProfileActiveNow}"
-                                                             Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
-                                                </Grid>
-                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE769;" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0"
-                                                           Visibility="{Binding IsPaused, Converter={StaticResource BoolToVisibility}}" />
-                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </RadioButton>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                                <!-- Where a dragged profile will land: an upright line with a dot in the gap between chips -->
-                                <Canvas x:Name="ProfileDropLayer" IsHitTestVisible="False">
-                                    <Grid x:Name="ProfileDropMarker" Width="10" Visibility="Collapsed">
-                                        <Border Width="2" CornerRadius="1" Background="{DynamicResource AccentFill}" HorizontalAlignment="Center" Margin="0,5,0,0" />
-                                        <Ellipse Width="10" Height="10" VerticalAlignment="Top" Stroke="{DynamicResource AccentFill}" StrokeThickness="2" Fill="{DynamicResource Surface}" />
-                                    </Grid>
-                                </Canvas>
-                            </Grid>
-                            <Button Style="{StaticResource GhostButton}" Height="30" Click="ProfileAdd_Click" ToolTip="{x:Static s:Strings.ProfilesIntro}"
-                                    AutomationProperties.Name="{x:Static s:Strings.ProfileAdd}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="14" VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Static s:Strings.ProfileAddShort}" Margin="6,0,0,0" />
-                                </StackPanel>
-                            </Button>
-                        </WrapPanel>
-                        <Grid x:Name="ProfileInfoRow" Margin="0,12,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="ProfileCondition" Style="{StaticResource Help}" FontSize="13" VerticalAlignment="Center" />
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
-                                <Button x:Name="ProfileScheduleButton" Style="{StaticResource QuietButton}" Height="28" Margin="0,0,4,0" Click="ProfileSchedule_Click"
-                                        Content="{x:Static s:Strings.ProfileBackToSchedule}" ToolTip="{x:Static s:Strings.ProfileBackToScheduleTip}" Visibility="Collapsed" />
-                                <Button x:Name="ProfileOrderButton" Style="{StaticResource QuietButton}" Height="28" Margin="0,0,4,0" Click="ProfileOrder_Click"
-                                        Content="{x:Static s:Strings.ProfileOrderShort}" ToolTip="{x:Static s:Strings.ProfileOrderTip}" />
-                                <Button x:Name="ProfilePauseButton" Style="{StaticResource QuietButton}" Height="28" Click="ShownProfilePause_Click" />
-                                <Button x:Name="ProfilePauseEditButton" Style="{StaticResource QuietButton}" Height="28" Margin="4,0,0,0"
-                                        Content="{x:Static s:Strings.ProfilePauseEdit}" Click="ShownProfilePauseEdit_Click" />
-                                <Button x:Name="ProfileEditButton" Style="{StaticResource QuietButton}" Height="28" Margin="4,0,0,0"
-                                        Content="{x:Static s:Strings.ProfileEdit}" Click="ShownProfileEdit_Click" />
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                <!-- Profiles: the kit's bar (KitProfiles), the frame for the list below. Left to right in order of precedence,
+                     No profile last; edit, pause and order open as pages of this tab -->
+                <ContentControl x:Name="ProfileBarHost" DockPanel.Dock="Top" Margin="0,0,24,16" Focusable="False" IsTabStop="False" />
+
 
                 <Grid DockPanel.Dock="Top" Height="32" Margin="0,0,24,12">
                     <Grid.ColumnDefinitions>
@@ -587,6 +498,7 @@
                 </Grid>
             </Border>
         </Grid>
+        </ContentControl>
 
         <!-- ========== Windows autostart ========== -->
         <DockPanel x:Name="WindowsView" Margin="32,16,20,20" Visibility="Collapsed">
@@ -1010,140 +922,6 @@
                         <StackPanel x:Name="LegalContent" Margin="0,0,8,0" />
                     </ScrollViewer>
                 </DockPanel>
-            </Border>
-
-            <!-- Profile: name, days, time. Small and fixed, so the shadow may sit on the card itself. -->
-            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
-            <Border Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Height="{Binding ActualHeight, ElementName=ProfileCard}" Visibility="{Binding Visibility, ElementName=ProfileCard}"
-                    Opacity="{Binding Opacity, ElementName=ProfileCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ProfileCard}"
-                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
-            <Border x:Name="ProfileCard" Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
-                <DockPanel>
-                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
-                        <Grid>
-                            <Button x:Name="ProfileDeleteButton" Style="{StaticResource GhostButton}" Foreground="{DynamicResource ErrorText}"
-                                    Content="{x:Static s:Strings.ProfileDelete}" HorizontalAlignment="Left" Click="ProfileDelete_Click" />
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Cancel}" Click="DialogCancel_Click" Margin="0,0,8,0" />
-                                <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.Save}" Click="ProfileSave_Click" />
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
-                        <StackPanel Margin="24,24,24,20">
-                            <TextBlock x:Name="ProfileTitle" Style="{StaticResource DialogTitle}" />
-                            <!-- Name, color, days, time, outside the hours, for all apps: the family's shared part (EsteemWorks.Kit ProfileFields) -->
-                            <ContentControl x:Name="ProfileFieldsHost" Focusable="False" />
-                        </StackPanel>
-                    </ScrollViewer>
-                </DockPanel>
-            </Border>
-
-            <!-- Order of the profiles: one below the other, top wins, Standard at the bottom -->
-            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
-            <Border Width="520" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Height="{Binding ActualHeight, ElementName=ProfileOrderCard}" Visibility="{Binding Visibility, ElementName=ProfileOrderCard}"
-                    Opacity="{Binding Opacity, ElementName=ProfileOrderCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ProfileOrderCard}"
-                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
-            <Border x:Name="ProfileOrderCard" Width="520" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="24,24,24,16" ToolTip="{x:Static s:Strings.ProfileOrderHelp}">
-                        <TextBlock Style="{StaticResource DialogTitle}" Text="{x:Static s:Strings.ProfileOrderTitle}" />
-                        <TextBlock Style="{StaticResource InfoGlyph}" VerticalAlignment="Center" Margin="8,0,0,0" />
-                    </StackPanel>
-                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
-                        <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.DoneEditing}" Click="DialogCancel_Click" HorizontalAlignment="Right" />
-                    </Border>
-                    <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" Padding="24,0,16,16">
-                        <Grid Margin="0,0,8,0">
-                            <ItemsControl x:Name="ProfileOrderList" Focusable="False" AllowDrop="True" Background="Transparent"
-                                          DragOver="ProfileOrder_DragOver" Drop="ProfileOrder_Drop" DragLeave="ProfileOrder_DragLeave">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Height="56" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}" Background="{DynamicResource Surface}"
-                                                Padding="8,0,8,0" PreviewMouseLeftButtonDown="ProfileOrderRow_PreviewMouseDown" PreviewMouseMove="ProfileOrderRow_PreviewMouseMove">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Cursor" Value="SizeAll" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsCustom}" Value="False">
-                                                            <Setter Property="Cursor" Value="Arrow" />
-                                                            <Setter Property="Opacity" Value="0.75" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="20" />
-                                                    <ColumnDefinition Width="28" />
-                                                    <ColumnDefinition Width="22" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE76F;" FontSize="12" Foreground="{DynamicResource Text4}" VerticalAlignment="Center"
-                                                           Visibility="{Binding IsCustom, Converter={StaticResource BoolToVisibility}}" />
-                                                <TextBlock Grid.Column="1" Text="{Binding Rank}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
-                                                <Grid Grid.Column="2" Width="14" Height="14" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                                    <Ellipse Width="8" Height="8" Fill="{Binding Swatch}" />
-                                                    <Ellipse Stroke="{Binding Swatch}" StrokeThickness="1.5" Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
-                                                </Grid>
-                                                <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="4,0,8,0">
-                                                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Detail}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center"
-                                                            Visibility="{Binding IsCustom, Converter={StaticResource BoolToVisibility}}">
-                                                    <Button Style="{StaticResource IconButton}" Content="&#xE70E;" FontSize="11" IsEnabled="{Binding CanUp}" Click="ProfileOrderUp_Click"
-                                                            ToolTip="{x:Static s:Strings.ProfileEarlierTip}" AutomationProperties.Name="{x:Static s:Strings.ProfileEarlierTip}" />
-                                                    <Button Style="{StaticResource IconButton}" Content="&#xE70D;" FontSize="11" IsEnabled="{Binding CanDown}" Click="ProfileOrderDown_Click"
-                                                            ToolTip="{x:Static s:Strings.ProfileLaterTip}" AutomationProperties.Name="{x:Static s:Strings.ProfileLaterTip}" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <!-- Where a dragged profile will land, as in the list of apps -->
-                            <Canvas x:Name="ProfileOrderDropLayer" IsHitTestVisible="False">
-                                <Grid x:Name="ProfileOrderMarker" Height="10" Visibility="Collapsed">
-                                    <Border Height="2" CornerRadius="1" Background="{DynamicResource AccentFill}" VerticalAlignment="Center" Margin="5,0,0,0" />
-                                    <Ellipse Width="10" Height="10" HorizontalAlignment="Left" Stroke="{DynamicResource AccentFill}" StrokeThickness="2" Fill="{DynamicResource Pop}" />
-                                </Grid>
-                            </Canvas>
-                        </Grid>
-                    </ScrollViewer>
-                </DockPanel>
-            </Border>
-
-            <!-- Pause a profile: from now, for a planned span, or until resumed; all day or with times -->
-            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
-            <Border Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Height="{Binding ActualHeight, ElementName=PauseCard}" Visibility="{Binding Visibility, ElementName=PauseCard}"
-                    Opacity="{Binding Opacity, ElementName=PauseCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=PauseCard}"
-                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
-            <Border x:Name="PauseCard" Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
-                <StackPanel>
-                    <StackPanel Margin="24,24,24,20">
-                        <TextBlock x:Name="PauseTitleText" Style="{StaticResource DialogTitle}" />
-                        <!-- From now, a period or until resumed: the family's shared part (EsteemWorks.Kit ProfilePauseFields) -->
-                        <ContentControl x:Name="PauseFieldsHost" Focusable="False" />
-                    </StackPanel>
-                    <Border Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
-                        <Grid>
-                            <Button x:Name="PauseRemoveButton" Style="{StaticResource GhostButton}" Foreground="{DynamicResource ErrorText}"
-                                    Content="{x:Static s:Strings.PauseRemove}" HorizontalAlignment="Left" Click="PauseRemove_Click" />
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Cancel}" Click="DialogCancel_Click" Margin="0,0,8,0" />
-                                <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.Save}" Click="PauseConfirm_Click" />
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </StackPanel>
             </Border>
 
             <!-- Add app -->
