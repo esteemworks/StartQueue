@@ -70,6 +70,21 @@ public sealed class SettingsVm : INotifyPropertyChanged
     public bool ModeDisabled { get => Current.NewEntries == NewEntryMode.TakeOverDisabled; set => Pick(value, s => s.NewEntries = NewEntryMode.TakeOverDisabled); }
     public bool ModeNotify { get => Current.NewEntries == NewEntryMode.NotifyOnly; set => Pick(value, s => s.NewEntries = NewEntryMode.NotifyOnly); }
 
+    /// <summary>The drop-down for new autostart entries: take over and start, take over switched off, only tell.</summary>
+    public int NewModeIndex
+    {
+        get => Current.NewEntries switch { NewEntryMode.TakeOverDisabled => 1, NewEntryMode.NotifyOnly => 2, _ => 0 };
+        set => Change(s => s.NewEntries = value switch { 1 => NewEntryMode.TakeOverDisabled, 2 => NewEntryMode.NotifyOnly, _ => NewEntryMode.TakeOverEnabled });
+    }
+
+    /// <summary>What the chosen way means, under the row.</summary>
+    public string NewModeHelp => Current.NewEntries switch
+    {
+        NewEntryMode.TakeOverDisabled => Strings.ModeDisabledHelp,
+        NewEntryMode.NotifyOnly => Strings.ModeNotifyHelp,
+        _ => Strings.ModeEnabledHelp,
+    };
+
     public bool Scan5 { get => Current.ScanIntervalMinutes == 5; set => Pick(value, s => s.ScanIntervalMinutes = 5); }
     public bool Scan10 { get => Current.ScanIntervalMinutes == 10; set => Pick(value, s => s.ScanIntervalMinutes = 10); }
     public bool Scan30 { get => Current.ScanIntervalMinutes == 30; set => Pick(value, s => s.ScanIntervalMinutes = 30); }

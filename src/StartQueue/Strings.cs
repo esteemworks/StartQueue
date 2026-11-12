@@ -355,6 +355,9 @@ public static class Strings
     public static string SettingsAppearance => T("General", "Allgemein");
     public static string SettingsAppearanceHelp => T("How this window looks and speaks.", "Wie dieses Fenster aussieht und spricht.");
     public static string SettingsTheme => T("Color mode of this window", "Farbmodus dieses Fensters");
+    public static string SettingsThemeHelp => T("Only this window; Windows itself you set under Color mode", "Nur dieses Fenster, Windows selbst stellst du unter Farbmodus ein");
+    public static string SettingsNewModeRow => T("When an app adds itself", "Wenn sich eine App einträgt");
+    public static string SettingsScanShort => T("Also finds new startup tasks of Store apps", "Findet auch neue Startaufgaben von Store-Apps");
     public static string ThemeSystem => T("Like Windows", "Wie Windows");
     public static string ThemeLight => T("Light", "Hell");
     public static string ThemeDark => T("Dark", "Dunkel");

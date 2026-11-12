@@ -13,7 +13,10 @@ param(
     [switch]$Setup,
     # Takes the compiled kit in kit\ even when the kit's sources are next to this repository, as anyone building the
     # public repository does. Releases are built this way, so what is published is what the repository builds.
-    [switch]$KitPackage
+    [switch]$KitPackage,
+    # A build for a release. Every other build shows its commit and build time under Updates, since it keeps the
+    # version number of the last release (EsteemWorks.Kit, KitApp.VersionText). Releases also take -KitPackage.
+    [switch]$Release
 )
 
 $ErrorActionPreference = 'Stop'
@@ -43,6 +46,7 @@ if ($KitPackage) {
     $kitArgs = @('-p:EsteemWorksKitSource=')
     Write-Host "Kit: the package in kit\ ($(([xml](Get-Content (Join-Path $root 'kit\EsteemWorks.Kit.props'))).Project.PropertyGroup.EsteemWorksKitVersion))"
 }
+if ($Release) { $kitArgs += '-p:EsteemWorksRelease=true'; Write-Host 'Release build' }
 dotnet publish $project -c $Configuration -r win-x64 --self-contained $($SelfContained.IsPresent.ToString().ToLower()) -o $out -v quiet @kitArgs
 if ($LASTEXITCODE) { throw 'App build failed' }
 

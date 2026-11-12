@@ -116,7 +116,9 @@ public partial class MainWindow : Window
         Frame.PageChanged += FramePageChanged;
         PlacePreparedPair();
         // The family's About, Troubleshooting and More from EsteemWorks; "Privacy and notices" sits beside the data folder.
-        AboutPage.Build(AboutHost, Ui.Button(Strings.LegalTitle, Legal_Click));
+        // Privacy and notices on the kit's page: StartQueue's own sections, each with its icon.
+        AboutPage.Sections = () => Strings.LegalSections(Paths.Data).Select((section, i) => (LegalIcons[Math.Min(i, LegalIcons.Length - 1)], section.Title, section.Text));
+        AboutPage.Build(AboutHost);
         // The note of "Check" closes by itself, on a click, and when the window moves or loses the focus.
         ScanResult.CustomPopupPlacementCallback = PlaceUnderRightEdge;
         scanResultTimer.Tick += (_, _) => CloseScanResult();
@@ -306,6 +308,27 @@ public partial class MainWindow : Window
             SettingsView.ScrollToVerticalOffset(Math.Max(0, cardTop - 8));
             await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
             SavePng(Root, Path.Combine(folder, "settings-startup.png"));
+            // The kit's pages under About, each opened from its row and left with Back: Updates, Back up settings,
+            // Troubleshooting, Privacy and notices.
+            var pageRows = new List<NavRow>();
+            void FindRows(DependencyObject parent)
+            {
+                for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+                {
+                    var child = VisualTreeHelper.GetChild(parent, i);
+                    if (child is NavRow { Tile: null } row) pageRows.Add(row);
+                    else FindRows(child);
+                }
+            }
+            FindRows(AboutHost);
+            for (var i = 0; i < pageRows.Count; i++)
+            {
+                pageRows[i].RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+                await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                SavePng(Root, Path.Combine(folder, $"settings-page-{i + 1}.png"));
+                KitSubpage.Back(SettingsView, focus: false);
+                await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }
             // What "Shut down, prepare apps" asks first, on a device where it can work.
             ShowView(View.Order);
             _ = ConfirmAsync(Strings.PreparedShutDownTitle, Strings.PreparedBody, Strings.PreparedNotePossible,
@@ -1198,7 +1221,8 @@ public partial class MainWindow : Window
             OpenAddDialog();
             e.Handled = true;
         }
-        else if (e.Key == Key.Escape && view == View.Settings)
+        // On a page of the settings (Updates, Backup, ...) Esc returns to the settings: the page handles it.
+        else if (e.Key == Key.Escape && view == View.Settings && KitSubpage.Depth(SettingsView) == 0)
         {
             ShowView(lastTab);
             e.Handled = true;
@@ -1953,7 +1977,8 @@ public partial class MainWindow : Window
 
     void DialogCancel_Click(object sender, RoutedEventArgs e) => CloseOverlay();
 
-    void Legal_Click(object sender, RoutedEventArgs e) => OpenInfo(Strings.LegalTitle, Strings.LegalSections(Paths.Data));
+    /// <summary>Privacy, made with AI, what it changes in Windows, publisher, liability, third parties.</summary>
+    static readonly string[] LegalIcons = ["\uE72E", "\uE946", "\uE713", "\uE77B", "\uE7BA", "\uE8A5"];
 
     void ParametersInfo_Click(object sender, RoutedEventArgs e) => OpenInfo(Strings.ParamInfoTitle, Strings.ParamInfoSections);
 

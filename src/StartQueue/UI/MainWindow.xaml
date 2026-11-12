@@ -838,209 +838,113 @@
         </DockPanel>
 
         <!-- ========== Settings ========== -->        <!-- Every card: title and one line of context, then rows with the label left and the control right -->
-        <ScrollViewer x:Name="SettingsView" VerticalScrollBarVisibility="Auto" Visibility="Collapsed" Margin="0,0,4,20">
-            <StackPanel Margin="32,24,28,4" MaxWidth="820">
+        <!-- The settings, built from the kit's rows as in every app of the family (design system, "Settings pages, for
+             every one"): one column at most 760 px wide, a label above each card, an icon, the label, a short
+             description and one control per row. About, Updates, Backup, Troubleshooting and Privacy come from AboutPage -->
+        <ScrollViewer x:Name="SettingsView" VerticalScrollBarVisibility="Auto" Visibility="Collapsed" Margin="0,0,4,0">
+            <StackPanel Style="{StaticResource SettingsPage}">
 
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <StackPanel Style="{StaticResource CardHeader}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsAppearanceHelp}"><TextBlock Style="{StaticResource CardTitle}" Text="{x:Static s:Strings.SettingsAppearance}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}">
-                                <TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsTheme}" />
+                <kit:SectionLabel Label="{x:Static s:Strings.SettingsAppearance}" Margin="4,0,0,8" />
+                <kit:SettingsCard>
+                    <kit:SettingRow Icon="&#xE790;" Label="{x:Static s:Strings.SettingsTheme}" Description="{x:Static s:Strings.SettingsThemeHelp}">
+                        <Border Style="{StaticResource SegmentGroup}">
+                            <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="Theme" Content="{x:Static s:Strings.ThemeSystem}" IsChecked="{Binding ThemeSystem}" />
+                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Theme" Content="{x:Static s:Strings.ThemeLight}" IsChecked="{Binding ThemeLight}" />
+                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Theme" Content="{x:Static s:Strings.ThemeDark}" IsChecked="{Binding ThemeDark}" />
                             </StackPanel>
-                            <Border Grid.Column="1" Style="{StaticResource SegmentGroup}">
-                                <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
-                                    <RadioButton Style="{StaticResource FirstSegment}" GroupName="Theme" Content="{x:Static s:Strings.ThemeSystem}" IsChecked="{Binding ThemeSystem}" />
-                                    <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="{x:Static s:Strings.ThemeLight}" IsChecked="{Binding ThemeLight}" />
-                                    <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="{x:Static s:Strings.ThemeDark}" IsChecked="{Binding ThemeDark}" />
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static kit:AccentRow.Help}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static kit:AccentRow.Label}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <!-- The family's segments (StartQueue, Profile, Windows, Sand) from the kit's AccentRow, set when the settings open -->
-                            <ContentControl x:Name="AccentHost" Grid.Column="1" Focusable="False" />
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.LanguageHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsLanguage}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <!-- A list that may grow: a drop-down, as in every app of the family -->
-                            <ComboBox Grid.Column="1" Width="260" Height="32" FontSize="13" VerticalAlignment="Center" SelectedIndex="{Binding LanguageIndex}"
-                                      AutomationProperties.Name="{x:Static s:Strings.SettingsLanguage}">
-                                <ComboBoxItem Content="{x:Static s:Strings.LanguageSystem}" />
-                                <ComboBoxItem Content="English" />
-                                <ComboBoxItem Content="Deutsch" />
-                            </ComboBox>
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <!-- How StartQueue is set up, what that means below it, and "Set up fully" (one UAC prompt) when there is a step up -->
-                            <StackPanel Style="{StaticResource SettingText}">
-                                <StackPanel Orientation="Horizontal" Background="Transparent" HorizontalAlignment="Left" ToolTip="{Binding ModeText}"><TextBlock Style="{StaticResource RowLabel}" Text="{Binding ModeTitle}" /><TextBlock Style="{StaticResource InfoGlyph}" VerticalAlignment="Center" /></StackPanel>
-                                <TextBlock Style="{StaticResource Help}" Text="{Binding SetupStateText}" TextWrapping="Wrap" />
+                        </Border>
+                    </kit:SettingRow>
+                    <!-- The family's segments (StartQueue, Profile, Windows, Sand) from the kit's AccentRow, set when the settings open -->
+                    <kit:SettingRow Icon="&#xE771;" Label="{x:Static kit:AccentRow.Label}" Description="{x:Static kit:AccentRow.Help}">
+                        <ContentControl x:Name="AccentHost" Focusable="False" />
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xE774;" Label="{x:Static s:Strings.SettingsLanguage}" Description="{x:Static s:Strings.LanguageHelp}">
+                        <ComboBox Width="220" Height="32" FontSize="13" SelectedIndex="{Binding LanguageIndex}">
+                            <ComboBoxItem Content="{x:Static s:Strings.LanguageSystem}" />
+                            <ComboBoxItem Content="English" />
+                            <ComboBoxItem Content="Deutsch" />
+                        </ComboBox>
+                    </kit:SettingRow>
+                    <!-- How StartQueue is set up, what that means below it, and "Set up fully" (one UAC prompt) when there is a step up -->
+                    <kit:SettingRow Icon="&#xEA18;" Label="{Binding ModeTitle}" Description="{Binding SetupStateText}" Info="{Binding ModeText}">
+                        <Button Style="{StaticResource SecondaryButton}" Click="SetUpAdmin_Click"
+                                Visibility="{Binding CanSetUpAdmin, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.SetUpAdminTip}"
+                                AutomationProperties.Name="{x:Static s:Strings.SetUpAdmin}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static s:Strings.SetUpAdmin}" Margin="8,0,0,0" />
                             </StackPanel>
-                            <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" VerticalAlignment="Center" Click="SetUpAdmin_Click"
-                                    Visibility="{Binding CanSetUpAdmin, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.SetUpAdminTip}"
-                                    AutomationProperties.Name="{x:Static s:Strings.SetUpAdmin}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Static s:Strings.SetUpAdmin}" Margin="8,0,0,0" />
-                                </StackPanel>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                        </Button>
+                    </kit:SettingRow>
+                </kit:SettingsCard>
 
-                <Border x:Name="SequenceCard" Style="{StaticResource Card}">
-                    <StackPanel>
-                        <StackPanel Style="{StaticResource CardHeader}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsSequenceHelp}"><TextBlock Style="{StaticResource CardTitle}" Text="{x:Static s:Strings.SettingsSequence}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsStartDelayHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsStartDelay}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding StartDelaySeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
-                                         AutomationProperties.Name="{x:Static s:Strings.SettingsStartDelay}" />
-                                <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsGapHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsGap}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding GapSeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
-                                         AutomationProperties.Name="{x:Static s:Strings.SettingsGap}" />
-                                <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsWaitLimitHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsWaitLimit}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding WaitLimitSeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
-                                         AutomationProperties.Name="{x:Static s:Strings.SettingsWaitLimit}" />
-                                <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsNotifySequenceHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsNotifySequence}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding NotifyAfterSequence}" VerticalAlignment="Center"
-                                      AutomationProperties.Name="{x:Static s:Strings.SettingsNotifySequence}" />
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.WindowsDelayHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.WindowsDelayOff}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <!-- Asks first (Click), so the binding only shows the state -->
-                            <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding WindowsDelayOff, Mode=OneWay}" VerticalAlignment="Center"
-                                      Click="WindowsDelay_Click" AutomationProperties.Name="{x:Static s:Strings.WindowsDelayOff}" />
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <!-- Shutting down with prepared apps: what Windows allows here, and one button to set it up or undo it -->
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}">
-                                <StackPanel Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsPreparedHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsPrepared}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                                <TextBlock Style="{StaticResource Help}" Text="{Binding PreparedText}" TextWrapping="Wrap" />
-                            </StackPanel>
-                            <Button x:Name="PreparedButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" VerticalAlignment="Center" Margin="16,0,0,0"
-                                    Content="{Binding PreparedButton}" Click="Prepared_Click"
-                                    Visibility="{Binding PreparedCanAct, Converter={StaticResource BoolToVisibility}}" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <StackPanel Style="{StaticResource CardHeader}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsNewMode}"><TextBlock Style="{StaticResource CardTitle}" Text="{x:Static s:Strings.SettingsNewEntries}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                        <!-- Negative margin: the radio circles line up with the text above -->
-                        <StackPanel Margin="-12,0,-12,8">
-                            <RadioButton Style="{StaticResource RadioCard}" GroupName="NewMode" Content="{x:Static s:Strings.NewModeEnabled}" Tag="{x:Static s:Strings.ModeEnabledHelp}" IsChecked="{Binding ModeEnabled}" />
-                            <RadioButton Style="{StaticResource RadioCard}" GroupName="NewMode" Content="{x:Static s:Strings.NewModeDisabled}" Tag="{x:Static s:Strings.ModeDisabledHelp}" IsChecked="{Binding ModeDisabled}" />
-                            <RadioButton Style="{StaticResource RadioCard}" GroupName="NewMode" Content="{x:Static s:Strings.NewModeNotify}" Tag="{x:Static s:Strings.ModeNotifyHelp}" IsChecked="{Binding ModeNotify}" />
+                <kit:SectionLabel Label="{x:Static s:Strings.SettingsSequence}" />
+                <kit:SettingsCard x:Name="SequenceCard">
+                    <kit:SettingRow Icon="&#xE768;" Label="{x:Static s:Strings.SettingsStartDelay}" Description="{x:Static s:Strings.SettingsStartDelayHelp}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding StartDelaySeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
+                                     AutomationProperties.Name="{x:Static s:Strings.SettingsStartDelay}" />
+                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                         </StackPanel>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.NotifyHelpShort}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsNotifyNew}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding NotifyNewEntries}" VerticalAlignment="Center"
-                                      AutomationProperties.Name="{x:Static s:Strings.SettingsNotifyNew}" />
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsStoreAppsHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsStoreApps}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ManageStoreApps}" VerticalAlignment="Center"
-                                      AutomationProperties.Name="{x:Static s:Strings.SettingsStoreApps}" />
-                        </Grid>
-                        <Border Style="{StaticResource Divider}" />
-                        <Grid Style="{StaticResource SettingRow}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Style="{StaticResource SettingText}" Orientation="Horizontal" ToolTip="{x:Static s:Strings.SettingsScanHelp}"><TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.SettingsScanInterval}" /><TextBlock Style="{StaticResource InfoGlyph}" /></StackPanel>
-                            <!-- Five segments as wide as the three of the appearance card (5 x 81.6 = 3 x 136) -->
-                            <Border Grid.Column="1" Style="{StaticResource SegmentGroup}">
-                                <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
-                                    <RadioButton Style="{StaticResource FirstSegment}" Width="81.6" GroupName="Scan" Content="5 min" IsChecked="{Binding Scan5}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="81.6" GroupName="Scan" Content="10 min" IsChecked="{Binding Scan10}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="81.6" GroupName="Scan" Content="30 min" IsChecked="{Binding Scan30}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="81.6" GroupName="Scan" Content="60 min" IsChecked="{Binding Scan60}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="81.6" GroupName="Scan" Content="{x:Static s:Strings.Never}" IsChecked="{Binding ScanNever}" />
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xE916;" Label="{x:Static s:Strings.SettingsGap}" Description="{x:Static s:Strings.SettingsGapHelp}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding GapSeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
+                                     AutomationProperties.Name="{x:Static s:Strings.SettingsGap}" />
+                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xE121;" Label="{x:Static s:Strings.SettingsWaitLimit}" Description="{x:Static s:Strings.SettingsWaitLimitHelp}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding WaitLimitSeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
+                                     AutomationProperties.Name="{x:Static s:Strings.SettingsWaitLimit}" />
+                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xEA8F;" Label="{x:Static s:Strings.SettingsNotifySequence}" Description="{x:Static s:Strings.SettingsNotifySequenceHelp}">
+                        <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding NotifyAfterSequence}" />
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xE823;" Label="{x:Static s:Strings.WindowsDelayOff}" Description="{x:Static s:Strings.WindowsDelayHelp}">
+                        <!-- Asks first (Click), so the binding only shows the state -->
+                        <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding WindowsDelayOff, Mode=OneWay}" Click="WindowsDelay_Click" />
+                    </kit:SettingRow>
+                    <!-- Shutting down with prepared apps: what Windows allows here, and one button to set it up or undo it -->
+                    <kit:SettingRow Icon="&#xE7E8;" Label="{x:Static s:Strings.SettingsPrepared}" Description="{Binding PreparedText}" Info="{x:Static s:Strings.SettingsPreparedHelp}">
+                        <Button x:Name="PreparedButton" Style="{StaticResource SecondaryButton}" Content="{Binding PreparedButton}" Click="Prepared_Click"
+                                Visibility="{Binding PreparedCanAct, Converter={StaticResource BoolToVisibility}}" />
+                    </kit:SettingRow>
+                </kit:SettingsCard>
 
-                <!-- About, Troubleshooting and More from EsteemWorks: the family's cards, built by AboutPage -->
+                <kit:SectionLabel Label="{x:Static s:Strings.SettingsNewEntries}" />
+                <kit:SettingsCard>
+                    <kit:SettingRow Icon="&#xE710;" Label="{x:Static s:Strings.SettingsNewModeRow}" Description="{Binding NewModeHelp}">
+                        <ComboBox Width="260" Height="32" FontSize="13" SelectedIndex="{Binding NewModeIndex}">
+                            <ComboBoxItem Content="{x:Static s:Strings.NewModeEnabled}" />
+                            <ComboBoxItem Content="{x:Static s:Strings.NewModeDisabled}" />
+                            <ComboBoxItem Content="{x:Static s:Strings.NewModeNotify}" />
+                        </ComboBox>
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xEA8F;" Label="{x:Static s:Strings.SettingsNotifyNew}" Description="{x:Static s:Strings.NotifyHelpShort}">
+                        <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding NotifyNewEntries}" />
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xE719;" Label="{x:Static s:Strings.SettingsStoreApps}" Description="{x:Static s:Strings.SettingsStoreAppsHelp}">
+                        <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ManageStoreApps}" />
+                    </kit:SettingRow>
+                    <kit:SettingRow Icon="&#xE72C;" Label="{x:Static s:Strings.SettingsScanInterval}" Description="{x:Static s:Strings.SettingsScanShort}" Info="{x:Static s:Strings.SettingsScanHelp}">
+                        <Border Style="{StaticResource SegmentGroup}">
+                            <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="Scan" Content="5 min" IsChecked="{Binding Scan5}" />
+                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="10 min" IsChecked="{Binding Scan10}" />
+                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="30 min" IsChecked="{Binding Scan30}" />
+                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="60 min" IsChecked="{Binding Scan60}" />
+                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="{x:Static s:Strings.Never}" IsChecked="{Binding ScanNever}" />
+                            </StackPanel>
+                        </Border>
+                    </kit:SettingRow>
+                </kit:SettingsCard>
+
+                <!-- About, Updates, Back up settings, Troubleshooting, Privacy and notices and More from EsteemWorks: built by AboutPage -->
                 <StackPanel x:Name="AboutHost" />
             </StackPanel>
         </ScrollViewer>
