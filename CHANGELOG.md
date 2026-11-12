@@ -47,6 +47,7 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
 - **Services, Filter:** the menu shows a check mark next to each ticked start type and state; before, it showed the names of the start types where the icon goes
 - **The window's groundwork is the same in every EsteemWorks app:** the body text in Segoe UI Variable Text, the pages in line with the title (32 px from the edge), F5, Ctrl+N and Esc from the kit, shut down and restart with prepared apps on the tab line left of the gear. An empty startup order offers **Add app** right under its text
 - **Dialogs and Check as in every EsteemWorks app:** **Add app**, the questions before removing or changing something and the explanations open on the family's dialog card. **Check** tells what it found, or that nothing new turned up, as a notification at the bottom of the window instead of its own note under the button; F5 does the same
+- **The first start as in every EsteemWorks app:** the steps of the introduction use the family's pieces (heading, features, facts, notes, **Set up fully**). **Look around first** is kept: StartQueue opens as it was left after a restart, with **Continue setup**, instead of at Welcome again. The marker of scrolling with the middle mouse button is the family's
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
 ## 1.6.0
