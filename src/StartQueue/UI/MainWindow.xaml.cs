@@ -22,7 +22,6 @@ public partial class MainWindow : Window
     bool editing;
     Point dragStart;
     EntryVm? dragCandidate;
-    TaskCompletionSource<bool>? confirm;
     AddAppModel? addModel;
     Guid? shownProfile;
     /// <summary>The profile editor's and the pause dialog's fields, the same in every app of the family.</summary>
@@ -115,12 +114,10 @@ public partial class MainWindow : Window
         // Privacy and notices on the kit's page: StartQueue's own sections, each with its icon.
         AboutPage.Sections = () => Strings.LegalSections(Paths.Data).Select((section, i) => (LegalIcons[Math.Min(i, LegalIcons.Length - 1)], section.Title, section.Text));
         AboutPage.Build(AboutHost);
-        // The note of "Check" closes by itself, on a click, and when the window moves or loses the focus.
-        ScanResult.CustomPopupPlacementCallback = PlaceUnderRightEdge;
-        scanResultTimer.Tick += (_, _) => CloseScanResult();
-        Deactivated += (_, _) => CloseScanResult();
-        LocationChanged += (_, _) => CloseScanResult();
-        SizeChanged += (_, _) => CloseScanResult();
+        // The kit's dialogs over the whole window: questions, the cards of Add app and of explanations, notifications.
+        dialog = new KitDialog(DialogLayer);
+        // Check is the family's "Check now": the icon turns, F5 does the same, a notification says what turned up.
+        Frame.AddCheck(Strings.Scan, Strings.ScanTip, ScanAsync);
         // A list's panel exists once it has made its first rows; from then on it is held to its visible width.
         foreach (var list in new ListBox[] { EntryList, ServicesList, AddList })
             list.ItemContainerGenerator.StatusChanged += (_, _) =>
@@ -131,10 +128,9 @@ public partial class MainWindow : Window
         shownProfile = Profiles.Active(DateTime.Now)?.Id;
         FontWeight = Theme.BodyWeight;
         EntryList.ItemsSource = entries;
-        // F5, Ctrl+N and Esc on the settings are the kit's frame's; StartQueue's own dialogs keep the keys while open.
-        Frame.Refresh = () => _ = ScanAsync();
+        // F5, Ctrl+N and Esc on the settings are the kit's frame's; the kit's dialogs keep the keys while open.
         Frame.New = OpenAddDialog;
-        Frame.KeysBlocked = () => Overlay.Visibility == Visibility.Visible;
+        Frame.KeysBlocked = () => dialog.IsOpen;
         _ = new MiddleScroll(this, ScrollMarker);
         Closing += (_, e) =>
         {
@@ -327,7 +323,6 @@ public partial class MainWindow : Window
                 Strings.PreparedShutDown, danger: false, icon: "");
             await Task.Delay(400);
             SavePng(Root, Path.Combine(folder, "prepared.png"));
-            confirm?.TrySetResult(false);
             CloseOverlay();
             ShowView(View.Order);
             OpenAddDialog();
@@ -370,7 +365,6 @@ public partial class MainWindow : Window
                         Strings.F(Strings.ServiceEssentialBody, essential.Name, Strings.ServiceDoStop), "", Strings.ServiceChangeAnyway, danger: true, icon: "\uE7BA");
                     await Task.Delay(400);
                     SavePng(Root, Path.Combine(folder, "service-confirm.png"));
-                    confirm?.TrySetResult(false);
                     CloseOverlay();
                 }
                 services.Toggle(windowsHeader);
@@ -394,7 +388,6 @@ public partial class MainWindow : Window
                     vm.HasOrigin ? Strings.RemoveNote : "", Strings.Remove, danger: true);
                 await Task.Delay(400);
                 SavePng(Root, Path.Combine(folder, "confirm.png"));
-                confirm?.TrySetResult(false);
                 CloseOverlay();
             }
             // Maximizing and restoring for real, without and with the lists held to their width. The window shows on
@@ -421,26 +414,7 @@ public partial class MainWindow : Window
                 }
                 (Left, Top, Width, Height) = (-20000, -20000, 1280, 820);
             }
-            // The note of "Check", drawn on its own: the popup itself would open on screen.
-            foreach (var (name, nothing, text) in new[]
-            {
-                ("scan-nothing", true, Strings.ScanNothingNew),
-                ("scan-found", false, Strings.F(Strings.ScanTakenOver, "Spotify, Steam") + "\n" + Strings.F(Strings.ScanNewService, "Contoso Update Service")),
-            })
-            {
-                ScanResultIcon.Text = nothing ? "" : "";
-                ScanResultIcon.SetResourceReference(TextBlock.ForegroundProperty, nothing ? "Text3" : "Accent");
-                ScanResultText.Text = text;
-                // With its frame, so the shadow shows as on screen.
-                ScanResultText.InvalidateMeasure();
-                ScanResultCard.InvalidateMeasure();
-                ScanResultFrame.InvalidateMeasure();
-                ScanResultFrame.Measure(new Size(500, 300));
-                ScanResultFrame.Arrange(new Rect(ScanResultFrame.DesiredSize));
-                ScanResultFrame.UpdateLayout();
-                SavePng(ScanResultFrame, Path.Combine(folder, $"{name}.png"));
-            }
-            // The menus, drawn on their own like the note above: opened, they would show on screen.
+            // The menus, drawn on their own: opened, they would show on screen.
             ShowView(View.Order);
             if (entries.Count > 0)
             {
@@ -466,7 +440,7 @@ public partial class MainWindow : Window
             SaveLoose(new ToolTip { Content = Strings.ScanTip }, Path.Combine(folder, "tooltip.png"));
             // The kit's notifications at the bottom of the window: a plain one and Undo in front of it.
             ShowView(View.Order);
-            Notices.Show(Strings.F(Strings.ScanTakenOver, "Spotify"));
+            Notices.Show(Strings.F(Strings.ScanTakenOver, "Spotify, Steam") + "\n" + Strings.F(Strings.ScanNewService, "Contoso Update Service"), NoticeKind.Done);
             if (entries.Count > 0) ShowUndo(Strings.F(Strings.RemovedText, entries[0].Name), () => { });
             await Task.Delay(700);
             SavePng(Root, Path.Combine(folder, "notices.png"));
@@ -1047,11 +1021,10 @@ public partial class MainWindow : Window
 
     // ---------- Notifications, Undo among them ----------
 
-    KitNotices? notices;
-    FocusReturn? overlayFocus;
+    readonly KitDialog dialog;
 
     /// <summary>The kit's notifications at the bottom of the window: at most three, the time stops while hovered.</summary>
-    KitNotices Notices => notices ??= new KitNotices(NoticeLayer);
+    KitNotices Notices => dialog.Notices;
 
     void ShowUndo(string text, Action undo) => Notices.ShowUndo(text, undo);
 
@@ -1231,22 +1204,15 @@ public partial class MainWindow : Window
 
     void Scan_Click(object sender, RoutedEventArgs e) => _ = ScanAsync();
 
-    async Task ScanAsync()
+    /// <summary>The check behind the kit's "Check now": what turned up since before, one line each.</summary>
+    async Task<IReadOnlyList<string>> ScanAsync()
     {
-        Motion.StartSpin(ScanTurn);
         var before = Found();
-        try
-        {
-            // New entries first, so the Windows autostart list is read after them; the services meanwhile.
-            var servicesRead = LoadServicesAsync(force: true);
-            await host.SweepAsync(userTriggered: true);
-            await Task.WhenAll(host.RefreshReportAsync(), servicesRead);
-        }
-        finally
-        {
-            Motion.StopSpin(ScanTurn);
-        }
-        ShowScanResult(before, Found());
+        // New entries first, so the Windows autostart list is read after them; the services meanwhile.
+        var servicesRead = LoadServicesAsync(force: true);
+        await host.SweepAsync(userTriggered: true);
+        await Task.WhenAll(host.RefreshReportAsync(), servicesRead);
+        return ScanFindings(before, Found());
     }
 
     /// <summary>What a check can turn up, by key with the name to show.</summary>
@@ -1259,8 +1225,8 @@ public partial class MainWindow : Window
         // Services read for the first time are not "new".
         services.Loaded ? services.Rows.OfType<ServiceVm>().GroupBy(s => s.Info.Name).ToDictionary(g => g.Key, g => g.First().Name) : null);
 
-    /// <summary>A short note under "Check": what turned up since before, or that nothing did.</summary>
-    void ShowScanResult(Findings before, Findings after)
+    /// <summary>What turned up since before, one line each; empty when nothing did.</summary>
+    static List<string> ScanFindings(Findings before, Findings after)
     {
         static string Names(IEnumerable<string> names)
         {
@@ -1280,33 +1246,8 @@ public partial class MainWindow : Window
         if (before.Services != null && after.Services != null && Added(before.Services, after.Services).ToList() is { Count: > 0 } newServices)
             lines.Add(Strings.F(newServices.Count == 1 ? Strings.ScanNewService : Strings.ScanNewServices, Names(newServices)));
 
-        var nothing = lines.Count == 0;
-        ScanResultIcon.Text = nothing ? "" : "";
-        ScanResultIcon.SetResourceReference(TextBlock.ForegroundProperty, nothing ? "Text3" : "Accent");
-        ScanResultText.Text = nothing ? Strings.ScanNothingNew : string.Join("\n", lines);
-        ScanResult.IsOpen = true;
-        // Grows out of the Scan button above its right edge, as the kit's menus do (design system, Motion).
-        Motion.GrowFrom(ScanResultFrame, new Point(1, 0));
-        // Long enough to read; findings stay a little longer.
-        scanResultTimer.Stop();
-        scanResultTimer.Interval = TimeSpan.FromSeconds(nothing ? 3 : 7);
-        scanResultTimer.Start();
+        return lines;
     }
-
-    readonly System.Windows.Threading.DispatcherTimer scanResultTimer = new();
-
-    void ScanResult_Click(object sender, MouseButtonEventArgs e) => CloseScanResult();
-
-    void CloseScanResult()
-    {
-        scanResultTimer.Stop();
-        ScanResult.IsOpen = false;
-    }
-
-    /// <summary>The note sits below "Check", right edges in line, so it stays inside the window.</summary>
-    static CustomPopupPlacement[] PlaceUnderRightEdge(Size popup, Size target, Point offset) =>
-        // The card's own margin (room for the shadow) sets it 4 px below the button, as menus sit.
-        [new CustomPopupPlacement(new Point(target.Width - popup.Width, target.Height), PopupPrimaryAxis.Horizontal)];
 
     void MarkSeen_Click(object sender, RoutedEventArgs e) => host.MarkAllSeen();
 
@@ -1493,38 +1434,13 @@ public partial class MainWindow : Window
         await LoadServicesAsync(force: true);
     }
 
-    void DialogCancel_Click(object sender, RoutedEventArgs e) => CloseOverlay();
-
     /// <summary>Privacy, made with AI, what it changes in Windows, publisher, liability, third parties.</summary>
     static readonly string[] LegalIcons = ["\uE72E", "\uE946", "\uE713", "\uE77B", "\uE7BA", "\uE8A5"];
 
     void ParametersInfo_Click(object sender, RoutedEventArgs e) => OpenInfo(Strings.ParamInfoTitle, Strings.ParamInfoSections);
 
-    /// <summary>A longer explanation in a dialog: a heading and a paragraph per section.</summary>
-    void OpenInfo(string heading, (string Title, string Text)[] sections)
-    {
-        InfoTitle.Text = heading;
-        LegalContent.Children.Clear();
-        foreach (var (title, text) in sections)
-        {
-            var head = new TextBlock
-            {
-                Text = title,
-                FontSize = 14,
-                FontWeight = FontWeights.SemiBold,
-                Margin = new Thickness(0, LegalContent.Children.Count == 0 ? 8 : 18, 0, 6),
-            };
-            head.SetResourceReference(TextBlock.ForegroundProperty, "Text1");
-            var body = new TextBlock { Text = text, FontSize = 13, LineHeight = 20, TextWrapping = TextWrapping.Wrap };
-            body.SetResourceReference(TextBlock.ForegroundProperty, "Text3");
-            LegalContent.Children.Add(head);
-            LegalContent.Children.Add(body);
-        }
-        ConfirmCard.Visibility = AddCard.Visibility = Visibility.Collapsed;
-        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
-        Motion.Appear(Overlay);
-        Motion.Appear(LegalCard, fromScale: 0.96);
-    }
+    /// <summary>A longer explanation on the kit's card: a heading and a paragraph per section.</summary>
+    void OpenInfo(string heading, (string Title, string Text)[] sections) => _ = dialog.ShowInfoAsync(heading, sections);
 
     // ---------- Windows autostart ----------
 
@@ -1552,126 +1468,65 @@ public partial class MainWindow : Window
 
     // ---------- In-app dialogs ----------
 
-    public Task<bool> ConfirmAsync(string title, string body, string note, string okText, bool danger, bool showCancel = true, string? icon = null)
-    {
-        confirm?.TrySetResult(false);
-        confirm = new TaskCompletionSource<bool>();
-
-        ConfirmTitle.Text = title;
-        ConfirmBody.Text = body;
-        ConfirmNote.Text = note;
-        ConfirmNote.Visibility = string.IsNullOrEmpty(note) ? Visibility.Collapsed : Visibility.Visible;
-        ConfirmIconBox.Background = (Brush)FindResource(danger ? "ErrorBg" : "NoticeBg");
-        ConfirmIcon.Foreground = (Brush)FindResource(danger ? "ErrorText" : "NoticeText");
-        ConfirmIcon.Text = icon ?? (danger ? "" : showCancel ? "" : "");
-        ConfirmOk.Content = okText;
-        ConfirmOk.Style = (Style)FindResource(danger ? "DangerButton" : "PrimaryButton");
-        ConfirmCancel.Visibility = showCancel ? Visibility.Visible : Visibility.Collapsed;
-        ConfirmSecond.Visibility = Visibility.Collapsed;
-        ConfirmCard.Width = 440;
-        var first = danger && showCancel ? ConfirmCancel : ConfirmOk;
-
-        AddCard.Visibility = Visibility.Collapsed;
-        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
-        Motion.Appear(Overlay);
-        Motion.Appear(ConfirmCard, fromScale: 0.96);
-        // For a removal the first focus is on Cancel, so a hasty Enter does no harm (design system, Dialogs).
-        Dispatcher.BeginInvoke(() => first.Focus());
-        return confirm.Task;
-    }
+    /// <summary>A question on the kit's card (KitDialog): the button says what happens, a removal is red with Cancel first.</summary>
+    public Task<bool> ConfirmAsync(string title, string body, string note, string okText, bool danger, bool showCancel = true, string? icon = null) =>
+        dialog.ConfirmAsync(title, body, okText, danger, string.IsNullOrEmpty(note) ? null : note, showCancel, icon);
 
     public Task ShowMessageAsync(string title, string text)
     {
         if (!IsVisible) host.ShowWindow();
-        return ConfirmAsync(title, text, "", Strings.Ok, danger: false, showCancel: false);
+        return dialog.ShowMessageAsync(title, text);
     }
 
-    /// <summary>
-    /// A question with two ways on besides Cancel: <paramref name="secondText"/> in the middle, <paramref name="mainText"/>
-    /// the main button. Gives back KitDialog.Cancelled, Second or Main, as the kit's dialog does.
-    /// </summary>
-    public async Task<int> ChooseAsync(string title, string body, string secondText, string mainText)
-    {
-        var answer = ConfirmAsync(title, body, "", mainText, danger: false, icon: ProfileSharing.Icon);
-        // Three buttons with the family's words need more room than two.
-        ConfirmCard.Width = 680;
-        ConfirmSecond.Content = secondText;
-        ConfirmSecond.Visibility = Visibility.Visible;
-        secondChosen = false;
-        var main = await answer;
-        return secondChosen ? KitDialog.Second : main ? KitDialog.Main : KitDialog.Cancelled;
-    }
+    /// <summary>A question with two ways on besides Cancel, as the kit's dialog has it.</summary>
+    public Task<int> ChooseAsync(string title, string body, string secondText, string mainText) => dialog.ChooseAsync(title, body, secondText, mainText);
 
-    bool secondChosen;
-
-    void ConfirmSecond_Click(object sender, RoutedEventArgs e)
-    {
-        secondChosen = true;
-        FinishConfirm(false);
-    }
-
-    void ConfirmOk_Click(object sender, RoutedEventArgs e) => FinishConfirm(true);
-
-    void ConfirmCancel_Click(object sender, RoutedEventArgs e) => FinishConfirm(false);
-
-    void FinishConfirm(bool result)
-    {
-        CloseOverlay();
-        var pending = confirm;
-        confirm = null;
-        pending?.TrySetResult(result);
-    }
-
-    void CloseOverlay()
-    {
-        Overlay.Visibility = Visibility.Collapsed;
-        ConfirmCard.Visibility = Visibility.Collapsed;
-        AddCard.Visibility = Visibility.Collapsed;
-        LegalCard.Visibility = Visibility.Collapsed;
-        // Back to the control that opened the dialog; the list when that control is gone.
-        if (!offScreen)
-        {
-            if (overlayFocus != null) overlayFocus.Restore();
-            else EntryList.Focus();
-        }
-        overlayFocus = null;
-    }
-
-    void Overlay_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-        {
-            if (ConfirmCard.Visibility == Visibility.Visible) FinishConfirm(false);
-            else CloseOverlay();
-            e.Handled = true;
-        }
-    }
+    /// <summary>Closes the open question (as Cancel) or card.</summary>
+    void CloseOverlay() => dialog.Close();
 
     // ---------- Add app ----------
 
     void Add_Click(object sender, RoutedEventArgs e) => OpenAddDialog();
 
+    bool addOpen;
+
     async void OpenAddDialog()
     {
-        ConfirmCard.Visibility = Visibility.Collapsed;
-        if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
-        Motion.Appear(Overlay);
-        Motion.Appear(AddCard, fromScale: 0.96);
+        foreach (var part in new FrameworkElement[] { AddSearch, AddBrowse, AddBody }) Detach(part);
         AddSearch.Text = "";
         AddList.ItemsSource = null;
         AddLoading.Visibility = Visibility.Visible;
-        if (!offScreen) AddSearch.FocusSearch();
+        addOpen = true;
+        var closed = dialog.ShowCardAsync(new DialogCard
+        {
+            Title = Strings.PickerTitle,
+            Top = AddSearch,
+            Content = AddBody,
+            FooterStart = AddBrowse,
+            DoneText = Strings.DoneEditing,
+            CloseButton = true,
+            Fill = true,
+        });
+        _ = closed.ContinueWith(_ => addOpen = false, TaskScheduler.FromCurrentSynchronizationContext());
+        // Into the search field, after the card has put the focus on its main button.
+        if (!offScreen) _ = Dispatcher.BeginInvoke(() => AddSearch.FocusSearch(), System.Windows.Threading.DispatcherPriority.Input);
 
         // The rows come in after the fade-in, so building them does not stall it.
         var fadeIn = Task.Delay(Motion.Enabled ? Motion.DialogTime : TimeSpan.Zero);
         var candidates = await host.LoadCandidatesAsync();
         await fadeIn;
-        if (AddCard.Visibility != Visibility.Visible) return;
+        if (!addOpen) return;
         addModel = new AddAppModel(candidates);
         AddLoading.Visibility = Visibility.Collapsed;
         addModel.Filter(AddSearch.Text.Trim());
         var rows = new System.Windows.Data.ListCollectionView(addModel.Rows) { Filter = row => ((AddRow)row).IsShown };
         AddList.ItemsSource = rows;
+    }
+
+    /// <summary>Takes a part of Add app from where it was (its holder or the card shown last), so the card can show it.</summary>
+    static void Detach(FrameworkElement part)
+    {
+        if (part.Parent is Panel panel) panel.Children.Remove(part);
     }
 
     // Filtering the view: only the rows that fit the window are built, also while typing.
@@ -1697,5 +1552,4 @@ public partial class MainWindow : Window
         host.AddPath(dialog.FileName);
     }
 
-    void AddClose_Click(object sender, RoutedEventArgs e) => CloseOverlay();
 }

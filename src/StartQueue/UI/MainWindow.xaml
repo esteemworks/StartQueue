@@ -115,18 +115,7 @@
         <kit:KitFrame x:Name="Frame">
             <kit:KitFrame.Actions>
                 <!-- The status chip before these is the kit's (Frame.SetStatus) -->
-                <Button x:Name="ScanButton" Style="{StaticResource HeroButton}" Click="Scan_Click" Margin="0,0,8,0"
-                        ToolTip="{x:Static s:Strings.ScanTip}" AutomationProperties.Name="{x:Static s:Strings.Scan}">
-                    <StackPanel Orientation="Horizontal">
-                        <!-- Turns while a scan runs -->
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE72C;" FontSize="14" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-                            <TextBlock.RenderTransform>
-                                <RotateTransform x:Name="ScanTurn" />
-                            </TextBlock.RenderTransform>
-                        </TextBlock>
-                        <TextBlock Text="{x:Static s:Strings.Scan}" Margin="8,0,0,0" />
-                    </StackPanel>
-                </Button>
+                <!-- Check is the kit's (Frame.AddCheck), the first action after the status chip -->
                 <Button x:Name="AddButton" Style="{StaticResource PrimaryButton}" Click="Add_Click"
                         ToolTip="{x:Static s:Strings.AddAppTip}" AutomationProperties.Name="{x:Static s:Strings.AddApp}">
                     <StackPanel Orientation="Horizontal">
@@ -807,9 +796,6 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- ========== The kit's notifications (KitNotices), among them Undo after removing an app ========== -->
-        <Grid x:Name="NoticeLayer" />
-
         <!-- ========== Overlay for in-app dialogs ========== -->
         </kit:KitFrame>
 
@@ -824,133 +810,31 @@
             </StackPanel>
         </Border>
 
-        <Popup x:Name="ScanResult" PlacementTarget="{Binding ElementName=ScanButton}" Placement="Custom" AllowsTransparency="True" StaysOpen="True">
-            <!-- shadow-pop in two layers: the far one around the card, the near one on it. Grows out of the Scan button -->
-            <Border x:Name="ScanResultFrame" Margin="16,4,16,24" Effect="{DynamicResource ShadowPopFar}">
-                <Border x:Name="ScanResultCard" CornerRadius="8" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                        Padding="12,10,16,10" MaxWidth="380" MouseLeftButtonUp="ScanResult_Click" Cursor="Hand" Effect="{DynamicResource ShadowPopNear}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="ScanResultIcon" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Top" Margin="0,2,8,0" />
-                        <TextBlock x:Name="ScanResultText" Grid.Column="1" FontSize="13" LineHeight="19" Foreground="{DynamicResource Text1}" TextWrapping="Wrap" />
-                    </Grid>
-                </Border>
-            </Border>
-        </Popup>
-        <!-- ========== Dialogs in the window; Tab stays inside while one is open ========== -->
-        <Grid x:Name="Overlay" Background="{DynamicResource Overlay}" Visibility="Collapsed" KeyDown="Overlay_KeyDown"
-              KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle">
+        <!-- ========== The kit's dialogs (KitDialog): questions, cards and the notifications, Undo among them ========== -->
+        <Grid x:Name="DialogLayer" />
 
-            <!-- Confirm / message -->
-            <!-- shadow-dialog in two layers (the kit's ShadowDialogFar and ShadowDialogNear). Shadows sit on separate,
-                 empty borders: an effect on the card itself would redraw the whole card on every change -->
-            <Border Width="{Binding ActualWidth, ElementName=ConfirmCard}" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Height="{Binding ActualHeight, ElementName=ConfirmCard}" Visibility="{Binding Visibility, ElementName=ConfirmCard}"
-                    Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}"
-                    Effect="{DynamicResource ShadowDialogFar}" />
-            <Border Width="{Binding ActualWidth, ElementName=ConfirmCard}" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Height="{Binding ActualHeight, ElementName=ConfirmCard}" Visibility="{Binding Visibility, ElementName=ConfirmCard}"
-                    Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}"
-                    Effect="{DynamicResource ShadowDialogNear}" />
-            <Border x:Name="ConfirmCard" Width="440" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <StackPanel>
-                    <StackPanel Margin="24,24,24,20">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="48" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border x:Name="ConfirmIconBox" Width="36" Height="36" CornerRadius="8" HorizontalAlignment="Left">
-                                <TextBlock x:Name="ConfirmIcon" FontFamily="{StaticResource IconFont}" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <TextBlock x:Name="ConfirmTitle" Grid.Column="1" Style="{StaticResource DialogTitle}" VerticalAlignment="Center" />
-                        </Grid>
-                        <TextBlock x:Name="ConfirmBody" FontSize="14" Foreground="{DynamicResource Text2}" TextWrapping="Wrap" Margin="0,12,0,0" />
-                        <TextBlock x:Name="ConfirmNote" Style="{StaticResource Muted}" Margin="0,8,0,0" />
-                    </StackPanel>
-                    <Border Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button x:Name="ConfirmCancel" Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Cancel}" Click="ConfirmCancel_Click" Margin="0,0,8,0" />
-                            <!-- A second way on, only for a choice of three (ChooseAsync) -->
-                            <Button x:Name="ConfirmSecond" Style="{StaticResource SecondaryButton}" Click="ConfirmSecond_Click" Margin="0,0,8,0" Visibility="Collapsed" />
-                            <Button x:Name="ConfirmOk" Style="{StaticResource DangerButton}" Click="ConfirmOk_Click" />
-                        </StackPanel>
-                    </Border>
+        <!-- The parts of "Add app", shown on the kit's dialog card (KitDialog.ShowCardAsync) -->
+        <Grid x:Name="AddParts" Visibility="Collapsed">
+            <kit:SearchBox x:Name="AddSearch" Placeholder="{x:Static s:Strings.SearchPlaceholder}" PassEscapeWhenEmpty="True"
+                           TextChanged="AddSearch_TextChanged" />
+            <Button x:Name="AddBrowse" Style="{StaticResource GhostButton}" Padding="4,0" HorizontalAlignment="Left" Click="AddBrowse_Click"
+                    AutomationProperties.Name="{x:Static s:Strings.BrowseFile}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE838;" FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock Text="{x:Static s:Strings.BrowseFile}" Margin="8,0,0,0" />
                 </StackPanel>
-            </Border>
-
-            <!-- Privacy and notices: headings and paragraphs filled in from code -->
-            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
-            <Border Width="600" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Height="{Binding ActualHeight, ElementName=LegalCard}" Visibility="{Binding Visibility, ElementName=LegalCard}"
-                    Opacity="{Binding Opacity, ElementName=LegalCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=LegalCard}"
-                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
-            <Border x:Name="LegalCard" Width="600" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
-                <DockPanel>
-                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
-                        <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.Close}" Click="DialogCancel_Click" HorizontalAlignment="Right" />
-                    </Border>
-                    <TextBlock x:Name="InfoTitle" DockPanel.Dock="Top" Style="{StaticResource DialogTitle}" Margin="24,24,24,8" />
-                    <ScrollViewer MaxHeight="460" VerticalScrollBarVisibility="Auto" Padding="24,0,16,20">
-                        <StackPanel x:Name="LegalContent" Margin="0,0,8,0" />
-                    </ScrollViewer>
-                </DockPanel>
-            </Border>
-
-            <!-- Add app -->
-            <Border Width="600" MaxHeight="640" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                    Visibility="{Binding Visibility, ElementName=AddCard}"
-                    Opacity="{Binding Opacity, ElementName=AddCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=AddCard}"
-                    Effect="{DynamicResource ShadowDialogFar}" />
-            <Border Width="600" MaxHeight="640" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                    Visibility="{Binding Visibility, ElementName=AddCard}"
-                    Opacity="{Binding Opacity, ElementName=AddCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=AddCard}"
-                    Effect="{DynamicResource ShadowDialogNear}" />
-            <!-- Stretch with a maximum height: centered, but in a small window it keeps its distance to the edges -->
-            <Border x:Name="AddCard" Width="600" MaxHeight="640" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Stretch" Visibility="Collapsed">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Margin="24,24,24,8">
-                        <Grid>
-                            <TextBlock Style="{StaticResource DialogTitle}" Text="{x:Static s:Strings.PickerTitle}" VerticalAlignment="Center" />
-                            <Button Style="{StaticResource IconButton}" Content="&#xE8BB;" FontSize="11" HorizontalAlignment="Right" Click="AddClose_Click"
-                                    ToolTip="{x:Static s:Strings.Close}" AutomationProperties.Name="{x:Static s:Strings.Close}" />
-                        </Grid>
-                        <!-- The kit's search field; empty, Esc goes on to the dialog and closes it -->
-                        <kit:SearchBox x:Name="AddSearch" Margin="0,16,0,0" Placeholder="{x:Static s:Strings.SearchPlaceholder}" PassEscapeWhenEmpty="True"
-                                       TextChanged="AddSearch_TextChanged" />
-                    </StackPanel>
-                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0"
-                            CornerRadius="0,0,10,10" Padding="24,16">
-                        <Grid>
-                            <Button Style="{StaticResource GhostButton}" Padding="4,0" HorizontalAlignment="Left" Click="AddBrowse_Click"
-                                    AutomationProperties.Name="{x:Static s:Strings.BrowseFile}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE838;" FontSize="14" VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Static s:Strings.BrowseFile}" Margin="8,0,0,0" />
-                                </StackPanel>
-                            </Button>
-                            <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.DoneEditing}" HorizontalAlignment="Right" Click="AddClose_Click" />
-                        </Grid>
-                    </Border>
-                    <Grid>
-                        <!-- Virtualized, so opening builds only the visible rows. Scrolling counts pixels, not rows:
-                             rows differ in height, and row-wise scrolling made the list jump back. -->
-                        <ListBox x:Name="AddList" Background="Transparent" BorderThickness="0" Padding="24,0,24,8" Margin="0,8,4,0"
-                                 ItemContainerStyle="{StaticResource PassiveItem}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True"
-                                 VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                                 VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.CacheLength="1,2" VirtualizingPanel.CacheLengthUnit="Page"
-                                 AutomationProperties.Name="{x:Static s:Strings.PickerTitle}" />
-                        <TextBlock x:Name="AddLoading" Style="{StaticResource Muted}" Text="{x:Static s:Strings.LoadingApps}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Grid>
-                </DockPanel>
-            </Border>
+            </Button>
+            <Grid x:Name="AddBody">
+                <!-- Virtualized, so opening builds only the visible rows. Scrolling counts pixels, not rows:
+                     rows differ in height, and row-wise scrolling made the list jump back. -->
+                <ListBox x:Name="AddList" Background="Transparent" BorderThickness="0" Padding="24,0,24,8" Margin="0,8,4,0"
+                         ItemContainerStyle="{StaticResource PassiveItem}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True"
+                         VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                         VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.CacheLength="1,2" VirtualizingPanel.CacheLengthUnit="Page"
+                         AutomationProperties.Name="{x:Static s:Strings.PickerTitle}" />
+                <TextBlock x:Name="AddLoading" Style="{StaticResource Muted}" Text="{x:Static s:Strings.LoadingApps}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
         </Grid>
 
         <!-- Starting point of scrolling with the middle mouse button (MiddleScroll) -->
