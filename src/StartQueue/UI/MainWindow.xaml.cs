@@ -1674,11 +1674,11 @@ public partial class MainWindow : Window
         var newlyShared = profile.Shared && (newProfile ? profileFields.TakesOver == null : before is not { Shared: true } || !FamilyProfiles.SameName(before.Name, profile.Name));
         if (newlyShared && FamilyProfiles.SharedNamed(profile.Name, app, except: profile.Id) is { } offered)
         {
-            var hint = ProfileSharing.NotSharedHint(offered.Name);
+            var hint = ProfileSharing.NotSharedHint;
             // One that other apps use too cannot simply give way to another; it needs another name.
             var choice = before != null && FamilyProfiles.UsedByOthers(before, app) ? KitDialog.Cancelled
                 : FamilyProfiles.SameRules(profile, offered) ? KitDialog.Main
-                : await AskOverProfileAsync(() => ChooseAsync(ProfileSharing.ClashTitle(offered.Name, offered.Apps), ProfileSharing.ClashBody(profile, offered, app),
+                : await AskOverProfileAsync(() => ChooseAsync(ProfileSharing.ClashTitle(offered.Name), ProfileSharing.ClashBody(profile, offered, app),
                     ProfileSharing.Overwrite, ProfileSharing.TakeExisting));
             if (choice == KitDialog.Cancelled)
             {
