@@ -131,7 +131,8 @@ public partial class MainWindow : Window
         // F5, Ctrl+N and Esc on the settings are the kit's frame's; the kit's dialogs keep the keys while open.
         Frame.New = OpenAddDialog;
         Frame.KeysBlocked = () => dialog.IsOpen;
-        _ = new MiddleScroll(this, ScrollMarker);
+        // Scrolling with the middle mouse button; the kit draws the marker at the starting point.
+        _ = new MiddleScroll(this);
         Closing += (_, e) =>
         {
             if (host.Exiting || closingForGood) return;

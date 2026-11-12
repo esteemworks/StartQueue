@@ -8,59 +8,8 @@
     <Grid>
 
         <!-- ========== 1 Welcome ========== -->
-        <StackPanel x:Name="WelcomePage">
-            <TextBlock Style="{StaticResource H2}" TextWrapping="Wrap" Text="{x:Static s:Strings.IntroWelcomeTitle}" />
-            <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="21" Foreground="{DynamicResource Text2}" Text="{x:Static s:Strings.IntroWelcomeText}" />
-            <Border Style="{StaticResource Card}" Padding="24,4" Margin="0,16,0,16">
-                <StackPanel>
-                    <Grid Margin="0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="38" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE8FD;" FontSize="20" Foreground="{DynamicResource Text3}" VerticalAlignment="Top" Margin="0,1,0,0" />
-                        <StackPanel Grid.Column="1">
-                            <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextWrapping="Wrap" Text="{x:Static s:Strings.IntroPointListTitle}" />
-                            <TextBlock Style="{StaticResource Help}" Margin="0,4,0,0" Text="{x:Static s:Strings.IntroPointListText}" />
-                        </StackPanel>
-                    </Grid>
-                    <Border Style="{StaticResource Divider}" Margin="0" />
-                    <Grid Margin="0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="38" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE823;" FontSize="20" Foreground="{DynamicResource Text3}" VerticalAlignment="Top" Margin="0,1,0,0" />
-                        <StackPanel Grid.Column="1">
-                            <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextWrapping="Wrap" Text="{x:Static s:Strings.IntroPointFirstTitle}" />
-                            <TextBlock Style="{StaticResource Help}" Margin="0,4,0,0" Text="{x:Static s:Strings.IntroPointFirstText}" />
-                        </StackPanel>
-                    </Grid>
-                    <Border Style="{StaticResource Divider}" Margin="0" />
-                    <Grid Margin="0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="38" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7A7;" FontSize="20" Foreground="{DynamicResource Text3}" VerticalAlignment="Top" Margin="0,1,0,0" />
-                        <StackPanel Grid.Column="1">
-                            <TextBlock FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextWrapping="Wrap" Text="{x:Static s:Strings.IntroPointBackTitle}" />
-                            <TextBlock Style="{StaticResource Help}" Margin="0,4,0,0" Text="{x:Static s:Strings.IntroPointBackText}" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-            <Border Background="{DynamicResource NoticeBg}" CornerRadius="8" Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE946;" FontSize="16" Foreground="{DynamicResource NoticeText}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <TextBlock x:Name="WelcomeFound" Grid.Column="1" FontSize="13" Foreground="{DynamicResource NoticeText}" TextWrapping="Wrap" VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-        </StackPanel>
+        <!-- The kit's pieces (IntroParts), filled in from code: heading, lead, features, the note -->
+        <StackPanel x:Name="WelcomePage" />
 
         <!-- ========== 2 Take over ========== -->
         <Grid x:Name="TakeOverPage" Visibility="Collapsed">
@@ -68,12 +17,10 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <StackPanel MaxWidth="760" HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H2}" TextWrapping="Wrap" Text="{x:Static s:Strings.IntroTakeOverTitle}" />
-                <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="21" Foreground="{DynamicResource Text2}" Text="{x:Static s:Strings.IntroTakeOverText}" />
-            </StackPanel>
+            <!-- Heading and lead from the kit (IntroParts) -->
+            <StackPanel x:Name="TakeOverHead" MaxWidth="760" HorizontalAlignment="Left" />
             <!-- Two columns as in the design: a wide step (IntroStep Wide), the list left, the two cards right -->
-            <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="20" />
@@ -138,13 +85,8 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <TextBlock x:Name="AllUsersText" Style="{StaticResource Help}" Margin="0,8,0,0" TextWrapping="Wrap" />
-                            <Button x:Name="SetUpFullyButton" Style="{StaticResource GhostButton}" HorizontalAlignment="Left" Margin="-12,8,0,4" Click="SetUpFully_Click"
-                                    ToolTip="{x:Static s:Strings.IntroSetUpFullyTip}" AutomationProperties.Name="{x:Static s:Strings.IntroSetUpFully}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" />
-                                    <TextBlock Text="{x:Static s:Strings.IntroSetUpFully}" Margin="8,0,0,0" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
+                            <!-- The kit's "Set up fully" (IntroParts.SetUpFully) -->
+                            <ContentControl x:Name="SetUpFullyHost" Margin="-12,8,0,4" Focusable="False" />
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource Card}" Padding="16,12,16,8">
@@ -165,62 +107,7 @@
         </Grid>
 
         <!-- ========== 3 Switch on ========== -->
-        <StackPanel x:Name="ReadyPage" Visibility="Collapsed">
-            <TextBlock Style="{StaticResource H2}" Text="{x:Static s:Strings.IntroReadyTitle}" />
-            <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="21" Foreground="{DynamicResource Text2}" Text="{x:Static s:Strings.IntroReadyText}" />
-            <Border Style="{StaticResource Card}" Padding="24,4" Margin="0,16,0,16">
-                <Grid x:Name="ReadyRows">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Margin="0,12" Foreground="{DynamicResource Text1}" Text="{x:Static s:Strings.IntroReadyStarts}" />
-                    <ItemsControl x:Name="ReadyList" Grid.Column="1" Margin="0,12" Focusable="False">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="2" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,4,16,4">
-                                    <Border Width="24" Height="24" CornerRadius="12" Background="{DynamicResource ChipBg}" VerticalAlignment="Center"
-                                            Visibility="{Binding HasNumber, Converter={StaticResource BoolToVisibility}}">
-                                        <TextBlock Text="{Binding Number}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource Text2}"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                    <TextBlock Text="{Binding Name}" Margin="8,0,0,0" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <Border Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" />
-                    <TextBlock Grid.Row="1" Margin="0,12" Foreground="{DynamicResource Text1}" Text="{x:Static s:Strings.IntroReadyWindows}" />
-                    <TextBlock x:Name="ReadyWindows" Grid.Row="1" Grid.Column="1" Margin="0,12" Foreground="{DynamicResource Text2}" TextWrapping="Wrap" />
-                    <Border Grid.Row="2" Grid.ColumnSpan="2" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" />
-                    <TextBlock Grid.Row="2" Margin="0,12" Foreground="{DynamicResource Text1}" Text="{x:Static s:Strings.IntroReadyNew}" />
-                    <TextBlock x:Name="ReadyNew" Grid.Row="2" Grid.Column="1" Margin="0,12" Foreground="{DynamicResource Text2}" TextWrapping="Wrap" />
-                    <Border Grid.Row="3" Grid.ColumnSpan="2" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" />
-                    <TextBlock Grid.Row="3" Margin="0,12" Foreground="{DynamicResource Text1}" Text="{x:Static s:Strings.IntroReadySetUp}" />
-                    <TextBlock x:Name="ReadySetUp" Grid.Row="3" Grid.Column="1" Margin="0,12" Foreground="{DynamicResource Text2}" TextWrapping="Wrap" />
-                </Grid>
-            </Border>
-            <Border Background="{DynamicResource NoticeBg}" CornerRadius="8" Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7A7;" FontSize="16" Foreground="{DynamicResource NoticeText}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                    <TextBlock Grid.Column="1" FontSize="13" Foreground="{DynamicResource NoticeText}" TextWrapping="Wrap" VerticalAlignment="Center" Text="{x:Static s:Strings.IntroReadyGiveBack}" />
-                </Grid>
-            </Border>
-        </StackPanel>
+        <!-- The kit's pieces (IntroParts), filled in from code: heading, lead, the facts, the note -->
+        <StackPanel x:Name="ReadyPage" Visibility="Collapsed" />
     </Grid>
 </UserControl>

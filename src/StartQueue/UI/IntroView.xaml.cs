@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using EsteemWorks.Kit.UI;
 using StartQueue.Core;
 
 namespace StartQueue.UI;
@@ -96,10 +98,72 @@ public partial class IntroView : UserControl
     /// <summary>The step shown, 0 to 2.</summary>
     public int Step { get; private set; }
 
+    // Filled by Sync: the note of Welcome, the facts of Switch on.
+    TextBlock welcomeFound = null!;
+    readonly UniformGrid readyList = new() { Columns = 2 };
+    readonly TextBlock readyWindows = Value();
+    readonly TextBlock readyNew = Value();
+    readonly TextBlock readySetUp = Value();
+
     public IntroView(TrayHost host)
     {
         this.host = host;
         InitializeComponent();
+        BuildPieces();
+    }
+
+    static TextBlock Value()
+    {
+        var value = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        value.SetResourceReference(TextBlock.ForegroundProperty, "Text2");
+        return value;
+    }
+
+    /// <summary>The steps' heading, lead, features, facts and notes: the kit's pieces, as in every EsteemWorks app.</summary>
+    void BuildPieces()
+    {
+        WelcomePage.Children.Add(IntroParts.Heading(Strings.IntroWelcomeTitle));
+        WelcomePage.Children.Add(IntroParts.Lead(Strings.IntroWelcomeText));
+        WelcomePage.Children.Add(IntroParts.Features(
+            ("\uE8FD", Strings.IntroPointListTitle, Strings.IntroPointListText),
+            ("\uE823", Strings.IntroPointFirstTitle, Strings.IntroPointFirstText),
+            ("\uE7A7", Strings.IntroPointBackTitle, Strings.IntroPointBackText)));
+        var found = IntroParts.Notice("");
+        welcomeFound = IntroParts.Note(found);
+        WelcomePage.Children.Add(found);
+
+        TakeOverHead.Children.Add(IntroParts.Heading(Strings.IntroTakeOverTitle));
+        TakeOverHead.Children.Add(IntroParts.Lead(Strings.IntroTakeOverText));
+        SetUpFullyHost.Content = IntroParts.SetUpFully(host.SetUpAdminFeatures, Strings.IntroSetUpFullyTip);
+
+        ReadyPage.Children.Add(IntroParts.Heading(Strings.IntroReadyTitle));
+        ReadyPage.Children.Add(IntroParts.Lead(Strings.IntroReadyText));
+        ReadyPage.Children.Add(IntroParts.Facts(
+        [
+            (Strings.IntroReadyStarts, readyList),
+            (Strings.IntroReadyWindows, readyWindows),
+            (Strings.IntroReadyNew, readyNew),
+            (Strings.IntroReadySetUp, readySetUp),
+        ]));
+        ReadyPage.Children.Add(IntroParts.Notice(Strings.IntroReadyGiveBack, "\uE7A7"));
+    }
+
+    /// <summary>One app in the summary: its number in a grey circle and its name; "and 4 more" without a number.</summary>
+    static FrameworkElement ReadyLine(ReadyItem item)
+    {
+        var line = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 16, 8) };
+        if (item.HasNumber)
+        {
+            var number = new TextBlock { Text = item.Number.ToString(), FontSize = 12, FontWeight = FontWeights.SemiBold, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            number.SetResourceReference(TextBlock.ForegroundProperty, "Text2");
+            var circle = new Border { Width = 24, Height = 24, CornerRadius = new CornerRadius(12), Child = number, Margin = new Thickness(0, 0, 8, 0) };
+            circle.SetResourceReference(Border.BackgroundProperty, "ChipBg");
+            line.Children.Add(circle);
+        }
+        var name = new TextBlock { Text = item.Name, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
+        name.SetResourceReference(TextBlock.ForegroundProperty, "Text1");
+        line.Children.Add(name);
+        return line;
     }
 
     /// <summary>The step <paramref name="step"/>, for the kit's frame to show (IntroStep.Build).</summary>
@@ -123,7 +187,7 @@ public partial class IntroView : UserControl
         var forAll = host.Report?.Items.Where(i => i.Status == WindowsItemStatus.MachineLocked).Select(i => i.Item.DisplayName).ToList() ?? [];
         leave.IntersectWith(found.Select(e => e.Id));
 
-        WelcomeFound.Text = found.Count + forAll.Count == 1 ? Strings.IntroWelcomeFoundOne : Strings.F(Strings.IntroWelcomeFound, found.Count + forAll.Count);
+        welcomeFound.Text = found.Count + forAll.Count == 1 ? Strings.IntroWelcomeFoundOne : Strings.F(Strings.IntroWelcomeFound, found.Count + forAll.Count);
 
         if (Step == TakeOver)
         {
@@ -147,7 +211,7 @@ public partial class IntroView : UserControl
             AllUsersLabel.Text = Strings.F(Strings.IntroForAllUsers, forAll.Count);
             AllUsersList.ItemsSource = forAll;
             AllUsersText.Text = Setup.UserIsAdmin ? Strings.IntroForAllUsersText : Strings.IntroForAllUsersNoAdmin;
-            SetUpFullyButton.Visibility = Setup.UserIsAdmin && !Elevation.AdminMode ? Visibility.Visible : Visibility.Collapsed;
+            SetUpFullyHost.Visibility = Setup.UserIsAdmin && !Elevation.AdminMode ? Visibility.Visible : Visibility.Collapsed;
         }
 
         if (Step == Ready)
@@ -157,19 +221,20 @@ public partial class IntroView : UserControl
             var lines = shown.Select((e, i) => new ReadyItem(i + 1, e.Name)).ToList();
             if (shown.Count < starts.Count) lines.Add(new ReadyItem(0, Strings.F(Strings.IntroReadyMore, starts.Count - shown.Count)));
             if (lines.Count == 0) lines.Add(new ReadyItem(0, Strings.IntroReadyNothing));
-            ReadyList.ItemsSource = lines;
+            readyList.Children.Clear();
+            foreach (var line in lines) readyList.Children.Add(ReadyLine(line));
 
             var windows = new List<string>();
             if (forAll.Count > 0) windows.Add(forAll.Count == 1 ? Strings.IntroReadyWindowsAllOne : Strings.F(Strings.IntroReadyWindowsAll, forAll.Count));
             if (leave.Count > 0) windows.Add(leave.Count == 1 ? Strings.IntroReadyWindowsLeftOne : Strings.F(Strings.IntroReadyWindowsLeft, leave.Count));
-            ReadyWindows.Text = windows.Count == 0 ? Strings.IntroReadyWindowsNone : string.Join("\n", windows);
-            ReadyNew.Text = mode switch
+            readyWindows.Text = windows.Count == 0 ? Strings.IntroReadyWindowsNone : string.Join("\n", windows);
+            readyNew.Text = mode switch
             {
                 NewEntryMode.TakeOverDisabled => Strings.IntroReadyNewDisabled,
                 NewEntryMode.NotifyOnly => Strings.IntroReadyNewNotify,
                 _ => Strings.IntroReadyNewEnabled,
             };
-            ReadySetUp.Text = Elevation.AdminMode ? Strings.IntroReadyFull : Strings.IntroReadyBasis;
+            readySetUp.Text = Elevation.AdminMode ? Strings.IntroReadyFull : Strings.IntroReadyBasis;
         }
     }
 
@@ -198,5 +263,4 @@ public partial class IntroView : UserControl
             : NewEntryMode.TakeOverEnabled;
     }
 
-    void SetUpFully_Click(object sender, RoutedEventArgs e) => host.SetUpAdminFeatures();
 }
