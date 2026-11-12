@@ -1083,11 +1083,11 @@
             <!-- Confirm / message -->
             <!-- shadow-dialog in two layers (the kit's ShadowDialogFar and ShadowDialogNear). Shadows sit on separate,
                  empty borders: an effect on the card itself would redraw the whole card on every change -->
-            <Border Width="440" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <Border Width="{Binding ActualWidth, ElementName=ConfirmCard}" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
                     Height="{Binding ActualHeight, ElementName=ConfirmCard}" Visibility="{Binding Visibility, ElementName=ConfirmCard}"
                     Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}"
                     Effect="{DynamicResource ShadowDialogFar}" />
-            <Border Width="440" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <Border Width="{Binding ActualWidth, ElementName=ConfirmCard}" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
                     Height="{Binding ActualHeight, ElementName=ConfirmCard}" Visibility="{Binding Visibility, ElementName=ConfirmCard}"
                     Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}"
                     Effect="{DynamicResource ShadowDialogNear}" />
@@ -1111,6 +1111,8 @@
                     <Border Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button x:Name="ConfirmCancel" Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Cancel}" Click="ConfirmCancel_Click" Margin="0,0,8,0" />
+                            <!-- A second way on, only for a choice of three (ChooseAsync) -->
+                            <Button x:Name="ConfirmSecond" Style="{StaticResource SecondaryButton}" Click="ConfirmSecond_Click" Margin="0,0,8,0" Visibility="Collapsed" />
                             <Button x:Name="ConfirmOk" Style="{StaticResource DangerButton}" Click="ConfirmOk_Click" />
                         </StackPanel>
                     </Border>

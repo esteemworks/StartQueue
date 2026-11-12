@@ -1637,6 +1637,8 @@ public partial class MainWindow : Window
         ProfileTitle.ToolTip = newProfile ? Strings.ProfileNewHelp : null;
         profileFields.Load(profile ?? sample, Profiles.All);
         ProfileDeleteButton.Visibility = newProfile ? Visibility.Collapsed : Visibility.Visible;
+        // "Delete" only when the profile is gone afterwards; while other apps use it, it only leaves StartQueue.
+        ProfileDeleteButton.Content = ProfileSharing.RemoveLabel(Profiles.App, profile != null && FamilyProfiles.UsedByOthers(profile, Profiles.App));
 
         ConfirmCard.Visibility = AddCard.Visibility = PauseCard.Visibility = Visibility.Collapsed;
         if (Overlay.Visibility != Visibility.Visible) overlayFocus = FocusReturn.Take();
@@ -1645,9 +1647,55 @@ public partial class MainWindow : Window
         if (!offScreen) Dispatcher.BeginInvoke(profileFields.FocusName);
     }
 
-    void ProfileSave_Click(object sender, RoutedEventArgs e)
+    async void ProfileSave_Click(object sender, RoutedEventArgs e)
     {
         if (profileFields.Read() is not { } profile) return;
+        var app = Profiles.App;
+        var before = newProfile ? null : FamilyProfiles.Find(profile.Id);
+
+        // "For all EsteemWorks apps" off while other apps use it: after asking, StartQueue gets a copy of its own and the
+        // others keep theirs (STANDARD.md, "Family profiles").
+        if (before is { Shared: true } && !profile.Shared && FamilyProfiles.UsedByOthers(before, app))
+        {
+            var others = FamilyProfiles.SharedWith(before, app);
+            var detach = await AskOverProfileAsync(async () => await ConfirmAsync(ProfileSharing.DetachTitle(before.Name),
+                ProfileSharing.DetachBody(before.Name, app, others), "", ProfileSharing.Detach, danger: false, icon: ProfileSharing.Icon) ? KitDialog.Main : KitDialog.Cancelled);
+            if (detach == KitDialog.Cancelled) return;
+            var own = host.DetachProfile(before.Id);
+            profile.Id = own;
+            host.SaveProfile(profile);
+            if (shownProfile == before.Id) shownProfile = own;
+            CloseOverlay();
+            Sync();
+            return;
+        }
+
+        // On, while another app offers a profile of the same name: join it instead of making another one.
+        var newlyShared = profile.Shared && (newProfile ? profileFields.TakesOver == null : before is not { Shared: true } || !FamilyProfiles.SameName(before.Name, profile.Name));
+        if (newlyShared && FamilyProfiles.SharedNamed(profile.Name, app, except: profile.Id) is { } offered)
+        {
+            var hint = ProfileSharing.NotSharedHint(offered.Name);
+            // One that other apps use too cannot simply give way to another; it needs another name.
+            var choice = before != null && FamilyProfiles.UsedByOthers(before, app) ? KitDialog.Cancelled
+                : FamilyProfiles.SameRules(profile, offered) ? KitDialog.Main
+                : await AskOverProfileAsync(() => ChooseAsync(ProfileSharing.ClashTitle(offered.Name, offered.Apps), ProfileSharing.ClashBody(profile, offered, app),
+                    ProfileSharing.Overwrite, ProfileSharing.TakeExisting));
+            if (choice == KitDialog.Cancelled)
+            {
+                profileFields.SetShared(false);
+                profileFields.ShowHint(hint);
+                return;
+            }
+            // A new one is saved first (with the switches of the profile shown now), then gives way to the offered one.
+            Guid? own = newProfile ? host.AddProfile(profile, null, shownProfile) : host.SaveProfile(profile) ? profile.Id : null;
+            if (own is not { } ownId) return;
+            host.RejoinProfile(ownId, offered.Id, overwrite: choice == KitDialog.Second);
+            if (newProfile || shownProfile == ownId) shownProfile = offered.Id;
+            CloseOverlay();
+            Sync();
+            return;
+        }
+
         if (newProfile)
         {
             // A new profile starts with the switches of the profile the list shows now.
@@ -1657,6 +1705,25 @@ public partial class MainWindow : Window
         else host.SaveProfile(profile);
         CloseOverlay();
         Sync();
+    }
+
+    /// <summary>
+    /// Asks over the profile editor: the editor steps aside while the question shows, and comes back as it was when
+    /// the answer is Cancel.
+    /// </summary>
+    async Task<int> AskOverProfileAsync(Func<Task<int>> ask)
+    {
+        var keep = overlayFocus;
+        overlayFocus = null;
+        ProfileCard.Visibility = Visibility.Collapsed;
+        var answer = await ask();
+        if (answer == KitDialog.Cancelled)
+        {
+            Motion.Appear(Overlay);
+            Motion.Appear(ProfileCard, fromScale: 0.96);
+        }
+        overlayFocus = keep;
+        return answer;
     }
 
     void ProfileDelete_Click(object sender, RoutedEventArgs e)
@@ -1962,6 +2029,8 @@ public partial class MainWindow : Window
         ConfirmOk.Content = okText;
         ConfirmOk.Style = (Style)FindResource(danger ? "DangerButton" : "PrimaryButton");
         ConfirmCancel.Visibility = showCancel ? Visibility.Visible : Visibility.Collapsed;
+        ConfirmSecond.Visibility = Visibility.Collapsed;
+        ConfirmCard.Width = 440;
         var first = danger && showCancel ? ConfirmCancel : ConfirmOk;
 
         AddCard.Visibility = Visibility.Collapsed;
@@ -1977,6 +2046,30 @@ public partial class MainWindow : Window
     {
         if (!IsVisible) host.ShowWindow();
         return ConfirmAsync(title, text, "", Strings.Ok, danger: false, showCancel: false);
+    }
+
+    /// <summary>
+    /// A question with two ways on besides Cancel: <paramref name="secondText"/> in the middle, <paramref name="mainText"/>
+    /// the main button. Gives back KitDialog.Cancelled, Second or Main, as the kit's dialog does.
+    /// </summary>
+    public async Task<int> ChooseAsync(string title, string body, string secondText, string mainText)
+    {
+        var answer = ConfirmAsync(title, body, "", mainText, danger: false, icon: ProfileSharing.Icon);
+        // Three buttons with the family's words need more room than two.
+        ConfirmCard.Width = 680;
+        ConfirmSecond.Content = secondText;
+        ConfirmSecond.Visibility = Visibility.Visible;
+        secondChosen = false;
+        var main = await answer;
+        return secondChosen ? KitDialog.Second : main ? KitDialog.Main : KitDialog.Cancelled;
+    }
+
+    bool secondChosen;
+
+    void ConfirmSecond_Click(object sender, RoutedEventArgs e)
+    {
+        secondChosen = true;
+        FinishConfirm(false);
     }
 
     void ConfirmOk_Click(object sender, RoutedEventArgs e) => FinishConfirm(true);

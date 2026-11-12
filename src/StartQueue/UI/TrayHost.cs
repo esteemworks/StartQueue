@@ -1004,7 +1004,47 @@ public sealed class TrayHost : IDisposable
     }
 
     /// <summary>Name, color, schedule, pause, offered or not: for every app that uses the profile.</summary>
-    public void SaveProfile(FamilyProfile profile) => ChangeFamily(() => FamilyProfiles.Save(profile));
+    public bool SaveProfile(FamilyProfile profile) => ChangeFamily(() => FamilyProfiles.Save(profile));
+
+    /// <summary>The entries that start in the profile now.</summary>
+    List<Guid> StartingIn(Guid profile) =>
+        Profiles.Find(profile) is { } p ? config.Entries.Where(e => Profiles.IsOn(config, e, p)).Select(e => e.Id).ToList() : [];
+
+    /// <summary>
+    /// StartQueue stops sharing the profile while other apps use it: it gets a copy of its own, and which apps start in
+    /// it moves along. Gives back the id StartQueue uses from now on.
+    /// </summary>
+    public Guid DetachProfile(Guid id)
+    {
+        var own = id;
+        // Which apps start in it, as they start now (also when the profile still follows the older rule).
+        var on = StartingIn(id);
+        if (!ChangeFamily(() => own = FamilyProfiles.Detach(id, Profiles.App))) return id;
+        if (own != id)
+            Change(c =>
+            {
+                c.ProfileEntries.Remove(id);
+                c.ProfileEntries[own] = on;
+            });
+        return own;
+    }
+
+    /// <summary>
+    /// StartQueue joins the offered profile <paramref name="shared"/> of the same name instead of keeping
+    /// <paramref name="own"/>; which apps start in it stays StartQueue's own. <paramref name="overwrite"/>: name, color
+    /// and schedule from here apply in the other apps too.
+    /// </summary>
+    public void RejoinProfile(Guid own, Guid shared, bool overwrite)
+    {
+        var on = StartingIn(own);
+        if (!ChangeFamily(() => FamilyProfiles.Rejoin(own, shared, Profiles.App, overwrite))) return;
+        Change(c =>
+        {
+            c.ProfileEntries.Remove(own);
+            c.ProfileEntries[shared] = on;
+        });
+        Log.Info(overwrite ? "Joined a shared profile of the same name and overwrote it with StartQueue's" : "Joined a shared profile of the same name");
+    }
 
     public void UpdateProfile(Guid id, Action<FamilyProfile> change) => ChangeFamily(() => FamilyProfiles.Change(id, change));
 
