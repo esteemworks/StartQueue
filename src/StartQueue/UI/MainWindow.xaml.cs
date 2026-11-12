@@ -131,7 +131,10 @@ public partial class MainWindow : Window
         shownProfile = Profiles.Active(DateTime.Now)?.Id;
         FontWeight = Theme.BodyWeight;
         EntryList.ItemsSource = entries;
-        PreviewKeyDown += Window_PreviewKeyDown;
+        // F5, Ctrl+N and Esc on the settings are the kit's frame's; StartQueue's own dialogs keep the keys while open.
+        Frame.Refresh = () => _ = ScanAsync();
+        Frame.New = OpenAddDialog;
+        Frame.KeysBlocked = () => Overlay.Visibility == Visibility.Visible;
         _ = new MiddleScroll(this, ScrollMarker);
         Closing += (_, e) =>
         {
@@ -143,17 +146,12 @@ public partial class MainWindow : Window
         StartFirstStart();
     }
 
-    /// <summary>
-    /// Shut down and restart with prepared apps: one pair on the tab line, left of the gear, as before the kit's frame,
-    /// which has no place of its own for it.
-    /// </summary>
+    /// <summary>Shut down and restart with prepared apps: one pair on the tab line, left of the gear (the kit's LineActions).</summary>
     void PlacePreparedPair()
     {
         Root.Children.Remove(PreparedPair);
-        if (Frame.Gear.Parent is not Grid line) return;
-        PreparedPair.Margin = new Thickness(0, -7, 52, 0);
-        line.Children.Add(PreparedPair);
-        Frame.Gear.SizeChanged += (_, _) => PreparedPair.Margin = new Thickness(0, -7, Frame.Gear.ActualWidth + 8, 0);
+        PreparedPair.HorizontalAlignment = HorizontalAlignment.Left;
+        Frame.LineActions.Add(PreparedPair);
     }
 
     /// <summary>A tab was chosen or the settings opened or closed in the frame: the view for it.</summary>
@@ -723,6 +721,7 @@ public partial class MainWindow : Window
         foreach (var vm in entries) _ = vm.Icon;
 
         if (selected != null) EntryList.SelectedItem = entries.FirstOrDefault(v => v.Id == selected);
+        if (EmptyOrder.Children.Count == 0) Ui.Empty(EmptyOrder, Strings.EmptyTitle, Strings.EmptyText, Strings.AddApp, (_, _) => OpenAddDialog());
         EmptyOrder.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         SyncProfileBar(config, shown);
@@ -948,30 +947,6 @@ public partial class MainWindow : Window
         if (vm == null) return;
         DetailScroll.ScrollToTop();
         if (vm.IsNew && IsActive) vm.IsNew = false; // Looking at it counts as seen.
-    }
-
-    void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (Overlay.Visibility == Visibility.Visible) return;
-        if (Frame.InIntro && e.Key != Key.Escape) return;
-        if (e.Key == Key.F5)
-        {
-            _ = ScanAsync();
-            e.Handled = true;
-        }
-        else if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control)
-        {
-            OpenAddDialog();
-            e.Handled = true;
-        }
-        // On a page of the settings (Updates, Backup, ...) Esc returns to the settings: the page handles it.
-        // Esc in an open list or menu (its own popup window) closes that first, not the settings.
-        else if (e.Key == Key.Escape && view == View.Settings && KitSubpage.Depth(SettingsView) == 0
-            && !(e.OriginalSource is Visual source && PresentationSource.FromVisual(source)?.RootVisual is not Window))
-        {
-            ShowView(lastTab);
-            e.Handled = true;
-        }
     }
 
     void EntryList_KeyDown(object sender, KeyEventArgs e)

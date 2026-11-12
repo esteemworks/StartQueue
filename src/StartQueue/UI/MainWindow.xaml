@@ -166,7 +166,8 @@
                 <ColumnDefinition Width="360" />
             </Grid.ColumnDefinitions>
 
-            <DockPanel Margin="24,16,12,20">
+            <!-- In line with the header's 32 px; 12 to the details beside it -->
+            <DockPanel Margin="32,16,12,20">
                 <!-- Profiles: the kit's bar (KitProfiles), the frame for the list below. Left to right in order of precedence,
                      No profile last; edit, pause and order open as pages of this tab -->
                 <ContentControl x:Name="ProfileBarHost" DockPanel.Dock="Top" Margin="0,0,24,16" Focusable="False" IsTabStop="False" />
@@ -301,10 +302,8 @@
                         </Grid>
                     </Canvas>
 
-                    <StackPanel x:Name="EmptyOrder" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="440" Visibility="Collapsed">
-                        <TextBlock Style="{StaticResource H2}" Text="{x:Static s:Strings.EmptyTitle}" TextAlignment="Center" />
-                        <TextBlock Style="{StaticResource Muted}" TextAlignment="Center" Margin="0,8,0,0" Text="{x:Static s:Strings.EmptyText}" />
-                    </StackPanel>
+                    <!-- The kit's empty state (Ui.Empty), filled in from code -->
+                    <Grid x:Name="EmptyOrder" Visibility="Collapsed" />
                 </Grid>
             </DockPanel>
 
@@ -501,7 +500,7 @@
         </ContentControl>
 
         <!-- ========== Windows autostart ========== -->
-        <DockPanel x:Name="WindowsView" Margin="32,16,20,20" Visibility="Collapsed">
+        <DockPanel x:Name="WindowsView" Style="{StaticResource TabPage}" Visibility="Collapsed">
             <Grid DockPanel.Dock="Top" Height="32" Margin="0,0,24,16">
                 <TextBlock x:Name="WindowsHintText" Style="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{x:Static s:Strings.WindowsHintTip}" />
             </Grid>
@@ -603,7 +602,7 @@
         </DockPanel>
 
         <!-- ========== Services: shown and changed like in services.msc, never taken over ========== -->
-        <DockPanel x:Name="ServicesView" Margin="32,16,20,20" Visibility="Collapsed">
+        <DockPanel x:Name="ServicesView" Style="{StaticResource TabPage}" Visibility="Collapsed">
             <Grid DockPanel.Dock="Top" Margin="0,0,24,12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
