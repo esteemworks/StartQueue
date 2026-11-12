@@ -7,7 +7,7 @@
         Title="StartQueue" Width="1140" Height="740" MinWidth="920" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Bg}" Foreground="{DynamicResource Text2}"
-        FontFamily="Segoe UI" FontSize="14"
+        FontSize="{StaticResource TextTitle}"
         UseLayoutRounding="True" SnapsToDevicePixels="True"
         AllowDrop="True" DragOver="Window_DragOver" Drop="Window_Drop"
         >
@@ -45,14 +45,14 @@
         <DataTemplate DataType="{x:Type ui:AddHeader}">
             <StackPanel Orientation="Horizontal" Margin="0,20,0,8" HorizontalAlignment="Left" ToolTip="{Binding Hint}">
                 <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding Title}" />
-                <TextBlock Style="{StaticResource InfoGlyph}" FontSize="11" Visibility="{Binding HasHint, Converter={StaticResource BoolToVisibility}}" />
+                <TextBlock Style="{StaticResource InfoGlyph}" FontSize="{StaticResource TextCaption}" Visibility="{Binding HasHint, Converter={StaticResource BoolToVisibility}}" />
             </StackPanel>
         </DataTemplate>
         <DataTemplate DataType="{x:Type ui:AddNote}">
             <TextBlock Style="{StaticResource Muted}" Text="{Binding Text}" Margin="0,4,0,4" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type ui:CandidateVm}">
-            <Border x:Name="Card" Height="52" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1"
+            <Border x:Name="Card" Height="52" Margin="0,0,0,6" CornerRadius="{StaticResource RadiusRow}" BorderThickness="1"
                     BorderBrush="{DynamicResource Line}" Background="{DynamicResource Surface}" Padding="12,0,8,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -62,11 +62,11 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Image Source="{Binding Icon}" Width="28" Height="28" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
-                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}"
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="{StaticResource TextTitle}" FontWeight="SemiBold" Foreground="{DynamicResource Text1}"
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     <Grid Grid.Column="3" Width="148" Margin="12,0,0,0">
                         <!-- One primary per view: Done is the dialog's; each row's Add is a secondary button -->
-                        <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Add}" FontSize="13" Padding="0"
+                        <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Add}" FontSize="{StaticResource TextBody}" Padding="0"
                                 Click="AddCandidate_Click" Visibility="{Binding CanAdd, Converter={StaticResource BoolToVisibility}}" />
                         <TextBlock Text="{Binding DoneText}" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                    Visibility="{Binding IsDone, Converter={StaticResource BoolToVisibility}}">
@@ -119,7 +119,7 @@
                 <Button x:Name="AddButton" Style="{StaticResource PrimaryButton}" Click="Add_Click"
                         ToolTip="{x:Static s:Strings.AddAppTip}" AutomationProperties.Name="{x:Static s:Strings.AddApp}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="14" VerticalAlignment="Center" />
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" />
                         <TextBlock Text="{x:Static s:Strings.AddApp}" Margin="8,0,0,0" />
                     </StackPanel>
                 </Button>
@@ -180,9 +180,9 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE784;" FontSize="12" Foreground="{DynamicResource Text4}"
+                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE784;" FontSize="{StaticResource TextSmall}" Foreground="{DynamicResource Text4}"
                                                Cursor="SizeAll" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{x:Static s:Strings.DragTip}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Position}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Text4}"
+                                    <TextBlock Grid.Column="1" Text="{Binding Position}" FontSize="{StaticResource TextBody}" FontWeight="SemiBold" Foreground="{DynamicResource Text4}"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     <CheckBox Grid.Column="2" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding Enabled}" Margin="6,0,16,0"
                                               ToolTip="{x:Static s:Strings.StartAtLogon}" AutomationProperties.Name="{x:Static s:Strings.StartAtLogon}" />
@@ -204,8 +204,8 @@
                                         <Image Source="{Binding Icon}" Width="28" Height="28" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                RenderOptions.BitmapScalingMode="HighQuality" />
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Subtitle}" />
+                                            <TextBlock Text="{Binding Name}" FontSize="{StaticResource TextTitle}" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Subtitle}" FontSize="{StaticResource TextSmall}" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Subtitle}" />
                                         </StackPanel>
                                     </Grid>
 
@@ -234,7 +234,7 @@
                                         </Border>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="5" Text="{Binding LastStartText}" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    <TextBlock Grid.Column="5" Text="{Binding LastStartText}" FontSize="{StaticResource TextSmall}" HorizontalAlignment="Right" VerticalAlignment="Center"
                                                ToolTip="{Binding LastStartLong}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -265,7 +265,7 @@
                     <!-- Where a dragged row will land: a line with a dot in the gap between rows -->
                     <Canvas x:Name="DropLayer" IsHitTestVisible="False" ClipToBounds="True">
                         <Grid x:Name="DropMarker" Height="10" Visibility="Collapsed">
-                            <Border Height="2" CornerRadius="1" Background="{DynamicResource AccentFill}" VerticalAlignment="Center" Margin="5,0,0,0" />
+                            <Border Height="2" CornerRadius="{StaticResource RadiusLine}" Background="{DynamicResource AccentFill}" VerticalAlignment="Center" Margin="5,0,0,0" />
                             <Ellipse Width="10" Height="10" HorizontalAlignment="Left" Stroke="{DynamicResource AccentFill}" StrokeThickness="2" Fill="{DynamicResource Bg}" />
                         </Grid>
                     </Canvas>
@@ -296,9 +296,9 @@
                                 </StackPanel>
                             </Grid>
 
-                            <Border Background="{DynamicResource NoticeBg}" CornerRadius="8" Padding="12,10" Margin="0,16,0,0"
+                            <Border Background="{DynamicResource NoticeBg}" CornerRadius="{StaticResource RadiusRow}" Padding="12,10" Margin="0,16,0,0"
                                     Visibility="{Binding IsNew, Converter={StaticResource BoolToVisibility}}">
-                                <TextBlock Text="{Binding NewText}" Foreground="{DynamicResource NoticeText}" TextWrapping="Wrap" FontSize="13" />
+                                <TextBlock Text="{Binding NewText}" Foreground="{DynamicResource NoticeText}" TextWrapping="Wrap" FontSize="{StaticResource TextBody}" />
                             </Border>
 
                             <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.SectionStartup}" Margin="0,24,0,12" />
@@ -314,7 +314,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding DelaySeconds, UpdateSourceTrigger=LostFocus}"
                                              KeyDown="CommitOnEnter" AutomationProperties.Name="{x:Static s:Strings.DelayName}" />
-                                    <TextBlock Text="{x:Static s:Strings.SecondsShort}" Width="30" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static s:Strings.SecondsShort}" Width="30" Margin="8,0,0,0" FontSize="{StaticResource TextBody}" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Grid>
                             <Grid Margin="0,0,0,16">
@@ -349,7 +349,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding RepeatMinutes, UpdateSourceTrigger=LostFocus}"
                                              KeyDown="CommitOnEnter" AutomationProperties.Name="{x:Static s:Strings.RepeatName}" />
-                                    <TextBlock Text="{x:Static s:Strings.MinutesShort}" Width="30" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Static s:Strings.MinutesShort}" Width="30" Margin="8,0,0,0" FontSize="{StaticResource TextBody}" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="0,16,0,8" HorizontalAlignment="Left" ToolTip="{Binding WindowNote}">
@@ -374,7 +374,7 @@
                                 <Button Style="{StaticResource QuietButton}" Height="24" Padding="8,0" HorizontalAlignment="Right" Click="ParametersInfo_Click"
                                         ToolTip="{Binding ParametersHelp}" AutomationProperties.Name="{x:Static s:Strings.ParamHowItWorks}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE946;" FontSize="14" VerticalAlignment="Center" />
+                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE946;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" />
                                         <TextBlock Text="{x:Static s:Strings.ParamHowItWorks}" Margin="6,0,0,0" />
                                     </StackPanel>
                                 </Button>
@@ -438,7 +438,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,12,0,4" HorizontalAlignment="Left" ToolTip="{x:Static s:Strings.ProcessNameHelp}">
                                     <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ProcessName}" />
-                                    <TextBlock Style="{StaticResource InfoGlyph}" FontSize="11" />
+                                    <TextBlock Style="{StaticResource InfoGlyph}" FontSize="{StaticResource TextCaption}" />
                                 </StackPanel>
                                 <TextBox Style="{StaticResource FieldBox}" Text="{Binding ProcessName, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
                                          AutomationProperties.Name="{x:Static s:Strings.ProcessName}" />
@@ -453,7 +453,7 @@
                             <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                 <Button Style="{StaticResource SecondaryButton}" Click="StartNow_Click" AutomationProperties.Name="{x:Static s:Strings.StartNow}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="14" VerticalAlignment="Center" />
+                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" />
                                         <TextBlock Text="{x:Static s:Strings.StartNow}" Margin="8,0,0,0" />
                                     </StackPanel>
                                 </Button>
@@ -488,7 +488,7 @@
                     <ItemsControl x:Name="WindowsList" Focusable="False">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type ui:WindowsItemVm}">
-                                <Border Height="56" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}"
+                                <Border Height="56" Margin="0,0,0,6" CornerRadius="{StaticResource RadiusRow}" BorderThickness="1" BorderBrush="{DynamicResource Line}"
                                         Background="{DynamicResource Surface}" Padding="16,0,12,0">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -499,18 +499,18 @@
                                         </Grid.ColumnDefinitions>
                                         <Image Source="{Binding Icon}" Width="28" Height="28" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Origin}" FontSize="12" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Origin}" />
+                                            <TextBlock Text="{Binding Name}" FontSize="{StaticResource TextTitle}" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Origin}" FontSize="{StaticResource TextSmall}" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Origin}" />
                                         </StackPanel>
                                         <Border Grid.Column="2" Style="{StaticResource Chip}" Width="140" Margin="12,0" ToolTip="{Binding StatusTip}">
                                             <!-- Neutral for every kind: the color of a chip never tells the origin -->
                                             <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" />
                                         </Border>
-                                        <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Width="148" FontSize="13" Padding="0"
+                                        <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Width="148" FontSize="{StaticResource TextBody}" Padding="0"
                                                 IsEnabled="{Binding CanTakeOver}" Click="TakeOverOne_Click"
                                                 AutomationProperties.Name="{Binding ButtonText}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"
+                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" Margin="0,0,6,0"
                                                            Visibility="{Binding ShowShield, Converter={StaticResource BoolToVisibility}}" />
                                                 <TextBlock Text="{Binding ButtonText}" />
                                             </StackPanel>
@@ -525,7 +525,7 @@
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="{x:Static s:Strings.TasksHintTakeOver}">
                             <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.SectionLogonTasks}" />
                             <TextBlock x:Name="TasksCount" Style="{StaticResource SectionLabel}" Margin="8,0,0,0" />
-                            <TextBlock Style="{StaticResource InfoGlyph}" FontSize="11" />
+                            <TextBlock Style="{StaticResource InfoGlyph}" FontSize="{StaticResource TextCaption}" />
                         </StackPanel>
                         <Button x:Name="TakeOverAllTasksButton" Style="{StaticResource GhostButton}" Content="{x:Static s:Strings.TakeOverAll}" HorizontalAlignment="Right"
                                 Click="TakeOverAllTasks_Click" ToolTip="{x:Static s:Strings.TakeOverAllTasksTip}" />
@@ -534,7 +534,7 @@
                     <ItemsControl x:Name="TasksList" Focusable="False">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type ui:TaskItemVm}">
-                                <Border Height="56" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}"
+                                <Border Height="56" Margin="0,0,0,6" CornerRadius="{StaticResource RadiusRow}" BorderThickness="1" BorderBrush="{DynamicResource Line}"
                                         Background="{DynamicResource Surface}" Padding="16,0,12,0">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -545,17 +545,17 @@
                                         </Grid.ColumnDefinitions>
                                         <Image Source="{Binding Icon}" Width="28" Height="28" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Detail}" />
+                                            <TextBlock Text="{Binding Name}" FontSize="{StaticResource TextTitle}" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Detail}" FontSize="{StaticResource TextSmall}" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Detail}" />
                                         </StackPanel>
                                         <Border Grid.Column="2" Style="{StaticResource Chip}" Width="140" Margin="12,0" ToolTip="{Binding StatusTip}">
                                             <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" />
                                         </Border>
-                                        <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" FontSize="13" Padding="0" Click="TakeOverTask_Click"
+                                        <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" FontSize="{StaticResource TextBody}" Padding="0" Click="TakeOverTask_Click"
                                                 Visibility="{Binding CanTakeOver, Converter={StaticResource BoolToVisibility}}"
                                                 AutomationProperties.Name="{x:Static s:Strings.TakeOver}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"
+                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" Margin="0,0,6,0"
                                                            Visibility="{Binding ShowShield, Converter={StaticResource BoolToVisibility}}" />
                                                 <TextBlock Text="{x:Static s:Strings.TakeOver}" />
                                             </StackPanel>
@@ -580,7 +580,7 @@
                     <!-- The kit's search field: Esc clears, Ctrl+F finds it -->
                     <kit:SearchBox x:Name="ServicesSearch" Width="300" Placeholder="{x:Static s:Strings.ServicesSearch}" TextChanged="ServicesSearch_TextChanged" />
                     <!-- Sorted the same way in both sections -->
-                    <ComboBox x:Name="ServicesSortBox" Width="190" Height="32" Margin="8,0,0,0" FontSize="13" SelectedIndex="0" SelectionChanged="ServicesSort_Changed"
+                    <ComboBox x:Name="ServicesSortBox" Width="190" Height="32" Margin="8,0,0,0" FontSize="{StaticResource TextBody}" SelectedIndex="0" SelectionChanged="ServicesSort_Changed"
                               AutomationProperties.Name="{x:Static s:Strings.ServicesSort}" ToolTip="{x:Static s:Strings.ServicesSort}">
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortName}" />
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortStart}" />
@@ -591,7 +591,7 @@
                     <Button x:Name="ServicesFilterButton" Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" kit:KitMenuButton.Enabled="True"
                             ToolTip="{x:Static s:Strings.ServicesFilterTip}" AutomationProperties.Name="{Binding Text, ElementName=ServicesFilterText}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71C;" FontSize="14" VerticalAlignment="Center" />
+                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71C;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" />
                             <TextBlock x:Name="ServicesFilterText" Text="{x:Static s:Strings.ServicesFilter}" Margin="8,0,0,0" />
                         </StackPanel>
                         <Button.ContextMenu>
@@ -633,14 +633,14 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="{Binding Tip}">
                                     <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding Title}" />
                                     <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding Count}" Margin="8,0,0,0" />
-                                    <TextBlock Style="{StaticResource InfoGlyph}" FontSize="11" />
+                                    <TextBlock Style="{StaticResource InfoGlyph}" FontSize="{StaticResource TextCaption}" />
                                 </StackPanel>
                                 <Button Style="{StaticResource QuietButton}" HorizontalAlignment="Right" Content="{Binding ToggleText}" Click="ServiceSection_Click"
                                         Visibility="{Binding CanFold, Converter={StaticResource BoolToVisibility}}" />
                             </Grid>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type ui:ServiceVm}">
-                            <Border Height="60" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}"
+                            <Border Height="60" Margin="0,0,0,6" CornerRadius="{StaticResource RadiusRow}" BorderThickness="1" BorderBrush="{DynamicResource Line}"
                                     Background="{DynamicResource Surface}" Padding="16,0,8,0">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -652,7 +652,7 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel VerticalAlignment="Center" ToolTip="{Binding Tip}">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Name}" FontSize="{StaticResource TextTitle}" FontWeight="SemiBold" Foreground="{DynamicResource Text1}" TextTrimming="CharacterEllipsis" />
                                             <Border Style="{StaticResource Chip}" Margin="8,0,0,0" ToolTip="{Binding KindTip}"
                                                     Visibility="{Binding IsWindows, Converter={StaticResource BoolToVisibility}}">
                                                 <TextBlock Text="{Binding KindChip}">
@@ -669,7 +669,7 @@
                                                 </TextBlock>
                                             </Border>
                                         </StackPanel>
-                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Description}" FontSize="{StaticResource TextSmall}" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                     <Border Grid.Column="1" Style="{StaticResource Chip}" Width="118" Margin="12,0">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -679,7 +679,7 @@
                                                         <Setter Property="Fill" Value="{DynamicResource Text4}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                                <Setter Property="Fill" Value="#2F9E44" />
+                                                                <Setter Property="Fill" Value="{DynamicResource SuccessText}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -690,12 +690,12 @@
                                     </Border>
                                     <Grid Grid.Column="2" Width="196" VerticalAlignment="Center">
                                         <ComboBox ItemsSource="{x:Static ui:ServiceVm.StartTypes}" SelectedIndex="{Binding StartIndex, Mode=TwoWay}"
-                                                  IsEnabled="{Binding CanChangeStart}" Height="32" FontSize="13"
+                                                  IsEnabled="{Binding CanChangeStart}" Height="32" FontSize="{StaticResource TextBody}"
                                                   AutomationProperties.Name="{x:Static s:Strings.ServiceStartType}" ToolTip="{x:Static s:Strings.ServiceStartTypeTip}" />
                                     </Grid>
                                     <!-- Always takes its room, so the start type lines up in every row -->
                                     <Grid Grid.Column="3" Width="20" Margin="6,0,0,0">
-                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE945;" FontSize="12" Foreground="{DynamicResource Text4}"
+                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE945;" FontSize="{StaticResource TextSmall}" Foreground="{DynamicResource Text4}"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip="{x:Static s:Strings.ServiceTriggerTip}"
                                                    Visibility="{Binding HasTrigger, Converter={StaticResource BoolToVisibility}}" />
                                     </Grid>
@@ -732,21 +732,21 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding StartDelaySeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
                                      AutomationProperties.Name="{x:Static s:Strings.SettingsStartDelay}" />
-                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="{StaticResource TextBody}" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </kit:SettingRow>
                     <kit:SettingRow Icon="&#xE916;" Label="{x:Static s:Strings.SettingsGap}" Description="{x:Static s:Strings.SettingsGapHelp}">
                         <StackPanel Orientation="Horizontal">
                             <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding GapSeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
                                      AutomationProperties.Name="{x:Static s:Strings.SettingsGap}" />
-                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="{StaticResource TextBody}" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </kit:SettingRow>
                     <kit:SettingRow Icon="&#xE121;" Label="{x:Static s:Strings.SettingsWaitLimit}" Description="{x:Static s:Strings.SettingsWaitLimitHelp}">
                         <StackPanel Orientation="Horizontal">
                             <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding WaitLimitSeconds, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
                                      AutomationProperties.Name="{x:Static s:Strings.SettingsWaitLimit}" />
-                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static s:Strings.Seconds}" Width="64" Margin="8,0,0,0" FontSize="{StaticResource TextBody}" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </kit:SettingRow>
                     <kit:SettingRow Icon="&#xEA8F;" Label="{x:Static s:Strings.SettingsNotifySequence}" Description="{x:Static s:Strings.SettingsNotifySequenceHelp}">
@@ -766,7 +766,7 @@
                 <kit:SectionLabel Label="{x:Static s:Strings.SettingsNewEntries}" />
                 <kit:SettingsCard>
                     <kit:SettingRow Icon="&#xE710;" Label="{x:Static s:Strings.SettingsNewModeRow}" Description="{Binding NewModeHelp}">
-                        <ComboBox Width="260" Height="32" FontSize="13" SelectedIndex="{Binding NewModeIndex}">
+                        <ComboBox Width="260" Height="32" FontSize="{StaticResource TextBody}" SelectedIndex="{Binding NewModeIndex}">
                             <ComboBoxItem Content="{x:Static s:Strings.NewModeEnabled}" />
                             <ComboBoxItem Content="{x:Static s:Strings.NewModeDisabled}" />
                             <ComboBoxItem Content="{x:Static s:Strings.NewModeNotify}" />
@@ -820,7 +820,7 @@
             <Button x:Name="AddBrowse" Style="{StaticResource GhostButton}" Padding="4,0" HorizontalAlignment="Left" Click="AddBrowse_Click"
                     AutomationProperties.Name="{x:Static s:Strings.BrowseFile}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE838;" FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE838;" FontSize="{StaticResource TextTitle}" VerticalAlignment="Center" />
                     <TextBlock Text="{x:Static s:Strings.BrowseFile}" Margin="8,0,0,0" />
                 </StackPanel>
             </Button>

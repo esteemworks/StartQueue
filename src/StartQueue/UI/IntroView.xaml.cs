@@ -159,7 +159,7 @@ public partial class IntroView : UserControl
         var line = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 16, 8) };
         if (item.HasNumber)
         {
-            var number = new TextBlock { Text = item.Number.ToString(), FontSize = 12, FontWeight = FontWeights.SemiBold, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            var number = new TextBlock { Text = item.Number.ToString(), FontSize = (double)Application.Current.FindResource("TextSmall"), FontWeight = FontWeights.SemiBold, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             number.SetResourceReference(TextBlock.ForegroundProperty, "Text2");
             var circle = new Border { Width = 24, Height = 24, CornerRadius = new CornerRadius(12), Child = number, Margin = new Thickness(0, 0, 8, 0) };
             circle.SetResourceReference(Border.BackgroundProperty, "ChipBg");
