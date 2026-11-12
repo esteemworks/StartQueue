@@ -363,7 +363,7 @@ public static class Strings
     public static string ThemeDark => T("Dark", "Dunkel");
     public static string SettingsLanguage => T("Language", "Sprache");
     public static string LanguageSystem => T("Like Windows", "Wie Windows");
-    public static string LanguageHelp => T("Also applies to the \"Add to StartQueue\" entry in the Explorer context menu.", "Gilt auch für den Eintrag „Zu StartQueue hinzufügen“ im Kontextmenü des Explorers.");
+    public static string LanguageHelp => T("Also applies to the \"Add to StartQueue\" entry in the Explorer context menu", "Gilt auch für den Eintrag „Zu StartQueue hinzufügen“ im Kontextmenü des Explorers");
     public static string SettingsNewEntries => T("New autostart entries", "Neue Autostart-Einträge");
     public static string SettingsNewMode => T("When an app adds itself to the Windows autostart", "Wenn sich eine App in den Windows-Autostart einträgt");
     public static string NewModeEnabled => T("Take it over and start it", "Übernehmen und starten");
@@ -372,18 +372,18 @@ public static class Strings
     public static string SettingsNotifyNew => T("Show a notification", "Benachrichtigung anzeigen");
     public static string SettingsNotifyNewHelp => T("The red dot on the tray icon and the NEW mark appear either way.", "Der rote Punkt am Tray-Symbol und die Markierung NEU erscheinen in jedem Fall.");
     public static string SettingsStoreApps => T("Manage Store apps too", "Store-Apps mitverwalten");
-    public static string SettingsStoreAppsHelp => T("Off: the startup tasks of Store apps stay with Windows.", "Aus: Die Startaufgaben von Store-Apps bleiben bei Windows.");
+    public static string SettingsStoreAppsHelp => T("Off: the startup tasks of Store apps stay with Windows", "Aus: Die Startaufgaben von Store-Apps bleiben bei Windows");
     public static string SettingsSequence => T("Startup at sign-in", "Start bei der Anmeldung");
     public static string SettingsSequenceHelp => T("Applies to the whole list. Each app also has its own delay.", "Gilt für die ganze Liste. Jede App hat zusätzlich eine eigene Verzögerung.");
     public static string SettingsStartDelay => T("Wait before the first app", "Wartezeit vor der ersten App");
-    public static string SettingsStartDelayHelp => T("Gives Windows time to finish signing you in.", "Gibt Windows Zeit, die Anmeldung abzuschließen.");
+    public static string SettingsStartDelayHelp => T("Gives Windows time to finish signing you in", "Gibt Windows Zeit, die Anmeldung abzuschließen");
     public static string SettingsGap => T("Gap between apps", "Abstand zwischen den Apps");
-    public static string SettingsGapHelp => T("Added to each app's own delay.", "Kommt zur eigenen Verzögerung jeder App hinzu.");
+    public static string SettingsGapHelp => T("Added to each app's own delay", "Kommt zur eigenen Verzögerung jeder App hinzu");
     public static string SettingsWaitLimit => T("Longest wait for \"Wait until it runs\"", "Höchstens warten bei „Warten, bis sie läuft“");
-    public static string SettingsWaitLimitHelp => T("After that the next app starts, even if this one is not running yet.", "Danach startet die nächste App, auch wenn diese noch nicht läuft.");
+    public static string SettingsWaitLimitHelp => T("After that the next app starts, even if this one is not running yet", "Danach startet die nächste App, auch wenn diese noch nicht läuft");
     public static string Seconds => T("seconds", "Sekunden");
     public static string SettingsNotifySequence => T("Show a summary when done", "Zusammenfassung nach dem Start anzeigen");
-    public static string SettingsNotifySequenceHelp => T("A notification once every app has been started.", "Eine Benachrichtigung, sobald alle Apps gestartet sind.");
+    public static string SettingsNotifySequenceHelp => T("A notification once every app has been started", "Eine Benachrichtigung, sobald alle Apps gestartet sind");
     public static string SettingsScanInterval => T("Extra full scan", "Zusätzliche vollständige Prüfung");
     public static string SettingsScanHelp => T("Changes to Run keys and startup folders are noticed right away anyway. The full scan also finds new Store app startup tasks.",
         "Änderungen an Run-Schlüsseln und Autostart-Ordnern bemerkt StartQueue ohnehin sofort. Die vollständige Prüfung findet zusätzlich neue Startaufgaben von Store-Apps.");
@@ -560,16 +560,20 @@ public static class Strings
     public static string Scanning => T("Reading the Windows autostart…", "Windows-Autostart wird gelesen …");
 
     // ---------- Settings page ----------
+    public static string SetupFullAdds => T("Fully set up, StartQueue also manages machine-wide entries and starts apps as administrator",
+        "Vollständig verwaltet StartQueue auch systemweite Einträge und startet Apps als Administrator");
+    public static string SetupFullGives => T("machine-wide entries and starts as administrator too; Windows asks nothing more",
+        "auch systemweite Einträge und Starts als Administrator; Windows fragt nichts mehr");
     public static string ModeAdminTitle => T("Set up fully, with admin rights", "Vollständig eingerichtet, mit Adminrechten");
     public static string ModeAdminText => T("StartQueue also manages machine-wide entries and starts apps as administrator when you want. Windows asks nothing more.",
         "StartQueue verwaltet auch systemweite Einträge und startet Apps auf Wunsch als Administrator. Windows fragt nichts mehr.");
     public static string ModeUserTitle => T("Set up as Basic, without admin rights", "Als Basis eingerichtet, ohne Adminrechte");
     public static string ModeUserText => T("StartQueue fully manages your own entries. Machine-wide entries stay with Windows, starting as administrator is not available.",
         "Eigene Einträge verwaltet StartQueue vollständig. Systemweite Einträge bleiben bei Windows, Starts als Administrator sind nicht verfügbar.");
-    public static string ModeEnabledHelp => T("The app goes to the end of the apps that are on.", "Die App kommt ans Ende der eingeschalteten Apps.");
-    public static string ModeDisabledHelp => T("It is in the list but starts only once you turn it on.", "Sie steht in der Liste, startet aber erst, wenn du sie einschaltest.");
-    public static string ModeNotifyHelp => T("Windows keeps starting it. Take it over under Windows autostart.", "Windows startet sie weiter selbst. Übernehmen geht unter „Windows-Autostart“.");
-    public static string NotifyHelpShort => T("The red dot on the tray icon and NEW always appear.", "Roter Punkt am Tray-Symbol und NEU erscheinen immer.");
+    public static string ModeEnabledHelp => T("The app goes to the end of the apps that are on", "Die App kommt ans Ende der eingeschalteten Apps");
+    public static string ModeDisabledHelp => T("It is in the list but starts only once you turn it on", "Sie steht in der Liste, startet aber erst, wenn du sie einschaltest");
+    public static string ModeNotifyHelp => T("Windows keeps starting it; you take it over under Windows autostart", "Windows startet sie weiter selbst; übernehmen kannst du sie unter „Windows-Autostart“");
+    public static string NotifyHelpShort => T("The red dot on the tray icon and NEW always appear", "Roter Punkt am Tray-Symbol und NEU erscheinen immer");
     public static string Minutes => T("{0} min", "{0} min");
 
     // ---------- Add app dialog ----------
@@ -630,8 +634,8 @@ public static class Strings
         "Nach der Anmeldung wiederholt sich die Aufgabe alle {0}. StartQueue übernimmt das: Es startet die Aufgabe an ihrer Stelle in deiner Reihenfolge und danach alle {0}.");
     // ---------- Windows startup delay ----------
     public static string WindowsDelayOff => T("Switch off Windows' startup delay", "Windows-Startverzögerung abschalten");
-    public static string WindowsDelayHelp => T("For what Windows still starts by itself, and for StartQueue where it starts through the Run key.",
-        "Für alles, was Windows noch selbst startet, und für StartQueue, wo es über den Run-Eintrag startet.");
+    public static string WindowsDelayHelp => T("For what Windows still starts by itself, and for StartQueue where it starts through the Run key",
+        "Für alles, was Windows noch selbst startet, und für StartQueue, wo es über den Run-Eintrag startet");
     public static string WindowsDelayOffTitle => T("Switch off Windows' startup delay?", "Windows-Startverzögerung abschalten?");
     public static string WindowsDelayOffBody => T("After sign-in Windows waits a few seconds before its autostart and then starts the entries one by one once the system is idle. Switched off, they start right away.",
         "Nach der Anmeldung wartet Windows einige Sekunden mit seinem Autostart und startet die Einträge dann nacheinander, sobald das System ruhig ist. Abgeschaltet starten sie sofort.");

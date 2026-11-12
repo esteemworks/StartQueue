@@ -59,6 +59,16 @@ public sealed class SettingsVm : INotifyPropertyChanged
     /// <summary>The choice of the accent row (built by the kit's <c>AccentRow</c> in MainWindow), saved and applied.</summary>
     public void PickAccent(EsteemWorks.Kit.AccentChoice accent) => Change(s => s.Accent = accent.FromKit());
 
+    /// <summary>The color mode of this window, from the kit's General.</summary>
+    public void PickTheme(ThemeChoice theme) => Change(s => s.Theme = theme);
+
+    /// <summary>The language as the kit's General has it: null for Windows' own, "en" or "de".</summary>
+    public string? LanguageCode
+    {
+        get => Current.Language switch { LanguageChoice.English => "en", LanguageChoice.German => "de", _ => null };
+        set => Change(s => s.Language = value switch { "en" => LanguageChoice.English, "de" => LanguageChoice.German, _ => LanguageChoice.System });
+    }
+
     /// <summary>The language drop-down: Like Windows, English, Deutsch.</summary>
     public int LanguageIndex
     {

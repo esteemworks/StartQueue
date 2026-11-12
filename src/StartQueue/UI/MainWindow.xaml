@@ -844,40 +844,8 @@
         <ScrollViewer x:Name="SettingsView" VerticalScrollBarVisibility="Auto" Visibility="Collapsed" Margin="0,0,4,0">
             <StackPanel Style="{StaticResource SettingsPage}">
 
-                <kit:SectionLabel Label="{x:Static s:Strings.SettingsAppearance}" Margin="4,0,0,8" />
-                <kit:SettingsCard>
-                    <kit:SettingRow Icon="&#xE790;" Label="{x:Static s:Strings.SettingsTheme}" Description="{x:Static s:Strings.SettingsThemeHelp}">
-                        <Border Style="{StaticResource SegmentGroup}">
-                            <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
-                                <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="Theme" Content="{x:Static s:Strings.ThemeSystem}" IsChecked="{Binding ThemeSystem}" />
-                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Theme" Content="{x:Static s:Strings.ThemeLight}" IsChecked="{Binding ThemeLight}" />
-                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Theme" Content="{x:Static s:Strings.ThemeDark}" IsChecked="{Binding ThemeDark}" />
-                            </StackPanel>
-                        </Border>
-                    </kit:SettingRow>
-                    <!-- The family's segments (StartQueue, Profile, Windows, Sand) from the kit's AccentRow, set when the settings open -->
-                    <kit:SettingRow Icon="&#xE771;" Label="{x:Static kit:AccentRow.Label}" Description="{x:Static kit:AccentRow.Help}">
-                        <ContentControl x:Name="AccentHost" Focusable="False" />
-                    </kit:SettingRow>
-                    <kit:SettingRow Icon="&#xE774;" Label="{x:Static s:Strings.SettingsLanguage}" Description="{x:Static s:Strings.LanguageHelp}">
-                        <ComboBox Width="220" Height="32" FontSize="13" SelectedIndex="{Binding LanguageIndex}">
-                            <ComboBoxItem Content="{x:Static s:Strings.LanguageSystem}" />
-                            <ComboBoxItem Content="English" />
-                            <ComboBoxItem Content="Deutsch" />
-                        </ComboBox>
-                    </kit:SettingRow>
-                    <!-- How StartQueue is set up, what that means below it, and "Set up fully" (one UAC prompt) when there is a step up -->
-                    <kit:SettingRow Icon="&#xEA18;" Label="{Binding ModeTitle}" Description="{Binding SetupStateText}" Info="{Binding ModeText}">
-                        <Button Style="{StaticResource SecondaryButton}" Click="SetUpAdmin_Click"
-                                Visibility="{Binding CanSetUpAdmin, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.SetUpAdminTip}"
-                                AutomationProperties.Name="{x:Static s:Strings.SetUpAdmin}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" />
-                                <TextBlock Text="{x:Static s:Strings.SetUpAdmin}" Margin="8,0,0,0" />
-                            </StackPanel>
-                        </Button>
-                    </kit:SettingRow>
-                </kit:SettingsCard>
+                <!-- General is the kit's, the same rows in every app (KitSettingsPage.General), built when the settings open -->
+                <StackPanel x:Name="GeneralHost" />
 
                 <kit:SectionLabel Label="{x:Static s:Strings.SettingsSequence}" />
                 <kit:SettingsCard x:Name="SequenceCard">

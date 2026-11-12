@@ -1188,7 +1188,33 @@ public partial class MainWindow : Window
         {
             var settings = new SettingsVm(host);
             SettingsView.DataContext = settings;
-            AccentHost.Content = EsteemWorks.Kit.UI.AccentRow.Segments(host.Config.Settings.Accent.ToKit(), profiles: true, settings.PickAccent);
+            // General from the kit: color mode, accent, language, set up; StartQueue starts at sign-in by its own task,
+            // so it has no "Start with Windows".
+            GeneralHost.Children.Clear();
+            KitSettingsPage.General(GeneralHost, new GeneralSettings
+            {
+                Theme = host.Config.Settings.Theme,
+                SetTheme = settings.PickTheme,
+                Accent = host.Config.Settings.Accent.ToKit(),
+                SetAccent = settings.PickAccent,
+                Profiles = true,
+                Language = settings.LanguageCode,
+                SetLanguage = code => settings.LanguageCode = code,
+                LanguageNote = Strings.LanguageHelp,
+                Setup = new GeneralSetup
+                {
+                    IsFull = () => Elevation.AdminMode,
+                    CanSetUp = () => settings.CanSetUpAdmin,
+                    SetUpFully = () =>
+                    {
+                        host.SetUpAdminFeatures();
+                        return Task.CompletedTask;
+                    },
+                    FullAdds = Strings.SetupFullAdds,
+                    FullGives = Strings.SetupFullGives,
+                    Info = settings.SetupStateText,
+                },
+            });
         }
         SyncFirstStart(host.Config);
     }
@@ -1222,7 +1248,9 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
         // On a page of the settings (Updates, Backup, ...) Esc returns to the settings: the page handles it.
-        else if (e.Key == Key.Escape && view == View.Settings && KitSubpage.Depth(SettingsView) == 0)
+        // Esc in an open list or menu (its own popup window) closes that first, not the settings.
+        else if (e.Key == Key.Escape && view == View.Settings && KitSubpage.Depth(SettingsView) == 0
+            && !(e.OriginalSource is Visual source && PresentationSource.FromVisual(source)?.RootVisual is not Window))
         {
             ShowView(lastTab);
             e.Handled = true;
@@ -1600,7 +1628,6 @@ public partial class MainWindow : Window
 
     void RunSequence_Click(object sender, RoutedEventArgs e) => host.RunSequenceNow();
 
-    void SetUpAdmin_Click(object sender, RoutedEventArgs e) => host.SetUpAdminFeatures();
 
     // ---------- Windows startup delay ----------
 
