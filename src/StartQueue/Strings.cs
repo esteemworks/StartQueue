@@ -313,6 +313,8 @@ public static class Strings
     public static string TrayNotOn => T("Not switched on yet", "Noch nicht eingeschaltet");
     public static string TrayOn => T("On, {0} apps at sign-in", "Eingeschaltet, {0} Apps bei der Anmeldung");
     public static string TrayOnProfile => T("On, {0} apps in \"{1}\"", "Eingeschaltet, {0} Apps in „{1}“");
+    public static string TrayOnOne => T("On, 1 app at sign-in", "Eingeschaltet, 1 App bei der Anmeldung");
+    public static string TrayOnProfileOne => T("On, 1 app in \"{0}\"", "Eingeschaltet, 1 App in „{0}“");
     public static string NotifyNewTitle => T("New autostart entry", "Neuer Autostart-Eintrag");
     public static string NotifyNewText => T(
         "\"{0}\" added itself to the Windows autostart. StartQueue took it over and starts it at the end of your list.",

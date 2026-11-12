@@ -806,8 +806,8 @@ public sealed class TrayHost : IDisposable
             1 => Strings.TrayOneNew,
             > 1 => Strings.F(Strings.TrayNew, newCount),
             _ when !config.SwitchedOn => Strings.TrayNotOn,
-            _ when active != null => Strings.F(Strings.TrayOnProfile, starting, active.Name),
-            _ => Strings.F(Strings.TrayOn, starting),
+            _ when active != null => starting == 1 ? Strings.F(Strings.TrayOnProfileOne, active.Name) : Strings.F(Strings.TrayOnProfile, starting, active.Name),
+            _ => starting == 1 ? Strings.TrayOnOne : Strings.F(Strings.TrayOn, starting),
         };
     }
 
