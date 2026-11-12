@@ -161,9 +161,10 @@ public static class Strings
     public static string Remove => T("Remove", "Entfernen");
     public static string RemoveTip => T("Removes the app from StartQueue (Del)", "Entfernt die App aus StartQueue (Entf)");
 
-    public static string KindProgram => T("PROGRAM", "PROGRAMM");
-    public static string KindShortcut => T("SHORTCUT", "VERKNÜPFUNG");
-    public static string KindStoreApp => T("STORE APP", "STORE-APP");
+    // The kind of an entry, a quiet line below its name in the details (no capitals line above the title, design system).
+    public static string KindProgram => T("Program", "Programm");
+    public static string KindShortcut => T("Shortcut", "Verknüpfung");
+    public static string KindStoreApp => T("Store app", "Store-App");
     public static string StoreApp => T("Store app", "Store-App");
     public static string Shortcut => T("Shortcut", "Verknüpfung");
     public static string AddedByYou => T("Added by you on {0:g}.", "Von dir hinzugefügt am {0:g}.");
@@ -607,7 +608,7 @@ public static class Strings
     public static string KeepUnknownTip => T("On StartQueue's exception list.", "Steht auf der Ausnahmeliste von StartQueue.");
 
     // ---------- Scheduled tasks ----------
-    public static string KindTask => T("SCHEDULED TASK", "GEPLANTE AUFGABE");
+    public static string KindTask => T("Scheduled task", "Geplante Aufgabe");
     public static string TaskSubtitle => T("Scheduled task {0}", "Geplante Aufgabe {0}");
     public static string TasksHintTakeOver => T("These start at sign-in too. Taking one over switches off only its sign-in start; StartQueue then runs the task at its place in your order, with all its settings.",
         "Starten ebenfalls bei der Anmeldung. Übernehmen schaltet nur ihren Anmeldestart ab; StartQueue führt die Aufgabe dann an ihrer Stelle in deiner Reihenfolge aus, mit allen Einstellungen.");
@@ -786,7 +787,6 @@ public static class Strings
     public static string IntroStepTakeOver => T("Take over", "Übernehmen");
     public static string IntroStepSwitchOn => T("Switch on", "Einschalten");
 
-    public static string IntroWelcomeLabel => T("WELCOME", "WILLKOMMEN");
     public static string IntroWelcomeTitle => T("Your apps start after sign-in in your order.", "Deine Apps starten nach der Anmeldung in deiner Reihenfolge.");
     public static string IntroWelcomeText => T("StartQueue takes apps out of the Windows autostart and starts them itself: one after the other, with pauses, minimized or in the background, by day of the week if you like.",
         "StartQueue nimmt Apps aus dem Windows-Autostart und startet sie selbst: nacheinander, mit Pausen, minimiert oder im Hintergrund, auf Wunsch je nach Wochentag.");

@@ -155,6 +155,15 @@ public sealed class TrayHost : IDisposable
             var scale = args.FirstOrDefault(a => a.Length == 2 && a[0] == 'x' && char.IsDigit(a[1])) is { } x ? x[1] - '0' : 1;
             await new MainWindow(this) { SnapshotScale = scale }.SnapshotAsync(args[0], args.Contains("maximize", StringComparer.OrdinalIgnoreCase),
                 args.Contains("colors", StringComparer.OrdinalIgnoreCase));
+            // The tray menu, drawn without opening it (the kit's KitTray).
+            try
+            {
+                tray.SaveMenuPicture(Path.Combine(args[0], "tray.png"));
+            }
+            catch (Exception ex)
+            {
+                Log.Warning($"Snapshot of the tray menu failed: {ex.Message}");
+            }
         }
         finally
         {

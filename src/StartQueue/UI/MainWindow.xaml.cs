@@ -379,7 +379,7 @@ public partial class MainWindow : Window
                 services.Toggle(windowsHeader);
                 // Sorted by start type, only delayed ones; then back to how it was.
                 ServicesSortBox.SelectedIndex = 1;
-                var delayed = ServicesFilterMenu.Items.OfType<MenuItem>().First(i => (i.Tag as string) == "AutomaticDelayed");
+                var delayed = ServicesFilterMenu.Items.OfType<MenuItem>().First(i => (i.CommandParameter as string) == "AutomaticDelayed");
                 delayed.IsChecked = true;
                 ServicesFilterItem_Click(delayed, new RoutedEventArgs());
                 ServicesList.ScrollIntoView(services.Rows[0]);
@@ -434,11 +434,49 @@ public partial class MainWindow : Window
                 ScanResultIcon.Text = nothing ? "" : "";
                 ScanResultIcon.SetResourceReference(TextBlock.ForegroundProperty, nothing ? "Text3" : "Accent");
                 ScanResultText.Text = text;
-                ScanResultCard.Measure(new Size(500, 300));
-                ScanResultCard.Arrange(new Rect(ScanResultCard.DesiredSize));
-                ScanResultCard.UpdateLayout();
-                SavePng(ScanResultCard, Path.Combine(folder, $"{name}.png"));
+                // With its frame, so the shadow shows as on screen.
+                ScanResultText.InvalidateMeasure();
+                ScanResultCard.InvalidateMeasure();
+                ScanResultFrame.InvalidateMeasure();
+                ScanResultFrame.Measure(new Size(500, 300));
+                ScanResultFrame.Arrange(new Rect(ScanResultFrame.DesiredSize));
+                ScanResultFrame.UpdateLayout();
+                SavePng(ScanResultFrame, Path.Combine(folder, $"{name}.png"));
             }
+            // The menus, drawn on their own like the note above: opened, they would show on screen.
+            ShowView(View.Order);
+            if (entries.Count > 0)
+            {
+                var rowMenu = (ContextMenu)FindResource("RowMenu");
+                rowMenu.DataContext = entries[0];
+                SaveLoose(rowMenu, Path.Combine(folder, "menu-row.png"));
+            }
+            if (ProfileTabs.Items.OfType<ProfileTab>().FirstOrDefault(p => p.IsCustom) is { } customTab)
+            {
+                var profileMenu = (ContextMenu)FindResource("ProfileMenu");
+                profileMenu.DataContext = customTab;
+                SaveLoose(profileMenu, Path.Combine(folder, "menu-profile.png"));
+            }
+            // The filter menu belongs to its button; a copy of its entries is drawn.
+            ShowView(View.Services);
+            await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            var filterCopy = new ContextMenu();
+            foreach (var item in ServicesFilterMenu.Items)
+                filterCopy.Items.Add(item switch
+                {
+                    // "Automatic (delayed start)" ticked, so the picture shows the check mark.
+                    MenuItem m => new MenuItem { Header = m.Header, IsCheckable = m.IsCheckable, IsChecked = m.IsChecked || (m.CommandParameter as string) == "AutomaticDelayed", Tag = m.Tag, Style = m.Style, IsEnabled = m.IsEnabled, CommandParameter = m.CommandParameter },
+                    Separator => new Separator(),
+                    _ => new Separator(),
+                });
+            SaveLoose(filterCopy, Path.Combine(folder, "menu-filter.png"));
+            SaveLoose(new ToolTip { Content = Strings.ScanTip }, Path.Combine(folder, "tooltip.png"));
+            // The kit's notifications at the bottom of the window: a plain one and Undo in front of it.
+            ShowView(View.Order);
+            Notices.Show(Strings.F(Strings.ScanTakenOver, "Spotify"));
+            if (entries.Count > 0) ShowUndo(Strings.F(Strings.RemovedText, entries[0].Name), () => { });
+            await Task.Delay(700);
+            SavePng(Root, Path.Combine(folder, "notices.png"));
             // Wide and back again, as when maximizing and restoring: the rows have to follow the width.
             foreach (var wide in new[] { View.Order, View.Services })
             {
@@ -565,6 +603,45 @@ public partial class MainWindow : Window
     /// <summary>Snapshots draw at this many times the screen's pixels.</summary>
     public int SnapshotScale { get; init; } = 1;
 
+    /// <summary>Draws an element that is not shown (a menu), at its own size, with room for its shadow.</summary>
+    void SaveLoose(FrameworkElement element, string file)
+    {
+        try
+        {
+            // A menu may have no parent, so it is laid out on its own and drawn onto a frame by a brush.
+            element.Measure(new Size(600, 900));
+            element.Arrange(new Rect(element.DesiredSize));
+            element.UpdateLayout();
+            var frame = new Border
+            {
+                Padding = new Thickness(24),
+                Background = (Brush)FindResource("Bg"),
+                Child = new Border
+                {
+                    Width = element.ActualWidth,
+                    Height = element.ActualHeight,
+                    // Fixed to the element's own bounds, as in SavePng: its shadow reaching past them would shift it.
+                    Background = new VisualBrush(element)
+                    {
+                        Stretch = Stretch.None,
+                        ViewboxUnits = BrushMappingMode.Absolute,
+                        Viewbox = new Rect(0, 0, element.ActualWidth, element.ActualHeight),
+                        ViewportUnits = BrushMappingMode.Absolute,
+                        Viewport = new Rect(0, 0, element.ActualWidth, element.ActualHeight),
+                    },
+                },
+            };
+            frame.Measure(new Size(700, 1000));
+            frame.Arrange(new Rect(frame.DesiredSize));
+            frame.UpdateLayout();
+            SavePng(frame, file);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning($"Snapshot of {Path.GetFileName(file)} failed: {ex.Message}");
+        }
+    }
+
     void SavePng(FrameworkElement element, string file)
     {
         var screen = VisualTreeHelper.GetDpi(this);
@@ -642,6 +719,8 @@ public partial class MainWindow : Window
         DateTime? EndOfHours = null)
     {
         public bool IsCustom => Id != null;
+        // Screen readers read the item around the chip by this; a record would say "ProfileTab { Id = ... }".
+        public override string ToString() => Name;
         public string PauseLabel => IsPaused ? Strings.ProfileResume : Strings.ProfilePause;
         public bool CanUseUntil => EndOfHours != null;
         public string UseUntilLabel => EndOfHours is { } end ? Strings.F(Strings.ProfileUseUntil, Strings.ProfileMoment(end)) : "";
@@ -1006,7 +1085,7 @@ public partial class MainWindow : Window
     {
         StatusText.Text = text;
         StatusChip.ToolTip = tip;
-        if (StatusChip.Visibility != Visibility.Visible) Motion.Appear(StatusChip, fromScale: 0.94);
+        if (StatusChip.Visibility != Visibility.Visible) Motion.Appear(StatusChip, fromScale: 0.95);
         System.Windows.Automation.AutomationProperties.SetName(StatusChip, $"{text}. {tip}");
     }
 
@@ -1468,7 +1547,8 @@ public partial class MainWindow : Window
         ScanResultIcon.SetResourceReference(TextBlock.ForegroundProperty, nothing ? "Text3" : "Accent");
         ScanResultText.Text = nothing ? Strings.ScanNothingNew : string.Join("\n", lines);
         ScanResult.IsOpen = true;
-        Motion.Appear(ScanResultCard, fromScale: 0.96);
+        // Grows out of the Scan button above its right edge, as the kit's menus do (design system, Motion).
+        Motion.GrowFrom(ScanResultFrame, new Point(1, 0));
         // Long enough to read; findings stay a little longer.
         scanResultTimer.Stop();
         scanResultTimer.Interval = TimeSpan.FromSeconds(nothing ? 3 : 7);
@@ -1487,7 +1567,8 @@ public partial class MainWindow : Window
 
     /// <summary>The note sits below "Check", right edges in line, so it stays inside the window.</summary>
     static CustomPopupPlacement[] PlaceUnderRightEdge(Size popup, Size target, Point offset) =>
-        [new CustomPopupPlacement(new Point(target.Width - popup.Width, target.Height + 6), PopupPrimaryAxis.Horizontal)];
+        // The card's own margin (room for the shadow) sets it 4 px below the button, as menus sit.
+        [new CustomPopupPlacement(new Point(target.Width - popup.Width, target.Height), PopupPrimaryAxis.Horizontal)];
 
     void MarkSeen_Click(object sender, RoutedEventArgs e) => host.MarkAllSeen();
 
@@ -1723,7 +1804,7 @@ public partial class MainWindow : Window
     /// <summary>Ticked start types and states narrow the list; none ticked in a group means all of that group.</summary>
     void ServicesFilterItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not MenuItem { Tag: string tag } item) return;
+        if (sender is not MenuItem { CommandParameter: string tag } item) return;
         switch (tag)
         {
             case "Running": services.OnlyRunning = item.IsChecked; break;
@@ -1954,7 +2035,7 @@ public partial class MainWindow : Window
         if (!offScreen) AddSearch.FocusSearch();
 
         // The rows come in after the fade-in, so building them does not stall it.
-        var fadeIn = Task.Delay(Motion.Enabled ? 200 : 0);
+        var fadeIn = Task.Delay(Motion.Enabled ? Motion.DialogTime : TimeSpan.Zero);
         var candidates = await host.LoadCandidatesAsync();
         await fadeIn;
         if (AddCard.Visibility != Visibility.Visible) return;

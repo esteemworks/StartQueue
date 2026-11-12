@@ -27,6 +27,15 @@ All notable changes to StartQueue. Downloads are on the [releases page](../../re
 - The counts on the tabs roll to their new value when they change while the window is open
 - **Add app:** the Add button of each app is a plain button now; Done stays the one main button of the dialog
 - **Services:** start, stop and restart show on the row under the pointer or with the keyboard focus, like the actions in the startup order
+- **Calmer still, as the EsteemWorks design system has it since its version 21:**
+  - The chips on a row (minimized, background, waits, a delay, admin, repeat) are grey; only *still with Windows* and *New* keep the color. In Windows autostart and Services the state chips are grey too, whatever the origin
+  - The details show the app's name first and its kind (program, shortcut, Store app, scheduled task) as a quiet line below it; the first start's welcome has no capitals line above its title, and its icons are grey
+  - Shadows only on what floats, soft and in two layers: menus, tooltips, notifications and the note under Scan, a stronger one for dialogs. Cards and rows have none
+  - Every movement takes the family's times and curve: hovering fades in, a press shrinks a button to 97 percent, dialogs fade in from 96 percent, the note under **Scan** grows out of the button instead of out of the middle
+  - **Tooltips** wait 600 ms, and once one has shown, the next comes at once; they look like the menus (white or dark card, thin line, soft shadow)
+  - Spacing on the family's scale, icons in buttons at one size
+  - **The tray menu** looks like the menus in the window: light or dark with the app, taller rows, rounded corners
+- **Services, Filter:** the menu shows a check mark next to each ticked start type and state; before, it showed the names of the start types where the icon goes
 - **Accent color** has a fourth choice, **Sand**: the quiet beige of the EsteemWorks apps, the same in each of them. The row now has the order StartQueue, Profile, Windows, Sand, with the same words and tooltips as in the other EsteemWorks apps; **Profile** stays the default
 
 ## 1.6.0

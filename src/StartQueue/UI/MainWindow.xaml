@@ -92,7 +92,6 @@
                                     <Setter Property="Foreground" Value="{DynamicResource Text4}" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Added}" Value="True">
-                                            <Setter Property="FontSize" Value="13" />
                                             <Setter Property="FontWeight" Value="SemiBold" />
                                             <Setter Property="Foreground" Value="{DynamicResource Accent}" />
                                         </DataTrigger>
@@ -136,7 +135,7 @@
                         Background="{DynamicResource WarnChipBg}" Foreground="{DynamicResource WarnChipText}">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="12,0,10,0">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="12,0,12,0">
                                 <ContentPresenter VerticalAlignment="Center" />
                             </Border>
                             <ControlTemplate.Triggers>
@@ -156,7 +155,7 @@
                         ToolTip="{x:Static s:Strings.ScanTip}" AutomationProperties.Name="{x:Static s:Strings.Scan}">
                     <StackPanel Orientation="Horizontal">
                         <!-- Turns while a scan runs -->
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE72C;" FontSize="13" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE72C;" FontSize="14" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                             <TextBlock.RenderTransform>
                                 <RotateTransform x:Name="ScanTurn" />
                             </TextBlock.RenderTransform>
@@ -167,7 +166,7 @@
                 <Button x:Name="AddButton" Style="{StaticResource PrimaryButton}" Click="Add_Click"
                         ToolTip="{x:Static s:Strings.AddAppTip}" AutomationProperties.Name="{x:Static s:Strings.AddApp}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="13" VerticalAlignment="Center" />
+                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="14" VerticalAlignment="Center" />
                         <TextBlock Text="{x:Static s:Strings.AddApp}" Margin="8,0,0,0" />
                     </StackPanel>
                 </Button>
@@ -182,11 +181,11 @@
 
             <DockPanel Margin="24,16,12,20">
                 <!-- Profiles: the frame for the list below. Left to right in order of precedence, Standard last. -->
-                <Border DockPanel.Dock="Top" Margin="0,0,24,14" Padding="14,12" CornerRadius="8" Background="{DynamicResource Surface}"
+                <Border DockPanel.Dock="Top" Margin="0,0,24,16" Padding="16,12" CornerRadius="8" Background="{DynamicResource Surface}"
                         BorderBrush="{DynamicResource Line}" BorderThickness="1">
                     <StackPanel>
                         <WrapPanel Orientation="Horizontal" ToolTip="{x:Static s:Strings.ProfileBarTip}">
-                            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.ProfileBarLabel}" VerticalAlignment="Center" Margin="0,0,14,0" />
+                            <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.ProfileBarLabel}" VerticalAlignment="Center" Margin="0,0,12,0" />
                             <Grid>
                                 <ItemsControl x:Name="ProfileTabs" Focusable="False" AllowDrop="True" Background="Transparent"
                                               DragOver="ProfileTabs_DragOver" Drop="ProfileTabs_Drop" DragLeave="ProfileTabs_DragLeave">
@@ -211,7 +210,7 @@
                                             </RadioButton.Style>
                                             <StackPanel Orientation="Horizontal">
                                                 <!-- The profile's color; the profile that applies now gets a ring around it -->
-                                                <Grid Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,7,0">
+                                                <Grid Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,8,0">
                                                     <Ellipse Width="8" Height="8" Fill="{Binding Swatch}" />
                                                     <Ellipse Stroke="{Binding Swatch}" StrokeThickness="1.5" ToolTip="{x:Static s:Strings.ProfileActiveNow}"
                                                              Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
@@ -227,20 +226,20 @@
                                 <!-- Where a dragged profile will land: an upright line with a dot in the gap between chips -->
                                 <Canvas x:Name="ProfileDropLayer" IsHitTestVisible="False">
                                     <Grid x:Name="ProfileDropMarker" Width="10" Visibility="Collapsed">
-                                        <Border Width="2" CornerRadius="1" Background="{DynamicResource PrimaryBg}" HorizontalAlignment="Center" Margin="0,5,0,0" />
-                                        <Ellipse Width="10" Height="10" VerticalAlignment="Top" Stroke="{DynamicResource PrimaryBg}" StrokeThickness="2" Fill="{DynamicResource Surface}" />
+                                        <Border Width="2" CornerRadius="1" Background="{DynamicResource AccentFill}" HorizontalAlignment="Center" Margin="0,5,0,0" />
+                                        <Ellipse Width="10" Height="10" VerticalAlignment="Top" Stroke="{DynamicResource AccentFill}" StrokeThickness="2" Fill="{DynamicResource Surface}" />
                                     </Grid>
                                 </Canvas>
                             </Grid>
                             <Button Style="{StaticResource GhostButton}" Height="30" Click="ProfileAdd_Click" ToolTip="{x:Static s:Strings.ProfilesIntro}"
                                     AutomationProperties.Name="{x:Static s:Strings.ProfileAdd}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="11" VerticalAlignment="Center" />
+                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE710;" FontSize="14" VerticalAlignment="Center" />
                                     <TextBlock Text="{x:Static s:Strings.ProfileAddShort}" Margin="6,0,0,0" />
                                 </StackPanel>
                             </Button>
                         </WrapPanel>
-                        <Grid x:Name="ProfileInfoRow" Margin="0,10,0,0">
+                        <Grid x:Name="ProfileInfoRow" Margin="0,12,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -304,7 +303,7 @@
                                                Cursor="SizeAll" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{x:Static s:Strings.DragTip}" />
                                     <TextBlock Grid.Column="1" Text="{Binding Position}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource Text4}"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <CheckBox Grid.Column="2" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding Enabled}" Margin="6,0,14,0"
+                                    <CheckBox Grid.Column="2" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding Enabled}" Margin="6,0,16,0"
                                               ToolTip="{x:Static s:Strings.StartAtLogon}" AutomationProperties.Name="{x:Static s:Strings.StartAtLogon}" />
 
                                     <Grid Grid.Column="3">
@@ -329,6 +328,7 @@
                                         </StackPanel>
                                     </Grid>
 
+                                    <!-- Settings of the entry in neutral chips; only "still with Windows" (Windows starts it too) and New carry color -->
                                     <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,12,0">
                                         <Border Style="{StaticResource Chip}" Visibility="{Binding StillInWindows, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.StillInWindowsTip}">
                                             <TextBlock Style="{StaticResource ChipLabel}" Text="{x:Static s:Strings.StillInWindowsChip}" />
@@ -337,19 +337,19 @@
                                             <TextBlock Style="{StaticResource NewChipLabel}" Text="{x:Static s:Strings.NewChip}" />
                                         </Border>
                                         <Border Style="{StaticResource Chip}" Visibility="{Binding HasDelay, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.DelayTip}">
-                                            <TextBlock Style="{StaticResource ChipLabel}" Text="{Binding DelayText}" />
+                                            <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{Binding DelayText}" />
                                         </Border>
                                         <Border Style="{StaticResource Chip}" Visibility="{Binding WaitUntilRunning, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.WaitsTip}">
-                                            <TextBlock Style="{StaticResource ChipLabel}" Text="{x:Static s:Strings.WaitsChip}" />
+                                            <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{x:Static s:Strings.WaitsChip}" />
                                         </Border>
                                         <Border Style="{StaticResource Chip}" Visibility="{Binding RunElevated, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.AdminTip}">
-                                            <TextBlock Style="{StaticResource ChipLabel}" Text="{x:Static s:Strings.AdminChip}" />
+                                            <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{x:Static s:Strings.AdminChip}" />
                                         </Border>
                                         <Border Style="{StaticResource Chip}" Visibility="{Binding HasWindowChip, Converter={StaticResource BoolToVisibility}}" ToolTip="{Binding WindowNote}">
-                                            <TextBlock Style="{StaticResource ChipLabel}" Text="{Binding WindowChip}" />
+                                            <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{Binding WindowChip}" />
                                         </Border>
                                         <Border Style="{StaticResource Chip}" Visibility="{Binding HasRepeat, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.RepeatHelp}">
-                                            <TextBlock Style="{StaticResource ChipLabel}" Text="{Binding RepeatText}" />
+                                            <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{Binding RepeatText}" />
                                         </Border>
                                     </StackPanel>
 
@@ -368,7 +368,7 @@
                                         </TextBlock.Style>
                                     </TextBlock>
 
-                                    <StackPanel Grid.Column="6" Style="{StaticResource RowActions}" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="6" Style="{StaticResource RowActions}" Margin="8,0,0,0" VerticalAlignment="Center">
                                         <Button Style="{StaticResource RowAction}" Content="&#xE768;" Click="StartNow_Click"
                                                 ToolTip="{x:Static s:Strings.StartNow}" AutomationProperties.Name="{x:Static s:Strings.StartNow}" />
                                         <Button Style="{StaticResource RowAction}" Content="&#xE74D;" Click="RowRemove_Click" Margin="2,0"
@@ -384,8 +384,8 @@
                     <!-- Where a dragged row will land: a line with a dot in the gap between rows -->
                     <Canvas x:Name="DropLayer" IsHitTestVisible="False" ClipToBounds="True">
                         <Grid x:Name="DropMarker" Height="10" Visibility="Collapsed">
-                            <Border Height="2" CornerRadius="1" Background="{DynamicResource PrimaryBg}" VerticalAlignment="Center" Margin="5,0,0,0" />
-                            <Ellipse Width="10" Height="10" HorizontalAlignment="Left" Stroke="{DynamicResource PrimaryBg}" StrokeThickness="2" Fill="{DynamicResource Bg}" />
+                            <Border Height="2" CornerRadius="1" Background="{DynamicResource AccentFill}" VerticalAlignment="Center" Margin="5,0,0,0" />
+                            <Ellipse Width="10" Height="10" HorizontalAlignment="Left" Stroke="{DynamicResource AccentFill}" StrokeThickness="2" Fill="{DynamicResource Bg}" />
                         </Grid>
                     </Canvas>
 
@@ -410,26 +410,27 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <Image Source="{Binding Icon}" Width="40" Height="40" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
-                                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding KindLabel}" />
+                                <!-- The name first; its kind a quiet line below, no capitals line above the title -->
+                                <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
                                     <TextBlock Style="{StaticResource H2}" Text="{Binding Name}" />
+                                    <TextBlock Style="{StaticResource Muted}" Text="{Binding KindLabel}" />
                                 </StackPanel>
                             </Grid>
 
-                            <Border Background="{DynamicResource NoticeBg}" CornerRadius="8" Padding="14,10" Margin="0,16,0,0"
+                            <Border Background="{DynamicResource NoticeBg}" CornerRadius="8" Padding="12,10" Margin="0,16,0,0"
                                     Visibility="{Binding IsNew, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding NewText}" Foreground="{DynamicResource NoticeText}" TextWrapping="Wrap" FontSize="13" />
                             </Border>
 
                             <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.SectionStartup}" Margin="0,24,0,12" />
-                            <Grid Margin="0,0,0,14">
+                            <Grid Margin="0,0,0,16">
                                 <TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.StartAtLogon}" VerticalAlignment="Center" />
                                 <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding Enabled}" HorizontalAlignment="Right"
                                           AutomationProperties.Name="{x:Static s:Strings.StartAtLogon}" />
                             </Grid>
                             <!-- Which profile this switch belongs to -->
-                            <TextBlock x:Name="DetailProfileNote" Style="{StaticResource Help}" Margin="0,-10,0,14" Visibility="Collapsed" />
-                            <Grid Margin="0,0,0,14">
+                            <TextBlock x:Name="DetailProfileNote" Style="{StaticResource Help}" Margin="0,-12,0,16" Visibility="Collapsed" />
+                            <Grid Margin="0,0,0,16">
                                 <TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.DelayShort}" VerticalAlignment="Center" />
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <TextBox Style="{StaticResource FieldBox}" Width="64" Text="{Binding DelaySeconds, UpdateSourceTrigger=LostFocus}"
@@ -437,7 +438,7 @@
                                     <TextBlock Text="{x:Static s:Strings.SecondsShort}" Width="30" Margin="8,0,0,0" FontSize="13" Foreground="{DynamicResource Text3}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Grid>
-                            <Grid Margin="0,0,0,14">
+                            <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
@@ -461,7 +462,7 @@
                                 <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding RunElevated}" VerticalAlignment="Center"
                                           IsEnabled="{Binding AdminAvailable}" AutomationProperties.Name="{x:Static s:Strings.RunElevated}" />
                             </Grid>
-                            <Grid Margin="0,14,0,0">
+                            <Grid Margin="0,16,0,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="{x:Static s:Strings.RepeatHelp}">
                                     <TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.Repeat}" />
                                     <TextBlock Style="{StaticResource InfoGlyph}" />
@@ -494,7 +495,7 @@
                                 <Button Style="{StaticResource QuietButton}" Height="24" Padding="8,0" HorizontalAlignment="Right" Click="ParametersInfo_Click"
                                         ToolTip="{Binding ParametersHelp}" AutomationProperties.Name="{x:Static s:Strings.ParamHowItWorks}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE946;" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE946;" FontSize="14" VerticalAlignment="Center" />
                                         <TextBlock Text="{x:Static s:Strings.ParamHowItWorks}" Margin="6,0,0,0" />
                                     </StackPanel>
                                 </Button>
@@ -517,7 +518,7 @@
                                 <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ParamCurrentFixed}" Margin="0,12,0,4" />
                                 <TextBox Style="{StaticResource FieldBox}" Text="{Binding OriginalArguments, Mode=OneWay}" IsReadOnly="True" Opacity="0.65"
                                          AutomationProperties.Name="{x:Static s:Strings.ParamCurrentFixed}" />
-                                <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ParamExtra}" Margin="0,10,0,4" />
+                                <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ParamExtra}" Margin="0,12,0,4" />
                                 <TextBox Style="{StaticResource FieldBox}" Text="{Binding ExtraArguments, UpdateSourceTrigger=LostFocus}" KeyDown="CommitOnEnter"
                                          AutomationProperties.Name="{x:Static s:Strings.ParamExtra}" />
                             </StackPanel>
@@ -527,7 +528,7 @@
                                          AutomationProperties.Name="{x:Static s:Strings.ParamOwn}" />
                             </StackPanel>
                             <StackPanel Visibility="{Binding HasEffectiveCommand, Converter={StaticResource BoolToVisibility}}">
-                                <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ParamRuns}" Margin="0,10,0,4" />
+                                <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ParamRuns}" Margin="0,12,0,4" />
                                 <TextBlock Style="{StaticResource Value}" Text="{Binding EffectiveCommand}" />
                             </StackPanel>
                             <Grid Margin="0,24,0,8">
@@ -573,11 +574,11 @@
                             <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
                                 <Button Style="{StaticResource SecondaryButton}" Click="StartNow_Click" AutomationProperties.Name="{x:Static s:Strings.StartNow}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="12" VerticalAlignment="Center" />
+                                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="14" VerticalAlignment="Center" />
                                         <TextBlock Text="{x:Static s:Strings.StartNow}" Margin="8,0,0,0" />
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource QuietButton}" FontSize="14" Content="{x:Static s:Strings.MoreActions}" Margin="8,0,0,0" Click="More_Click" />
+                                <Button Style="{StaticResource QuietButton}" Content="{x:Static s:Strings.MoreActions}" Margin="8,0,0,0" Click="More_Click" />
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -607,7 +608,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type ui:WindowsItemVm}">
                                 <Border Height="56" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}"
-                                        Background="{DynamicResource Surface}" Padding="14,0,12,0">
+                                        Background="{DynamicResource Surface}" Padding="16,0,12,0">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="40" />
@@ -621,24 +622,14 @@
                                             <TextBlock Text="{Binding Origin}" FontSize="12" Foreground="{DynamicResource Text4}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Origin}" />
                                         </StackPanel>
                                         <Border Grid.Column="2" Style="{StaticResource Chip}" Width="140" Margin="12,0" ToolTip="{Binding StatusTip}">
-                                            <TextBlock Text="{Binding StatusText}" TextTrimming="CharacterEllipsis">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource ChipLabel}">
-                                                        <Setter Property="Foreground" Value="{DynamicResource Text3}" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsStore}" Value="True">
-                                                                <Setter Property="Foreground" Value="{DynamicResource ChipText}" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
+                                            <!-- Neutral for every kind: the color of a chip never tells the origin -->
+                                            <TextBlock Style="{StaticResource ChipLabel}" Foreground="{DynamicResource Text3}" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" />
                                         </Border>
                                         <Button Grid.Column="3" Style="{StaticResource SecondaryButton}" Width="148" FontSize="13" Padding="0"
                                                 IsEnabled="{Binding CanTakeOver}" Click="TakeOverOne_Click"
                                                 AutomationProperties.Name="{Binding ButtonText}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="12" VerticalAlignment="Center" Margin="0,0,6,0"
+                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"
                                                            Visibility="{Binding ShowShield, Converter={StaticResource BoolToVisibility}}" />
                                                 <TextBlock Text="{Binding ButtonText}" />
                                             </StackPanel>
@@ -649,7 +640,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
-                    <Grid Margin="0,18,0,8">
+                    <Grid Margin="0,16,0,8">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="{x:Static s:Strings.TasksHintTakeOver}">
                             <TextBlock Style="{StaticResource SectionLabel}" Text="{x:Static s:Strings.SectionLogonTasks}" />
                             <TextBlock x:Name="TasksCount" Style="{StaticResource SectionLabel}" Margin="8,0,0,0" />
@@ -663,7 +654,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type ui:TaskItemVm}">
                                 <Border Height="56" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}"
-                                        Background="{DynamicResource Surface}" Padding="14,0,12,0">
+                                        Background="{DynamicResource Surface}" Padding="16,0,12,0">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="40" />
@@ -683,7 +674,7 @@
                                                 Visibility="{Binding CanTakeOver, Converter={StaticResource BoolToVisibility}}"
                                                 AutomationProperties.Name="{x:Static s:Strings.TakeOver}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="12" VerticalAlignment="Center" Margin="0,0,6,0"
+                                                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"
                                                            Visibility="{Binding ShowShield, Converter={StaticResource BoolToVisibility}}" />
                                                 <TextBlock Text="{x:Static s:Strings.TakeOver}" />
                                             </StackPanel>
@@ -714,24 +705,25 @@
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortStart}" />
                         <ComboBoxItem Content="{x:Static s:Strings.ServicesSortState}" />
                     </ComboBox>
-                    <!-- Start types and state to show; several at once, the menu stays open while ticking -->
+                    <!-- Start types and state to show; several at once, the menu stays open while ticking. The value is the
+                         CommandParameter: Tag is a menu entry's icon in the kit -->
                     <Button x:Name="ServicesFilterButton" Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Click="ServicesFilter_Click"
                             ToolTip="{x:Static s:Strings.ServicesFilterTip}" AutomationProperties.Name="{Binding Text, ElementName=ServicesFilterText}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71C;" FontSize="12" VerticalAlignment="Center" />
+                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71C;" FontSize="14" VerticalAlignment="Center" />
                             <TextBlock x:Name="ServicesFilterText" Text="{x:Static s:Strings.ServicesFilter}" Margin="8,0,0,0" />
                         </StackPanel>
                         <Button.ContextMenu>
                             <ContextMenu x:Name="ServicesFilterMenu">
                                 <MenuItem Header="{x:Static s:Strings.ServiceStartType}" IsEnabled="False" />
-                                <MenuItem Header="{x:Static s:Strings.StartAutomatic}" Tag="Automatic" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
-                                <MenuItem Header="{x:Static s:Strings.StartDelayed}" Tag="AutomaticDelayed" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
-                                <MenuItem Header="{x:Static s:Strings.StartManual}" Tag="Manual" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
-                                <MenuItem Header="{x:Static s:Strings.StartDisabled}" Tag="Disabled" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
+                                <MenuItem Header="{x:Static s:Strings.StartAutomatic}" CommandParameter="Automatic" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
+                                <MenuItem Header="{x:Static s:Strings.StartDelayed}" CommandParameter="AutomaticDelayed" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
+                                <MenuItem Header="{x:Static s:Strings.StartManual}" CommandParameter="Manual" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
+                                <MenuItem Header="{x:Static s:Strings.StartDisabled}" CommandParameter="Disabled" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
                                 <Separator />
                                 <MenuItem Header="{x:Static s:Strings.ServicesFilterState}" IsEnabled="False" />
-                                <MenuItem Header="{x:Static s:Strings.ServiceRunning}" Tag="Running" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
-                                <MenuItem Header="{x:Static s:Strings.ServiceStopped}" Tag="Stopped" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
+                                <MenuItem Header="{x:Static s:Strings.ServiceRunning}" CommandParameter="Running" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
+                                <MenuItem Header="{x:Static s:Strings.ServiceStopped}" CommandParameter="Stopped" IsCheckable="True" StaysOpenOnClick="True" Click="ServicesFilterItem_Click" />
                                 <Separator />
                                 <MenuItem Header="{x:Static s:Strings.ServicesFilterReset}" Click="ServicesFilterReset_Click" />
                             </ContextMenu>
@@ -756,7 +748,7 @@
                     <!-- The rows are not selectable; Tab walks through their controls: show and hide, start type, start, stop, restart -->
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type ui:ServiceHeader}">
-                            <Grid Margin="0,10,0,6" Height="32">
+                            <Grid Margin="0,12,0,6" Height="32">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="{Binding Tip}">
                                     <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding Title}" />
                                     <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding Count}" Margin="8,0,0,0" />
@@ -768,7 +760,7 @@
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type ui:ServiceVm}">
                             <Border Height="60" Margin="0,0,0,6" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Line}"
-                                    Background="{DynamicResource Surface}" Padding="14,0,10,0">
+                                    Background="{DynamicResource Surface}" Padding="16,0,8,0">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -845,7 +837,7 @@
 
         <!-- ========== Settings ========== -->        <!-- Every card: title and one line of context, then rows with the label left and the control right -->
         <ScrollViewer x:Name="SettingsView" VerticalScrollBarVisibility="Auto" Visibility="Collapsed" Margin="0,0,4,20">
-            <StackPanel Margin="32,24,26,4" MaxWidth="820">
+            <StackPanel Margin="32,24,28,4" MaxWidth="820">
 
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
@@ -907,7 +899,7 @@
                                     Visibility="{Binding CanSetUpAdmin, Converter={StaticResource BoolToVisibility}}" ToolTip="{x:Static s:Strings.SetUpAdminTip}"
                                     AutomationProperties.Name="{x:Static s:Strings.SetUpAdmin}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="12" VerticalAlignment="Center" />
+                                    <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xEA18;" FontSize="14" VerticalAlignment="Center" />
                                     <TextBlock Text="{x:Static s:Strings.SetUpAdmin}" Margin="8,0,0,0" />
                                 </StackPanel>
                             </Button>
@@ -1069,19 +1061,19 @@
         </Border>
 
         <Popup x:Name="ScanResult" PlacementTarget="{Binding ElementName=ScanButton}" Placement="Custom" AllowsTransparency="True" StaysOpen="True">
-            <Border x:Name="ScanResultCard" Margin="16,0,16,20" CornerRadius="8" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    Padding="14,10,16,10" MaxWidth="380" MouseLeftButtonUp="ScanResult_Click" Cursor="Hand">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="18" ShadowDepth="4" Direction="270" Opacity="0.3" Color="Black" />
-                </Border.Effect>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="ScanResultIcon" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Top" Margin="0,2,10,0" />
-                    <TextBlock x:Name="ScanResultText" Grid.Column="1" FontSize="13" LineHeight="19" Foreground="{DynamicResource Text1}" TextWrapping="Wrap" />
-                </Grid>
+            <!-- shadow-pop in two layers: the far one around the card, the near one on it. Grows out of the Scan button -->
+            <Border x:Name="ScanResultFrame" Margin="16,4,16,24" Effect="{DynamicResource ShadowPopFar}">
+                <Border x:Name="ScanResultCard" CornerRadius="8" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
+                        Padding="12,10,16,10" MaxWidth="380" MouseLeftButtonUp="ScanResult_Click" Cursor="Hand" Effect="{DynamicResource ShadowPopNear}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="ScanResultIcon" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Top" Margin="0,2,8,0" />
+                        <TextBlock x:Name="ScanResultText" Grid.Column="1" FontSize="13" LineHeight="19" Foreground="{DynamicResource Text1}" TextWrapping="Wrap" />
+                    </Grid>
+                </Border>
             </Border>
         </Popup>
         <!-- ========== Dialogs in the window; Tab stays inside while one is open ========== -->
@@ -1089,14 +1081,16 @@
               KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle">
 
             <!-- Confirm / message -->
-            <!-- Shadows sit on separate, empty borders: an effect on the card itself would redraw the whole card on every change -->
+            <!-- shadow-dialog in two layers (the kit's ShadowDialogFar and ShadowDialogNear). Shadows sit on separate,
+                 empty borders: an effect on the card itself would redraw the whole card on every change -->
             <Border Width="440" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
                     Height="{Binding ActualHeight, ElementName=ConfirmCard}" Visibility="{Binding Visibility, ElementName=ConfirmCard}"
-                    Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="16" Direction="270" Opacity="0.35" Color="Black" />
-                </Border.Effect>
-            </Border>
+                    Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}"
+                    Effect="{DynamicResource ShadowDialogFar}" />
+            <Border Width="440" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Height="{Binding ActualHeight, ElementName=ConfirmCard}" Visibility="{Binding Visibility, ElementName=ConfirmCard}"
+                    Opacity="{Binding Opacity, ElementName=ConfirmCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ConfirmCard}"
+                    Effect="{DynamicResource ShadowDialogNear}" />
             <Border x:Name="ConfirmCard" Width="440" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
                     HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
                 <StackPanel>
@@ -1124,11 +1118,13 @@
             </Border>
 
             <!-- Privacy and notices: headings and paragraphs filled in from code -->
+            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
+            <Border Width="600" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Height="{Binding ActualHeight, ElementName=LegalCard}" Visibility="{Binding Visibility, ElementName=LegalCard}"
+                    Opacity="{Binding Opacity, ElementName=LegalCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=LegalCard}"
+                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
             <Border x:Name="LegalCard" Width="600" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="16" Direction="270" Opacity="0.35" Color="Black" />
-                </Border.Effect>
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
                 <DockPanel>
                     <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
                         <Button Style="{StaticResource PrimaryButton}" Content="{x:Static s:Strings.Close}" Click="DialogCancel_Click" HorizontalAlignment="Right" />
@@ -1141,15 +1137,17 @@
             </Border>
 
             <!-- Profile: name, days, time. Small and fixed, so the shadow may sit on the card itself. -->
+            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
+            <Border Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Height="{Binding ActualHeight, ElementName=ProfileCard}" Visibility="{Binding Visibility, ElementName=ProfileCard}"
+                    Opacity="{Binding Opacity, ElementName=ProfileCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ProfileCard}"
+                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
             <Border x:Name="ProfileCard" Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="16" Direction="270" Opacity="0.35" Color="Black" />
-                </Border.Effect>
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
                 <DockPanel>
                     <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
                         <Grid>
-                            <Button x:Name="ProfileDeleteButton" Style="{StaticResource GhostButton}" FontSize="14" Foreground="{DynamicResource ErrorText}"
+                            <Button x:Name="ProfileDeleteButton" Style="{StaticResource GhostButton}" Foreground="{DynamicResource ErrorText}"
                                     Content="{x:Static s:Strings.ProfileDelete}" HorizontalAlignment="Left" Click="ProfileDelete_Click" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Cancel}" Click="DialogCancel_Click" Margin="0,0,8,0" />
@@ -1168,13 +1166,15 @@
             </Border>
 
             <!-- Order of the profiles: one below the other, top wins, Standard at the bottom -->
+            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
+            <Border Width="520" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Height="{Binding ActualHeight, ElementName=ProfileOrderCard}" Visibility="{Binding Visibility, ElementName=ProfileOrderCard}"
+                    Opacity="{Binding Opacity, ElementName=ProfileOrderCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=ProfileOrderCard}"
+                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
             <Border x:Name="ProfileOrderCard" Width="520" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="16" Direction="270" Opacity="0.35" Color="Black" />
-                </Border.Effect>
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
                 <DockPanel>
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="24,24,24,14" ToolTip="{x:Static s:Strings.ProfileOrderHelp}">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="24,24,24,16" ToolTip="{x:Static s:Strings.ProfileOrderHelp}">
                         <TextBlock Style="{StaticResource DialogTitle}" Text="{x:Static s:Strings.ProfileOrderTitle}" />
                         <TextBlock Style="{StaticResource InfoGlyph}" VerticalAlignment="Center" Margin="8,0,0,0" />
                     </StackPanel>
@@ -1234,8 +1234,8 @@
                             <!-- Where a dragged profile will land, as in the list of apps -->
                             <Canvas x:Name="ProfileOrderDropLayer" IsHitTestVisible="False">
                                 <Grid x:Name="ProfileOrderMarker" Height="10" Visibility="Collapsed">
-                                    <Border Height="2" CornerRadius="1" Background="{DynamicResource PrimaryBg}" VerticalAlignment="Center" Margin="5,0,0,0" />
-                                    <Ellipse Width="10" Height="10" HorizontalAlignment="Left" Stroke="{DynamicResource PrimaryBg}" StrokeThickness="2" Fill="{DynamicResource Pop}" />
+                                    <Border Height="2" CornerRadius="1" Background="{DynamicResource AccentFill}" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                    <Ellipse Width="10" Height="10" HorizontalAlignment="Left" Stroke="{DynamicResource AccentFill}" StrokeThickness="2" Fill="{DynamicResource Pop}" />
                                 </Grid>
                             </Canvas>
                         </Grid>
@@ -1244,11 +1244,13 @@
             </Border>
 
             <!-- Pause a profile: from now, for a planned span, or until resumed; all day or with times -->
+            <!-- The far layer of shadow-dialog, behind the card; the near one sits on the card -->
+            <Border Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Height="{Binding ActualHeight, ElementName=PauseCard}" Visibility="{Binding Visibility, ElementName=PauseCard}"
+                    Opacity="{Binding Opacity, ElementName=PauseCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=PauseCard}"
+                    Effect="{DynamicResource ShadowDialogFar}" IsHitTestVisible="False" />
             <Border x:Name="PauseCard" Width="460" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="16" Direction="270" Opacity="0.35" Color="Black" />
-                </Border.Effect>
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Effect="{DynamicResource ShadowDialogNear}">
                 <StackPanel>
                     <StackPanel Margin="24,24,24,20">
                         <TextBlock x:Name="PauseTitleText" Style="{StaticResource DialogTitle}" />
@@ -1257,7 +1259,7 @@
                     </StackPanel>
                     <Border Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="24,16">
                         <Grid>
-                            <Button x:Name="PauseRemoveButton" Style="{StaticResource GhostButton}" FontSize="14" Foreground="{DynamicResource ErrorText}"
+                            <Button x:Name="PauseRemoveButton" Style="{StaticResource GhostButton}" Foreground="{DynamicResource ErrorText}"
                                     Content="{x:Static s:Strings.PauseRemove}" HorizontalAlignment="Left" Click="PauseRemove_Click" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button Style="{StaticResource SecondaryButton}" Content="{x:Static s:Strings.Cancel}" Click="DialogCancel_Click" Margin="0,0,8,0" />
@@ -1271,11 +1273,12 @@
             <!-- Add app -->
             <Border Width="600" MaxHeight="640" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                     Visibility="{Binding Visibility, ElementName=AddCard}"
-                    Opacity="{Binding Opacity, ElementName=AddCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=AddCard}">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="60" ShadowDepth="16" Direction="270" Opacity="0.35" Color="Black" />
-                </Border.Effect>
-            </Border>
+                    Opacity="{Binding Opacity, ElementName=AddCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=AddCard}"
+                    Effect="{DynamicResource ShadowDialogFar}" />
+            <Border Width="600" MaxHeight="640" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                    Visibility="{Binding Visibility, ElementName=AddCard}"
+                    Opacity="{Binding Opacity, ElementName=AddCard}" RenderTransformOrigin="0.5,0.5" RenderTransform="{Binding RenderTransform, ElementName=AddCard}"
+                    Effect="{DynamicResource ShadowDialogNear}" />
             <!-- Stretch with a maximum height: centered, but in a small window it keeps its distance to the edges -->
             <Border x:Name="AddCard" Width="600" MaxHeight="640" Margin="24" CornerRadius="10" Background="{DynamicResource Pop}" BorderBrush="{DynamicResource PopLine}" BorderThickness="1"
                     HorizontalAlignment="Center" VerticalAlignment="Stretch" Visibility="Collapsed">
@@ -1287,13 +1290,13 @@
                                     ToolTip="{x:Static s:Strings.Close}" AutomationProperties.Name="{x:Static s:Strings.Close}" />
                         </Grid>
                         <!-- The kit's search field; empty, Esc goes on to the dialog and closes it -->
-                        <kit:SearchBox x:Name="AddSearch" Margin="0,14,0,0" Placeholder="{x:Static s:Strings.SearchPlaceholder}" PassEscapeWhenEmpty="True"
+                        <kit:SearchBox x:Name="AddSearch" Margin="0,16,0,0" Placeholder="{x:Static s:Strings.SearchPlaceholder}" PassEscapeWhenEmpty="True"
                                        TextChanged="AddSearch_TextChanged" />
                     </StackPanel>
                     <Border DockPanel.Dock="Bottom" Background="{DynamicResource Footer}" BorderBrush="{DynamicResource PopLine}" BorderThickness="0,1,0,0"
-                            CornerRadius="0,0,10,10" Padding="24,14">
+                            CornerRadius="0,0,10,10" Padding="24,16">
                         <Grid>
-                            <Button Style="{StaticResource GhostButton}" FontSize="14" Padding="2,0" HorizontalAlignment="Left" Click="AddBrowse_Click"
+                            <Button Style="{StaticResource GhostButton}" Padding="4,0" HorizontalAlignment="Left" Click="AddBrowse_Click"
                                     AutomationProperties.Name="{x:Static s:Strings.BrowseFile}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE838;" FontSize="14" VerticalAlignment="Center" />
