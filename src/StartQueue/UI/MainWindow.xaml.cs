@@ -814,23 +814,15 @@ public partial class MainWindow : Window
         var newCount = config.Entries.Count(e => e.IsNew);
         var leftovers = Elevation.AdminMode ? host.LastSweep?.Leftovers ?? 0 : 0;
         if (newCount > 0)
-            SetStatus(newCount == 1 ? Strings.StatusOneNew : Strings.F(Strings.StatusNew, newCount), Strings.StatusNewTip);
+            Frame.SetStatus(newCount == 1 ? Strings.StatusOneNew : Strings.F(Strings.StatusNew, newCount), Strings.StatusNewTip, GoToStatus);
         else if (leftovers > 0)
-            SetStatus(leftovers == 1 ? Strings.StatusOneLeft : Strings.F(Strings.StatusLeft, leftovers), Strings.StatusLeftTip);
+            Frame.SetStatus(leftovers == 1 ? Strings.StatusOneLeft : Strings.F(Strings.StatusLeft, leftovers), Strings.StatusLeftTip, GoToStatus);
         else
-            StatusChip.Visibility = Visibility.Collapsed;
+            Frame.SetStatus(null);
         MarkSeenButton.Visibility = newCount > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    void SetStatus(string text, string tip)
-    {
-        StatusText.Text = text;
-        StatusChip.ToolTip = tip;
-        if (StatusChip.Visibility != Visibility.Visible) Motion.Appear(StatusChip, fromScale: 0.95);
-        System.Windows.Automation.AutomationProperties.SetName(StatusChip, $"{text}. {tip}");
-    }
-
-    void Status_Click(object sender, RoutedEventArgs e)
+    void GoToStatus()
     {
         var first = host.Config.Entries.FirstOrDefault(x => x.IsNew);
         if (first != null) Select(first.Id);

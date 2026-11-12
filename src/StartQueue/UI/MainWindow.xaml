@@ -114,28 +114,7 @@
              last), the tabs with the gear, the brand line, and at the first start the introduction. Tabs in code. -->
         <kit:KitFrame x:Name="Frame">
             <kit:KitFrame.Actions>
-                <!-- Only shown when something needs a look; a click goes there -->
-                <Button x:Name="StatusChip" Height="32" Margin="0,0,8,0" Cursor="Hand" Visibility="Collapsed" Click="Status_Click"
-                        AutomationProperties.Name="{Binding Text, ElementName=StatusText}"
-                        Background="{DynamicResource WarnChipBg}" Foreground="{DynamicResource WarnChipText}">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="12,0,12,0">
-                                <ContentPresenter VerticalAlignment="Center" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bd" Property="Opacity" Value="0.88" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="8" Height="8" Fill="{DynamicResource WarnChipText}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="StatusText" Margin="8,0,0,0" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE76C;" FontSize="10" Margin="8,1,0,0" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
+                <!-- The status chip before these is the kit's (Frame.SetStatus) -->
                 <Button x:Name="ScanButton" Style="{StaticResource HeroButton}" Click="Scan_Click" Margin="0,0,8,0"
                         ToolTip="{x:Static s:Strings.ScanTip}" AutomationProperties.Name="{x:Static s:Strings.Scan}">
                     <StackPanel Orientation="Horizontal">
