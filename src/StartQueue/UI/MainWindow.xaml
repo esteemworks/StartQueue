@@ -14,7 +14,8 @@
 
 
     <Window.Resources>
-        <!-- Row menu: right click on a row, the ⋯ button, or "More actions" in the details -->
+        <!-- Row menu: right click on a row, the ⋯ button, or "More actions" in the details; the buttons open it as menu
+             buttons of the kit (KitMenuButton), the row is chosen as it opens -->
         <ContextMenu x:Key="RowMenu" x:Shared="False">
             <MenuItem Header="{x:Static s:Strings.MenuStart}" Tag="&#xE768;" InputGestureText="{x:Static s:Strings.KeyEnter}" Click="Menu_Start" />
             <MenuItem Header="{Binding ToggleLabel}" Tag="&#xE7E8;" InputGestureText="{x:Static s:Strings.KeySpace}" Click="Menu_Toggle" />
@@ -373,7 +374,7 @@
                                                 ToolTip="{x:Static s:Strings.StartNow}" AutomationProperties.Name="{x:Static s:Strings.StartNow}" />
                                         <Button Style="{StaticResource RowAction}" Content="&#xE74D;" Click="RowRemove_Click" Margin="2,0"
                                                 ToolTip="{x:Static s:Strings.Remove}" AutomationProperties.Name="{x:Static s:Strings.Remove}" />
-                                        <Button Style="{StaticResource RowAction}" Content="&#xE712;" Click="More_Click"
+                                        <Button Style="{StaticResource RowAction}" Content="&#xE712;" ContextMenu="{StaticResource RowMenu}" kit:KitMenuButton.Enabled="True"
                                                 ToolTip="{x:Static s:Strings.MoreActions}" AutomationProperties.Name="{x:Static s:Strings.MoreActions}" />
                                     </StackPanel>
                                 </Grid>
@@ -578,7 +579,8 @@
                                         <TextBlock Text="{x:Static s:Strings.StartNow}" Margin="8,0,0,0" />
                                     </StackPanel>
                                 </Button>
-                                <Button Style="{StaticResource QuietButton}" Content="{x:Static s:Strings.MoreActions}" Margin="8,0,0,0" Click="More_Click" />
+                                <Button Style="{StaticResource QuietButton}" Content="{x:Static s:Strings.MoreActions}" Margin="8,0,0,0"
+                                        ContextMenu="{StaticResource RowMenu}" kit:KitMenuButton.Enabled="True" />
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -707,7 +709,7 @@
                     </ComboBox>
                     <!-- Start types and state to show; several at once, the menu stays open while ticking. The value is the
                          CommandParameter: Tag is a menu entry's icon in the kit -->
-                    <Button x:Name="ServicesFilterButton" Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" Click="ServicesFilter_Click"
+                    <Button x:Name="ServicesFilterButton" Style="{StaticResource SecondaryButton}" Height="32" Margin="8,0,0,0" kit:KitMenuButton.Enabled="True"
                             ToolTip="{x:Static s:Strings.ServicesFilterTip}" AutomationProperties.Name="{Binding Text, ElementName=ServicesFilterText}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE71C;" FontSize="14" VerticalAlignment="Center" />

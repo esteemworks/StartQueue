@@ -105,6 +105,8 @@ public partial class MainWindow : Window
     {
         this.host = host;
         InitializeComponent();
+        KitMenuButton.Opening += MenuButton_Opening;
+        Closed += (_, _) => KitMenuButton.Opening -= MenuButton_Opening;
         // The family's window from the kit: title bar, title with the line of facts, actions, tabs with the gear
         // (STANDARD, "The window"); the frame keeps the rules of tabs and gear and tells which page to show.
         Frame.Attach(this);
@@ -1259,15 +1261,15 @@ public partial class MainWindow : Window
         if (VmOf(sender) is { } vm) _ = RemoveAsync(vm);
     }
 
-    void More_Click(object sender, RoutedEventArgs e)
+    /// <summary>A row's ⋯ or "More actions" opens the row menu (a kit menu button): the row is chosen first.</summary>
+    void MenuButton_Opening(System.Windows.Controls.Primitives.ButtonBase button, ContextMenu menu)
     {
-        if (VmOf(sender) is not { } vm || sender is not FrameworkElement button) return;
-        EntryList.SelectedItem = vm;
-        var menu = (ContextMenu)FindResource("RowMenu");
-        menu.DataContext = vm;
-        menu.PlacementTarget = button;
-        menu.Placement = PlacementMode.Bottom;
-        menu.IsOpen = true;
+        if (Window.GetWindow(button) != this) return;
+        if (VmOf(button) is { } vm)
+        {
+            EntryList.SelectedItem = vm;
+            menu.DataContext = vm;
+        }
     }
 
     void Menu_Start(object sender, RoutedEventArgs e) => StartNow_Click(sender, e);
@@ -1859,13 +1861,6 @@ public partial class MainWindow : Window
         if (ServicesList == null) return;
         services.SortBy((ServiceSort)Math.Max(0, ServicesSortBox.SelectedIndex));
         (ServicesList.ItemsSource as System.Windows.Data.ListCollectionView)?.Refresh();
-    }
-
-    void ServicesFilter_Click(object sender, RoutedEventArgs e)
-    {
-        ServicesFilterMenu.PlacementTarget = ServicesFilterButton;
-        ServicesFilterMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-        ServicesFilterMenu.IsOpen = true;
     }
 
     /// <summary>Ticked start types and states narrow the list; none ticked in a group means all of that group.</summary>
