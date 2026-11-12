@@ -667,8 +667,6 @@ public static class Strings
     public static string ProfileAlways => T("always", "immer");
     public static string ProfileAdd => T("Add profile", "Profil hinzufügen");
     public static string ProfileEdit => T("Edit", "Bearbeiten");
-    public static string ProfilePause => T("Pause", "Pausieren");
-    public static string ProfileResume => T("Resume", "Fortsetzen");
     public static string ProfileNewTitle => T("New profile", "Neues Profil");
     public static string ProfileEditTitle => T("Edit profile", "Profil bearbeiten");
     public static string ProfileName => T("Name", "Name");
