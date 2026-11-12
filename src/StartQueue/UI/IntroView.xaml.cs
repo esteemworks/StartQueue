@@ -101,6 +101,9 @@ public partial class IntroView : UserControl
     // Filled by Sync: the note of Welcome, the facts of Switch on.
     TextBlock welcomeFound = null!;
     readonly UniformGrid readyList = new() { Columns = 2 };
+    // When StartQueue starts nothing yet: one sentence over the whole width, wrapped, like the other values.
+    readonly TextBlock readyNothing = Value();
+    readonly StackPanel readyStarts = new();
     readonly TextBlock readyWindows = Value();
     readonly TextBlock readyNew = Value();
     readonly TextBlock readySetUp = Value();
@@ -136,11 +139,13 @@ public partial class IntroView : UserControl
         TakeOverHead.Children.Add(IntroParts.Lead(Strings.IntroTakeOverText));
         SetUpFullyHost.Content = IntroParts.SetUpFully(host.SetUpAdminFeatures, Strings.IntroSetUpFullyTip);
 
+        readyStarts.Children.Add(readyList);
+        readyStarts.Children.Add(readyNothing);
         ReadyPage.Children.Add(IntroParts.Heading(Strings.IntroReadyTitle));
         ReadyPage.Children.Add(IntroParts.Lead(Strings.IntroReadyText));
         ReadyPage.Children.Add(IntroParts.Facts(
         [
-            (Strings.IntroReadyStarts, readyList),
+            (Strings.IntroReadyStarts, readyStarts),
             (Strings.IntroReadyWindows, readyWindows),
             (Strings.IntroReadyNew, readyNew),
             (Strings.IntroReadySetUp, readySetUp),
@@ -161,7 +166,7 @@ public partial class IntroView : UserControl
             line.Children.Add(circle);
         }
         var name = new TextBlock { Text = item.Name, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
-        name.SetResourceReference(TextBlock.ForegroundProperty, "Text1");
+        name.SetResourceReference(TextBlock.ForegroundProperty, item.HasNumber ? "Text1" : "Text2");
         line.Children.Add(name);
         return line;
     }
@@ -220,7 +225,9 @@ public partial class IntroView : UserControl
             var shown = starts.Count > ReadyListMost ? starts.Take(ReadyListMost - 1).ToList() : starts;
             var lines = shown.Select((e, i) => new ReadyItem(i + 1, e.Name)).ToList();
             if (shown.Count < starts.Count) lines.Add(new ReadyItem(0, Strings.F(Strings.IntroReadyMore, starts.Count - shown.Count)));
-            if (lines.Count == 0) lines.Add(new ReadyItem(0, Strings.IntroReadyNothing));
+            readyNothing.Text = Strings.IntroReadyNothing;
+            readyNothing.Visibility = lines.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            readyList.Visibility = lines.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
             readyList.Children.Clear();
             foreach (var line in lines) readyList.Children.Add(ReadyLine(line));
 
