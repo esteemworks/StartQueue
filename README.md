@@ -133,7 +133,7 @@ flowchart LR
 - **Profiles** are checked from left to right; the first one that applies and is not paused decides, otherwise none does and every app starts by its own switch. Outside its hours a profile can also hand over to no profile or to a chosen one. A profile chosen by hand wins until its time is up. When a profile applies is kept in `%APPDATA%\EsteemWorks\profiles.json`, shared by the EsteemWorks apps; which apps start in it stays in StartQueue's `config.json`. Profiles of StartQueue 1.5 and before move there at the first start and stay in `config.json` as well, for going back.
 - **Store apps** start the way their Windows startup task would, usually quietly in the notification area.
 - **Starting:** apps start top to bottom. A delay holds back that app and everything after it; "wait until it runs" holds back the rest until the app is seen running. Every other start runs on its own, so the list moves on at once.
-- **Watching:** changes to the Run keys and startup folders are noticed immediately; a full check, also through **Scan** or <kbd>F5</kbd>, finds new startup tasks, sign-in tasks and services.
+- **Watching:** changes to the Run keys and startup folders are noticed immediately; a full check, also through **Check** or <kbd>F5</kbd>, finds new startup tasks, sign-in tasks and services.
 - **Prepared shutdown:** StartQueue runs `shutdown /sg` (or `/g` to restart). Windows then signs in automatically after the start and locks at once, as it does after updates. Setting it up switches on that Windows option for your account and, if the PC only allows Windows Hello sign-in, switches that off; **Undo** puts back exactly what was there before.
 - **Settings over versions:** a new version takes over the list and settings of every earlier one; when their shape changes, the old file is backed up first under `%APPDATA%\StartQueue\backups` and taken over step by step. Before every update, import and restore StartQueue saves the current state there too, the last five stay. A list that cannot be read is never replaced: StartQueue keeps a copy, says so under About and offers an earlier state.
 - **First start:** a new installation (the setup's `--setup --new`) changes nothing in Windows until it is switched on. Until then each scan only fills the preview; a sign-in starts nothing through StartQueue. Switching on takes over what is ticked, with everything set for it in the preview; what is unticked goes on the keep list as *left with Windows by you*. An update or an installation over a list that stayed counts as switched on.
@@ -150,7 +150,7 @@ flowchart LR
 | Remove | the bin in the row, or <kbd>Del</kbd>, with undo |
 | More actions | right-click a row, or ⋯ |
 | Add an app | <kbd>Ctrl</kbd>+<kbd>N</kbd>, drag from the Start menu, or the Explorer context menu |
-| Check everything | **Scan** or <kbd>F5</kbd> |
+| Check everything | **Check** or <kbd>F5</kbd> |
 | Shut down or restart with prepared apps | the power buttons at the top right, or the tray menu |
 | Scroll | mouse wheel, or hold the middle mouse button and drag |
 

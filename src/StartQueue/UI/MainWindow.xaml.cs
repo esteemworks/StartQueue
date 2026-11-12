@@ -117,7 +117,7 @@ public partial class MainWindow : Window
         // The kit's dialogs over the whole window: questions, the cards of Add app and of explanations, notifications.
         dialog = new KitDialog(DialogLayer);
         // Check is the family's "Check now": the icon turns, F5 does the same, a notification says what turned up.
-        Frame.AddCheck(Strings.Scan, Strings.ScanTip, ScanAsync);
+        Frame.AddCheck(Strings.ScanTip, ScanAsync);
         // A list's panel exists once it has made its first rows; from then on it is held to its visible width.
         foreach (var list in new ListBox[] { EntryList, ServicesList, AddList })
             list.ItemContainerGenerator.StatusChanged += (_, _) =>

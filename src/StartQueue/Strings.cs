@@ -38,7 +38,6 @@ public static class Strings
     public static string F(string format, params object?[] args) => EsteemWorks.Kit.Strings.F(format, args);
 
     // ---------- Header ----------
-    public static string Scan => T("Scan", "Prüfen");
     public static string ScanNothingNew => T("Checked everything, nothing new.", "Alles geprüft, nichts Neues.");
     public static string ScanTakenOverOne => T("Taken over: {0}", "Übernommen: {0}");
     public static string ScanTakenOver => T("Taken over: {0}", "Übernommen: {0}");
