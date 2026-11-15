@@ -2,6 +2,10 @@
 
 All notable changes to StartQueue. Downloads are on the [releases page](../../releases).
 
+## 1.7.1
+
+- **Accessibility:** switching on **High contrast** or another help no longer sends you back from the page to the settings; the page, its scrolling and the focus on the switch stay, so you can switch on several in a row. The same holds for a change of the color mode or the accent color while a page is open
+
 ## 1.7.0
 
 StartQueue now works like every EsteemWorks app: the first start, the settings, the profiles, the dialogs, the keys and the look come from the family's shared parts, so what you learn in one app holds in the others. In short: a first start that changes nothing in Windows until you switch it on; Full set up without further UAC prompts; calmer colors and the family's motion; settings in one column with pages of their own; profiles edited on pages instead of dialogs; the mouse's back and forward buttons; and a page **Accessibility** with high contrast in light and dark. The details:
