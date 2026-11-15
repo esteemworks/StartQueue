@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>StartQueue</AssemblyName>
     <RootNamespace>StartQueue</RootNamespace>
-    <Version>1.6.0</Version>
+    <Version>1.7.0</Version>
     <!-- Program.Main, not the Main WPF generates: at sign-in the startup order begins before WPF loads. -->
     <StartupObject>StartQueue.Program</StartupObject>
     <Product>StartQueue</Product>

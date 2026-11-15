@@ -2,7 +2,9 @@
 
 All notable changes to StartQueue. Downloads are on the [releases page](../../releases).
 
-## Unreleased
+## 1.7.0
+
+StartQueue now works like every EsteemWorks app: the first start, the settings, the profiles, the dialogs, the keys and the look come from the family's shared parts, so what you learn in one app holds in the others. In short: a first start that changes nothing in Windows until you switch it on; Full set up without further UAC prompts; calmer colors and the family's motion; settings in one column with pages of their own; profiles edited on pages instead of dialogs; the mouse's back and forward buttons; and a page **Accessibility** with high contrast in light and dark. The details:
 
 ### Setup and first start
 - **The setup asks one question:** **Basic, without admin rights** (chosen) or **Full, with admin rights**, each with one sentence on what it means for StartQueue. Without admin rights Full is greyed out with the reason. The window is called "StartQueue einrichten" / "Set up StartQueue"; there is no "for all users" dialog any more (`/ALLUSERS` on the command line still works, `/FULL` chooses Full in a silent installation)
