@@ -378,7 +378,7 @@
                                 </Button>
                             </Grid>
                             <!-- Three choices: a drop-down (design system v32), each with what it means in its tooltip -->
-                            <ComboBox Height="32" HorizontalAlignment="Stretch" SelectedIndex="{Binding ParamIndex}" AutomationProperties.Name="{x:Static s:Strings.SectionParameters}">
+                            <ComboBox Height="32" HorizontalAlignment="Stretch" SelectedIndex="{Binding ParamIndex}" AutomationProperties.Name="{x:Static s:Strings.ParamInfoTitle}">
                                 <ComboBoxItem Content="{x:Static s:Strings.ParamAsBefore}" ToolTip="{x:Static s:Strings.ParamAsBeforeTip}" />
                                 <ComboBoxItem Content="{x:Static s:Strings.ParamAdd}" ToolTip="{x:Static s:Strings.ParamAddTip}" />
                                 <ComboBoxItem Content="{x:Static s:Strings.ParamReplace}" ToolTip="{x:Static s:Strings.ParamReplaceTip}" />
