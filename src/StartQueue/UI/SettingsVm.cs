@@ -101,6 +101,18 @@ public sealed class SettingsVm : INotifyPropertyChanged
     public bool Scan60 { get => Current.ScanIntervalMinutes == 60; set => Pick(value, s => s.ScanIntervalMinutes = 60); }
     public bool ScanNever { get => Current.ScanIntervalMinutes <= 0; set => Pick(value, s => s.ScanIntervalMinutes = 0); }
 
+    static readonly int[] ScanMinutes = [5, 10, 30, 60, 0];
+
+    /// <summary>The extra full check as a drop-down (five choices): 5, 10, 30, 60 minutes, never.</summary>
+    public int ScanIndex
+    {
+        get => Current.ScanIntervalMinutes <= 0 ? ScanMinutes.Length - 1 : Math.Max(0, Array.IndexOf(ScanMinutes, Current.ScanIntervalMinutes));
+        set
+        {
+            if (value >= 0 && value < ScanMinutes.Length) Change(s => s.ScanIntervalMinutes = ScanMinutes[value]);
+        }
+    }
+
     public bool NotifyNewEntries
     {
         get => Current.NotifyNewEntries;

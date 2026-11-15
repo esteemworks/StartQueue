@@ -356,15 +356,13 @@
                                 <TextBlock Style="{StaticResource RowLabel}" Text="{x:Static s:Strings.StartWindow}" />
                                 <TextBlock Style="{StaticResource InfoGlyph}" />
                             </StackPanel>
-                            <!-- Three equal segments across the panel; fixed when a shortcut or task decides, or there is no window -->
-                            <Border Style="{StaticResource SegmentGroup}" HorizontalAlignment="Stretch" IsEnabled="{Binding WindowEditable}" ToolTip="{Binding WindowNote}" ToolTipService.ShowOnDisabled="True">
-                                <UniformGrid kit:KitKeys.Roving="True" Rows="1">
-                                    <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="StartWindow" Content="{x:Static s:Strings.WindowNormal}" IsChecked="{Binding WindowNormal}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="StartWindow" Content="{x:Static s:Strings.WindowMinimized}" IsChecked="{Binding WindowMinimized}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="StartWindow" Content="{x:Static s:Strings.WindowBackground}" IsChecked="{Binding WindowBackground}"
-                                                 IsEnabled="{Binding CanBackground}" />
-                                </UniformGrid>
-                            </Border>
+                            <!-- Three choices: a drop-down (design system v32); fixed when a shortcut or task decides, or there is no window -->
+                            <ComboBox Height="32" HorizontalAlignment="Stretch" SelectedIndex="{Binding WindowIndex}" IsEnabled="{Binding WindowEditable}"
+                                      ToolTip="{Binding WindowNote}" ToolTipService.ShowOnDisabled="True" AutomationProperties.Name="{x:Static s:Strings.StartWindow}">
+                                <ComboBoxItem Content="{x:Static s:Strings.WindowNormal}" />
+                                <ComboBoxItem Content="{x:Static s:Strings.WindowMinimized}" />
+                                <ComboBoxItem Content="{x:Static s:Strings.WindowBackground}" IsEnabled="{Binding CanBackground}" />
+                            </ComboBox>
                             <!-- Only a fact stays visible (a start parameter, a minimized shortcut, no window); explanations are in the tooltip -->
                             <TextBlock Style="{StaticResource Help}" Text="{Binding WindowFact}" Margin="0,6,0,0" Visibility="{Binding HasWindowFact, Converter={StaticResource BoolToVisibility}}" />
 
@@ -379,16 +377,12 @@
                                     </StackPanel>
                                 </Button>
                             </Grid>
-                            <Border Style="{StaticResource SegmentGroup}" HorizontalAlignment="Stretch">
-                                <UniformGrid kit:KitKeys.Roving="True" Rows="1">
-                                    <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="Parameters" Content="{x:Static s:Strings.ParamAsBefore}" IsChecked="{Binding ParamAsBefore}"
-                                                 ToolTip="{x:Static s:Strings.ParamAsBeforeTip}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Parameters" Content="{x:Static s:Strings.ParamAdd}" IsChecked="{Binding ParamAdd}"
-                                                 ToolTip="{x:Static s:Strings.ParamAddTip}" />
-                                    <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Parameters" Content="{x:Static s:Strings.ParamReplace}" IsChecked="{Binding ParamReplace}"
-                                                 ToolTip="{x:Static s:Strings.ParamReplaceTip}" />
-                                </UniformGrid>
-                            </Border>
+                            <!-- Three choices: a drop-down (design system v32), each with what it means in its tooltip -->
+                            <ComboBox Height="32" HorizontalAlignment="Stretch" SelectedIndex="{Binding ParamIndex}" AutomationProperties.Name="{x:Static s:Strings.SectionParameters}">
+                                <ComboBoxItem Content="{x:Static s:Strings.ParamAsBefore}" ToolTip="{x:Static s:Strings.ParamAsBeforeTip}" />
+                                <ComboBoxItem Content="{x:Static s:Strings.ParamAdd}" ToolTip="{x:Static s:Strings.ParamAddTip}" />
+                                <ComboBoxItem Content="{x:Static s:Strings.ParamReplace}" ToolTip="{x:Static s:Strings.ParamReplaceTip}" />
+                            </ComboBox>
                             <StackPanel Visibility="{Binding ParamAsBefore, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Style="{StaticResource Help}" Text="{x:Static s:Strings.ParamCurrent}" Margin="0,12,0,4" />
                                 <TextBlock Style="{StaticResource Value}" Text="{Binding OriginalArguments}" />
@@ -779,15 +773,14 @@
                         <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ManageStoreApps}" />
                     </kit:SettingRow>
                     <kit:SettingRow Icon="&#xE72C;" Label="{x:Static s:Strings.SettingsScanInterval}" Description="{x:Static s:Strings.SettingsScanShort}" Info="{x:Static s:Strings.SettingsScanHelp}">
-                        <Border Style="{StaticResource SegmentGroup}">
-                            <StackPanel kit:KitKeys.Roving="True" Orientation="Horizontal">
-                                <RadioButton Style="{StaticResource FirstSegment}" Width="Auto" GroupName="Scan" Content="5 min" IsChecked="{Binding Scan5}" />
-                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="10 min" IsChecked="{Binding Scan10}" />
-                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="30 min" IsChecked="{Binding Scan30}" />
-                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="60 min" IsChecked="{Binding Scan60}" />
-                                <RadioButton Style="{StaticResource Segment}" Width="Auto" GroupName="Scan" Content="{x:Static s:Strings.Never}" IsChecked="{Binding ScanNever}" />
-                            </StackPanel>
-                        </Border>
+                        <!-- Five choices: a drop-down (design system v32) -->
+                        <ComboBox Width="220" Height="32" SelectedIndex="{Binding ScanIndex}">
+                            <ComboBoxItem Content="5 min" />
+                            <ComboBoxItem Content="10 min" />
+                            <ComboBoxItem Content="30 min" />
+                            <ComboBoxItem Content="60 min" />
+                            <ComboBoxItem Content="{x:Static s:Strings.Never}" />
+                        </ComboBox>
                     </kit:SettingRow>
                 </kit:SettingsCard>
 

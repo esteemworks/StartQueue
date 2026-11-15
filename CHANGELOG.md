@@ -2,8 +2,9 @@
 
 All notable changes to StartQueue. Downloads are on the [releases page](../../releases).
 
-## 1.7.1
+## 1.8.0
 
+- **Three or more choices are a drop-down list,** as in every EsteemWorks app; segments stay only for exactly two: **Extra full check** (5, 10, 30, 60 minutes, never), the **window at the start** (normal, minimized, in the background), the **start parameters** (as before, added, in their place), the **color mode** under General and the kind of a profile's **pause**. What each choice means stays in its tooltip and under the row
 - **Accessibility:** switching on **High contrast** or another help no longer sends you back from the page to the settings; the page, its scrolling and the focus on the switch stay, so you can switch on several in a row. The same holds for a change of the color mode or the accent color while a page is open
 
 ## 1.7.0

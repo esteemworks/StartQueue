@@ -97,6 +97,17 @@ public sealed class EntryVm : INotifyPropertyChanged
     public bool WindowMinimized { get => WindowNow.Mode == WindowMode.Minimized; set { if (value) SetWindow(WindowMode.Minimized); } }
     public bool WindowBackground { get => WindowNow.Mode == WindowMode.Background; set { if (value) SetWindow(WindowMode.Background); } }
 
+    /// <summary>The window at the start as a drop-down: normal, minimized, in the background.</summary>
+    public int WindowIndex
+    {
+        get => WindowNow.Mode switch { WindowMode.Minimized => 1, WindowMode.Background => 2, _ => 0 };
+        set
+        {
+            var mode = value switch { 1 => WindowMode.Minimized, 2 => WindowMode.Background, _ => WindowMode.Normal };
+            if (value is >= 0 and <= 2 && mode != WindowNow.Mode) SetWindow(mode);
+        }
+    }
+
     /// <summary>Apps that quit when their window closes can only start minimized.</summary>
     public bool CanBackground => !model.QuitsOnClose;
 
@@ -165,7 +176,7 @@ public sealed class EntryVm : INotifyPropertyChanged
             else model.Arguments = arguments;
         }
         Edited(nameof(WindowNormal));
-        foreach (var name in new[] { nameof(WindowMinimized), nameof(WindowBackground), nameof(WindowEditable), nameof(WindowNote), nameof(WindowFact), nameof(HasWindowFact),
+        foreach (var name in new[] { nameof(WindowIndex), nameof(WindowMinimized), nameof(WindowBackground), nameof(WindowEditable), nameof(WindowNote), nameof(WindowFact), nameof(HasWindowFact),
                                      nameof(HasWindowChip), nameof(WindowChip), nameof(Arguments), nameof(Subtitle) })
             Raise(name);
         RaiseParameters();
@@ -190,6 +201,17 @@ public sealed class EntryVm : INotifyPropertyChanged
     public bool ParamAdd { get => model.Parameters == ParameterMode.Add; set { if (value) SetParameters(ParameterMode.Add); } }
     public bool ParamReplace { get => model.Parameters == ParameterMode.Replace; set { if (value) SetParameters(ParameterMode.Replace); } }
 
+    /// <summary>The start parameters as a drop-down: as before, added, in their place.</summary>
+    public int ParamIndex
+    {
+        get => model.Parameters switch { ParameterMode.Add => 1, ParameterMode.Replace => 2, _ => 0 };
+        set
+        {
+            var mode = value switch { 1 => ParameterMode.Add, 2 => ParameterMode.Replace, _ => ParameterMode.AsBefore };
+            if (value is >= 0 and <= 2 && mode != model.Parameters) SetParameters(mode);
+        }
+    }
+
     /// <summary>Replacing starts from the parameters in use now, so taking something out is as easy as adding.</summary>
     void SetParameters(ParameterMode mode)
     {
@@ -203,7 +225,7 @@ public sealed class EntryVm : INotifyPropertyChanged
 
     void RaiseParameters()
     {
-        foreach (var name in new[] { nameof(ParamAdd), nameof(ParamReplace), nameof(ExtraArguments), nameof(OwnArguments), nameof(OriginalArguments),
+        foreach (var name in new[] { nameof(ParamIndex), nameof(WindowIndex), nameof(ParamAdd), nameof(ParamReplace), nameof(ExtraArguments), nameof(OwnArguments), nameof(OriginalArguments),
                                      nameof(EffectiveCommand), nameof(HasEffectiveCommand), nameof(Subtitle), nameof(WindowNormal), nameof(WindowMinimized),
                                      nameof(WindowBackground), nameof(WindowEditable), nameof(WindowNote), nameof(WindowFact), nameof(HasWindowFact),
                                      nameof(HasWindowChip), nameof(WindowChip) })
