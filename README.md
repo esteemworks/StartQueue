@@ -31,7 +31,7 @@ When you sign in, Windows launches every autostart app at the same time. They fi
 
 | Film | What it shows |
 | --- | --- |
-| **[Watch the tour](https://esteemworks.github.io/startqueue/)** (1:36, plays in your browser, sound on) | What Windows gives you for the autostart, then everything StartQueue adds: your order, delays, waiting for another app, quiet starts, profiles shared with the other EsteemWorks apps and prepared apps |
+| **[Watch the hands-on tutorial](https://esteemworks.github.io/startqueue/#tutorial)** (6:53, plays in your browser, with chapters and subtitles) | StartQueue 1.8.0 on a fresh Windows 11, from the setup to the last setting: the first start that changes nothing until you switch it on, your order, delays and waiting, quiet starts, profiles, Windows autostart and scheduled tasks, services and prepared apps |
 
 ## Highlights
 
@@ -78,15 +78,11 @@ Light and dark following Windows, StartQueue's ember colors, the Windows accent 
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/images/profiles.png" alt="Order of the profiles: Work on weekdays with a planned holiday pause, Weekend all day on Saturday and Sunday"><br><sub><b>Profiles:</b> drag them into order, plan a pause like an out-of-office reply</sub></td>
-    <td width="50%"><img src="docs/images/services.png" alt="Services view sorted by startup type with a filter"><br><sub><b>Services:</b> startup type, start and stop, sorted and filtered</sub></td>
+    <td width="50%"><img src="docs/images/windows.png" alt="Windows autostart view: what Windows still starts by itself, and the scheduled tasks at sign-in"><br><sub><b>Windows autostart:</b> what Windows still starts by itself and the scheduled tasks at sign-in, taken over with one click</sub></td>
+    <td width="50%"><img src="docs/images/services.png" alt="Services view: the services of apps, here the ones of Microsoft Edge, with their startup type"><br><sub><b>Services:</b> startup type, start and stop, sorted and filtered</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/images/windows.png" alt="Windows autostart view: what Windows still starts by itself"><br><sub><b>Windows autostart:</b> what Windows still starts by itself, taken over with one click</sub></td>
-    <td width="50%"><img src="docs/images/pause.png" alt="Pause dialog: pause a profile for a planned period with times"><br><sub><b>Pause:</b> from now, for a planned period, or until you resume</sub></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/images/profile-edit.png" alt="Profile dialog with color, weekdays and hours"><br><sub><b>Profile:</b> 16 colors, weekdays, hours or all day</sub></td>
+    <td width="50%"><img src="docs/images/profile-edit.png" alt="Profile editor with color, weekdays and hours"><br><sub><b>Profile:</b> 16 colors, weekdays, hours or all day</sub></td>
     <td width="50%"><img src="docs/images/settings.png" alt="Settings: general, startup at sign-in, new autostart entries"><br><sub><b>Settings:</b> color mode, accent color and language, the startup at sign-in, how new entries are handled</sub></td>
   </tr>
   <tr>
